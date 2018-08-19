@@ -1,0 +1,170 @@
+﻿@using System.Configuration
+@model List<Tourism_Project.Models.BookingModel>
+@{
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+}
+
+
+
+@{
+    // string widths = ViewBag.Single ? "2;10;3" : "2;2;10;3";
+    string widths = (ViewBag.Single == true || ViewBag.Single == null) ? "1;2;1.5;3;1;1" : "1;2;1.5;1.5;2;1;1";
+}
+
+
+@*<table width="100%" cellpadding="1.0" cellspacing="5.0" widths="@widths">
+        <row>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">Date</cell>
+            @if (ViewBag.Single == false)
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">Agent</cell>
+            }
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">Description</cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">Price</cell>
+        </row>
+        @{
+            float total = 0;
+        }
+        @foreach (var report in Model)
+        {
+            <row>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">@report.Date</cell>
+                @if (ViewBag.Single == false)
+                {
+                    <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">@report.Agent</cell>
+                }
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">@report.PassengerName @report.Adults Ad/@report.Children Ch/@report.FamilyChildren FCh/@report.Infant In on tour code @report.tourname, Voucher: @report.Voucher</cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">$@String.Format("{0:0.00}", report.Price)</cell>
+
+            </row>
+                total += @report.Price;
+        }
+        <row>
+
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true" />
+            @if (ViewBag.Single == false)
+            {
+                <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true" />
+            }
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">Amount Due</cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">$ @String.Format("{0:0.00}", total)</cell>
+
+        </row>
+        <row>
+            <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" colspan="3" horizontalalign="right">All GST Inclusive</cell>
+        </row>
+    </table>*@
+
+<table width="100%" cellpadding="0" cellspacing="0" widths="1;1;">
+    <row>
+        <cell borderwidth="0">
+            <image style="margin-bottom:20px;" plainwidth="64" plainheight="64" url="@Context.Server.MapPath("~/Images/LOGO.png")" />
+            <paragraph style="font-family: Helvetica; font-size: 13; font-style: italic;" setspacingbefore="10">
+                <chunk red="255" green="0" blue="0">@ViewBag.Title</chunk>
+            </paragraph>
+            <paragraph>
+                <chunk style="font-family:Times;font-weight:bold;">@ViewBag.Address</chunk>
+            </paragraph>
+            <paragraph>
+                <chunk style="font-family:Times;font-weight:bold;">Report Date: </chunk>
+                <chunk style="font-family:Times;">@DateTime.Now.AddHours(2).ToString("MM/dd/yyyy")</chunk>
+            </paragraph>
+            <paragraph>
+
+                <chunk style="font-family:Times;font-weight:bold;">Report Time: </chunk>
+                <chunk style="font-family:Times;">@DateTime.Now.AddHours(2).ToString("hh:mm tt")</chunk>
+            </paragraph>
+        </cell>
+        <cell borderwidth="0" horizontalalign="right">
+            <paragraph align="right">
+                <chunk style="font-family:Times;font-weight:bold;">Invoice Number : </chunk>
+                <chunk style="font-family:Times;">@ViewBag.Invoice </chunk>
+            </paragraph>
+            <paragraph align="right">
+                <newline />
+                <chunk style="font-family: Times;"></chunk><newline />
+                <chunk style="font-family: Times;"></chunk><newline />
+                <chunk style="font-family: Times;"></chunk><newline />
+                <chunk style="font-family: Times; font-weight: bold;">Trek North </chunk><newline />
+                <chunk style="font-family: Times;">Phone: @ConfigurationManager.AppSettings["PhoneNumber"].ToString()</chunk><newline />
+                <chunk style="font-family: Times;">PO Box 2901, Cairns, QId 4870</chunk><newline />
+                @*<chunk style="font-family: Times;">BSB: 484 799</chunk><newline />
+                <chunk style="font-family: Times;">ACC: 4527 98506</chunk><newline />
+                <chunk style="font-family: Times;">ABN: 12 156455 828 </chunk>*@
+            </paragraph>
+        </cell>
+    </row>
+    @*<row>
+        <cell><br/></cell>
+        <cell><br/></cell>
+    </row>*@
+</table>
+<paragraph style="font-family: Helvetica; font-size: 13; font-style: italic;" setspacingbefore="10">
+    <chunk red="255" green="0" blue="0"><newline /></chunk>
+</paragraph>
+<table width="100%" cellpadding="1.0" cellspacing="5.0" widths="@widths">
+    <row>
+        <cell borderwidth="0.25" horizontalalign="center" left="true" right="false" top="true" bottom="true">Tour Date</cell>
+        @if (ViewBag.Single == false)
+        {
+            <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true">Agent</cell>
+        }
+        <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true">Tour</cell>
+        <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true">Voucher</cell>
+        <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true">Passenger</cell>
+        <cell borderwidth="0.25" horizontalalign="right" left="true" right="false" top="true" bottom="true">Tour Price</cell>
+        <cell borderwidth="0.25" horizontalalign="right" left="true" right="true" top="true" bottom="true">Payable</cell>
+    </row>
+    @{
+        float total = 0;
+        float totalPrice = 0;
+    }
+    @foreach (var report in Model)
+    {
+        <row>
+            <cell borderwidth="0.25" horizontalalign="center" left="true" right="false" top="false" bottom="false">@report.Date</cell>
+            @if (ViewBag.Single == false)
+            {
+                <cell borderwidth="0.25" left="true" right="false" top="false" bottom="false">@report.Agent</cell>
+            }
+            <cell borderwidth="0.25" left="true" right="false" top="false" bottom="false">@report.tourname</cell>
+            <cell borderwidth="0.25" left="true" right="false" top="false" bottom="false">@report.Voucher</cell>
+            <cell borderwidth="0.25" left="true" right="false" top="false" bottom="false">@report.PassengerName</cell>
+            <cell borderwidth="0.25" horizontalalign="right" left="true" right="false" top="false" bottom="false">$@String.Format("{0:0.00}", report.Price)</cell>
+            <cell borderwidth="0.25" horizontalalign="right" left="true" right="true" top="false" bottom="false">$@String.Format("{0:0.00}", report.TotalPrice)</cell>
+
+            @*<cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">@report.PassengerName @report.Adults Ad/@report.Children Ch/@report.FamilyChildren FCh/@report.Infant In on tour code @report.tourname, Voucher: @report.Voucher</cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">$@String.Format("{0:0.00}", report.Price)</cell>*@
+
+        </row>
+            total += @report.Price;
+            totalPrice += (float)report.TotalPrice;
+    }
+    <row>
+
+        <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true" />
+        @if (ViewBag.Single == false)
+        {
+            <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true" />
+        }
+        <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true" />
+        <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true" />
+        <cell borderwidth="0.25" left="true" right="false" top="true" bottom="true">Amount Due</cell>
+        <cell borderwidth="0.25" horizontalalign="right" left="true" right="false" top="true" bottom="true">$ @String.Format("{0:0.00}", total)</cell>
+        <cell borderwidth="0.25" horizontalalign="right" left="true" right="true" top="true" bottom="true">$ @String.Format("{0:0.00}", totalPrice)</cell>
+    </row>
+    <row>
+        <cell borderwidth="0.25" left="false" right="false" top="false" bottom="false" colspan="@(( ViewBag.Single==true || ViewBag.Single ==null) ? "6" : "7" )" horizontalalign="right">All GST Inclusive</cell>
+    </row>
+</table>
+
+
+
+
+
+
+
+@*<paragraph>
+    <chunk style="font-size: 8px; font-weight: bolder;">Cancellation Policy for all tours</chunk><newline />
+    <chunk style="font-size: 8px; font-weight: bold;">Deposits are not refundable.</chunk>
+</paragraph>*@

@@ -1,0 +1,112 @@
+﻿@model Tourism_Project.Models.Seat
+@{
+    ViewBag.Title = "Seats";
+}
+@{ 
+    string status = ViewBag.Status;
+    if (status.Equals("error"))
+    {
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error!</strong> an error occured while retrieving seat(s).Try Again!  
+    </div> 
+    }          
+}
+<h2>@ViewBag.Title</h2>
+<label for="Tour">Select Tour</label>
+@Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                       new { value = 1000 , text = ""  }
+                  },
+                  "value",
+                  "text",
+                   1000))
+<label for="Tour">From</label>
+@Html.TextBoxFor(m => m.Date, new { @data_pickdate = "checkavailabilityFrom", @class="seatschecking", @placeholder = "Enter Date...", @required = "required" })
+<label for="Tour">To</label>
+@Html.TextBoxFor(m => m.ToDate, new { @data_pickdate = "checkavailabilityTo", @class="seatschecking", @placeholder = "Enter Date...", @required = "required" })
+<button class="btn btn-primary" data-check="seats" style="margin-bottom: 8px;">Check</button>
+
+<table class="table table-striped" style="background-color: antiquewhite">
+    <thead>
+        <tr>
+            <th>Index</th>
+            <th>Date</th>
+            <th>Seats Available</th>
+        </tr>
+    </thead>
+    <tbody id="seatsbody">
+    </tbody>
+</table>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+
+        $(function () {
+
+            $(".seatschecking").datepicker({ dateFormat: 'dd/mm/yy' });
+            var today = moment();
+            var todaymonth = today.months() + 1, todayday = today.date();
+            if (todayday < 10) todayday = '0' + todayday;
+            if (todaymonth < 10) todaymonth = '0' + todaymonth;
+
+            var future = moment().add('days', 10);
+            var futuremonth = future.months() + 1;
+            var futureday = future.date();
+            if (futureday < 10) futureday = '0' + futureday;
+            if (futuremonth < 10) futuremonth = '0' + futuremonth;
+
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp) {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value) {
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+                        if (i == 0) {
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("CheckSeatsAvailability", "Booking")',
+                                data: { tourid: value['Tour'], from: todayday + '/' + todaymonth + '/' + today.year(), to: futureday + '/' + futuremonth + '/' + future.year() },
+                                success: function (resp) {
+                                    if (resp.length == 0) {
+                                        $("#Tour").append('<div class="alert alert-info"><a class="close" data-dismiss="alert">×</a><strong>Information!</strong> no seats are available! </div>');
+                                    }
+                                    $('#seatsbody').empty();
+                                    $.each(resp, function (i, value) {
+                                        $('#seatsbody').append("<tr><td>" + (i + 1) + "</td><td>" + value['Date'] + "</td><td>" + value['available'] + "</td></tr>");
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            });
+
+
+            $('[data-check="seats"]').click(function () {
+
+                if ($("[data-pickdate='checkavailabilityFrom']").val() != "" && $("[data-pickdate='checkavailabilityTo']").val() != "") {
+                    $.ajax({
+                        type: 'POST',
+                        traditional: true,
+                        url: '@Url.Action("CheckSeatsAvailability", "Booking")',
+                        data: { tourid: $('#Tour option:selected').val(), from: $("[data-pickdate='checkavailabilityFrom']").val(), to: $("[data-pickdate='checkavailabilityTo']").val() },
+                        success: function (resp) {
+                            if (resp.length == 0) {
+                                $("#seatsbody").append('<div class="alert alert-info"><a class="close" data-dismiss="alert">×</a><strong>Information!</strong> no seats are available! </div>');
+                            }
+                            $('#seatsbody').empty();
+                            $.each(resp, function (i, value) {
+                                $('#seatsbody').append("<tr><td>" + (i + 1) + "</td><td>" + value['Date'] + "</td><td>" + value['available'] + "</td></tr>");
+                            })
+                        }
+                    });
+                }
+
+            });
+        });
+    </script>
+}

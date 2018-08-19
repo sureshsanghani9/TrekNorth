@@ -1,0 +1,444 @@
+﻿@{ int ADMIN = 1, STAFF = 2, AGENT = 3, DRIVER = 4, Satalite = 5; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @{string company_name = "TrekNorth";}
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - @company_name</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width" />
+    @*<meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />*@
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/bootstrap")
+    <link href="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+    <style>
+        ul.ui-autocomplete.ui-menu.ui-widget.ui-widget-content {
+            width: 550px !important;
+        }
+
+        .well {
+            padding: 8px !important;
+        }
+
+        .content-wrapper {
+            max-width: 90% !important;
+        }
+
+        .innerbody {
+            padding: 8px;
+        }
+
+        fieldset {
+            padding: 6px 20px 6px 20px;
+        }
+
+        .content-wrapper .float-right {
+            margin-top: 35px;
+            width: 88%;
+        }
+
+
+        .loginsec {
+            min-height: 550px;
+        }
+
+        @@media (max-width:640px) {
+            .content-wrapper {
+                max-width: 100% !important;
+            }
+
+            fieldset {
+                padding: 6px 0;
+            }
+
+            .innerbody {
+                padding: 0px;
+            }
+
+            fieldset ol {
+                margin: 0px;
+                padding: 0 10px;
+            }
+
+            .loginsec {
+                min-height: 0px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        @if (Request.IsAuthenticated)
+        {
+            string[] user = User.Identity.Name.Split(',');
+            string userType = user[2];//userid,username,usertype
+
+            //if (Int32.Parse(userType) == ADMIN || Int32.Parse(userType) == STAFF)
+            //{
+            <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <ul class="nav" style="float:right;">
+                            <li>
+                                <form class="navbar-search pull-left">
+
+                                    <input type="text" class="search-query" placeholder="Search Bookings" data-booking="search">
+                                </form>
+                                <section id="login" style="float:right;margin:10px 0 0 10px;font-size:15px;">
+                                    @Html.Partial("_LoginPartial")
+                                </section>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            // }
+        }
+        else
+        {
+
+            <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <ul class="nav" style="float:right;">
+                            <li>
+
+                                <form class="navbar-search pull-left">
+                                    <input type="text" class="search-query" placeholder="Search Bookings" data-booking="search">
+                                </form>
+
+                                <section id="login" style="float:right;margin:10px 0 0 10px;font-size:15px;">
+                                    @Html.Partial("_LoginPartial")
+                                </section>
+                                <span class="active" style="float:right;margin:10px 0 0 10px;font-size:15px;">@Html.ActionLink("Home", "Index", "Home")</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+        }
+
+
+
+        @*<header>
+                <div class="container">
+                    <h1 class="demo-logo" style="line-height: 30px !important; width:500px; margin:0 !important;">
+                        <a href="/" style="color: #7ac0da; text-decoration: none;  float:left; padding-right:20PX;">
+                            <img src='@Url.Content("~/Images/LOGO.png")' width="100" alt="Trek North">
+                        </a>
+                        <span style="font-size: 45px;">
+                            TNT Vouchers
+                            <small style="font-size:20px;  padding-top: 25px !important;">
+                                Manage vouchers
+                            </small>
+                        </span>
+
+                    </h1>
+                    <!-- /demo-headline -->
+                </div>
+
+            </header>
+        *@
+
+
+
+
+        <div class="content-wrapper">
+            @*<div style="width:100%"><img src="~/Images/LOGO.png" width="100" height="50" style="margin-left: 10px; margin-top: 50px;">
+                <a href="/" style="color: #7ac0da;">Trek North</a>*@
+
+            <div class="demo-logo mainlogo">
+                <a href="/" style="color: #7ac0da; text-decoration: none;  float:left; margin:20px 0 0 0">
+                    <img src='@Url.Content("~/Images/LOGO.png")' width="100" alt="Trek North" style="">
+                </a>
+                @*<span style="font-size: 30px;font-weight:bold;">
+                        TNT Vouchers
+
+                    </span>*@
+
+            </div>
+            @if (Request.IsAuthenticated)
+            {
+                <div class="tglbtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            }
+            <div class="float-right main-nav">
+
+                <nav>
+                    <ul id="menu" class="nav nav-pills">
+                        @if (Request.IsAuthenticated)
+                        {
+                            string[] user = User.Identity.Name.Split(',');
+                            string userType = user[2];//userid,username,usertype
+
+                            if (Int32.Parse(userType) == ADMIN)
+                            {
+                                <li class="active">@Html.ActionLink("Home", "Index", "Home")</li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Tour<b class="caret"></b></a>
+                                    <ul class="dropdown-menu" style="text-align:left;">
+                                        <li>@Html.ActionLink("Tour Code", "ViewTournames", "Booking")</li>
+                                        @*<li>@Html.ActionLink("Add Agent", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>*@
+                                        <li>@Html.ActionLink("Tour", "ViewTour", "Booking")</li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Seats<b class="caret"></b></a>
+                                    <ul class="dropdown-menu" style="text-align:left!important;">
+                                        <li>@Html.ActionLink("View Seats", "ViewSeats", "Booking", routeValues: null, htmlAttributes: new { id = "ViewSeats" })</li>
+                                        <li>@Html.ActionLink("Update Seats", "AddSeats", "Booking", routeValues: null, htmlAttributes: new { id = "addSeats" })</li>
+                                        @*<li>@Html.ActionLink("Check Availability", "Availability", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>*@
+                                        <li style="display:none;">@Html.ActionLink("Check Availability(Bulk)", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailabilityBulk" })</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Agents<b class="caret"></b></a>
+                                    <ul class="dropdown-menu" style="text-align:left;">
+                                        <li>@Html.ActionLink("View Admins", "ViewAdmins", "Booking", routeValues: null, htmlAttributes: new { id = "ViewAdmins" })</li>
+                                        @*<li>@Html.ActionLink("Add Agent", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>*@
+                                        <li>@Html.ActionLink("View Agents/Drivers", "ViewAgents", "Booking", routeValues: null, htmlAttributes: new { id = "viewAgents" })</li>
+                                        <li>@Html.ActionLink("View Staff", "ViewStaff", "Booking", routeValues: null, htmlAttributes: new { id = "viewStaff" })</li>
+                                        <li>@Html.ActionLink("Agents Invoices", "ViewAgentsReports", "Booking", routeValues: null, htmlAttributes: new { id = "viewAgentsReports" })</li>
+                                        <li>@Html.ActionLink("Top Agents", "TopAgents", "Booking", routeValues: null, htmlAttributes: new { id = "topAgents" })</li>
+                                        <li>@Html.ActionLink("Full Payment Agents", "ViewFullPaymentAgents", "Booking", routeValues: null, htmlAttributes: new { id = "viewFullPaymentAgents" })</li>
+                                    </ul>
+                                </li>
+
+                                <li>@Html.ActionLink("Locations", "ViewLocations", "Booking", routeValues: null, htmlAttributes: new { id = "updateLocations" })</li>
+                                <li class="dropdown" style="display: none;">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Locations<b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Add Locations", "AddLocations", "Booking", routeValues: null, htmlAttributes: new { id = "addLocations" })</li>
+                                        <li>@Html.ActionLink("Update Locations", "ViewLocations", "Booking", routeValues: null, htmlAttributes: new { id = "updateLocations" })</li>
+                                        <li>@Html.ActionLink("Remove Locations", "ViewLocations", "Booking", routeValues: null, htmlAttributes: new { id = "updateLocations" })</li>
+                                    </ul>
+                                </li>
+                                @*<li>@Html.ActionLink("Add Time", "AddTime", "Booking", routeValues: null, htmlAttributes: new { id = "addTime" })</li>*@
+                                <li>@Html.ActionLink("Manifests", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "addLocations" })</li>
+                                <li class="dropdown">
+                                    @Html.ActionLink("Bookings", "ViewAllBookings", "Booking", routeValues: null, htmlAttributes: new { id = "allBookings" })
+                                    @*<a class="dropdown-toggle" data-toggle="dropdown" href="#">Bookings<b class="caret"></b></a>
+                                        <ul class="dropdown-menu" style="text-align:left;">
+                                            <li>@Html.ActionLink("View Bookings", "ViewAllBookings", "Booking", routeValues: null, htmlAttributes: new { id = "allBookings" })</li>
+                                            <li>@Html.ActionLink("Update Bookings", "ViewAllBookings", "Booking", routeValues: null, htmlAttributes: new { id = "allBookings" })</li>
+                                        </ul>*@
+                                </li>
+                                <li class="dropdown">
+                                    @*<a class="dropdown-toggle" data-toggle="dropdown" href="#">Voucher System<b class="caret"></b></a>*@
+                                    @{
+
+                                        //if (Session["ShowVouchers"] != null && Convert.ToBoolean(Session["ShowVouchers"]))
+                                        //{
+                                        if (Int32.Parse(userType) == ADMIN || Int32.Parse(userType) != Satalite)
+                                        {
+                                            @Html.ActionLink("Voucher System", "Index", "Voucher", routeValues: null, htmlAttributes: new { id = "company", onClick = "javascript:window.open('/Voucher/'); return false;" })
+                                        }
+                                        //}
+                                    }
+
+                                    @*<ul class="dropdown-menu">
+                                            <li>@Html.ActionLink("Companies", "Index", "Company", routeValues: null, htmlAttributes: new { id = "company", onClick = "javascript:window.open('/Company/'); return false;" })</li>
+                                            <li>@Html.ActionLink("Vouchers", "Index", "Voucher", routeValues: null, htmlAttributes: new { id = "vouchers" })</li>
+                                        </ul>*@
+                                </li>
+                                <li>@Html.ActionLink("Tour Prices", "Index", "TourCodePrice", routeValues: null, htmlAttributes: new { id = "tourCodePrices" })</li>
+
+                                <li>@Html.ActionLink("Schedule", "Schedule", "Home")</li>
+                                <li>@Html.ActionLink("Booking Frequency", "CreateLine", "Voucher")</li>
+
+                                <li>@Html.ActionLink("Cash Sheet", "StaffWiseReport", "Voucher")</li>
+
+
+                                        }
+                                        else if (Int32.Parse(userType) == STAFF)
+                                        {
+                                            <li>@Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>
+                                            <li>@Html.ActionLink("Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "addLocations" })</li>
+                                            <li>
+                                                @{
+                                                    @*if (Session["ShowVouchers"] != null && Convert.ToBoolean(Session["ShowVouchers"]))
+                                                        {*@
+                                                    @Html.ActionLink("Voucher System", "Index", "Voucher", routeValues: null, htmlAttributes: new { id = "company", onClick = "javascript:window.open('/Voucher/'); return false;" })
+                                                    //}
+                                                }
+                                            </li>
+                                            <li class="dropdown">
+                                                @Html.ActionLink("View Bookings", "ViewAllBookings", "Booking", routeValues: null, htmlAttributes: new { id = "allBookings" })
+                                                @*<a class="dropdown-toggle" data-toggle="dropdown" href="#">Bookings<b class="caret"></b></a>
+                                                    <ul class="dropdown-menu" style="text-align:left;">
+                                                        <li>@Html.ActionLink("View Bookings", "ViewAllBookings", "Booking", routeValues: null, htmlAttributes: new { id = "allBookings" })</li>
+                                                        <li>@Html.ActionLink("Update Bookings", "ViewAllBookings", "Booking", routeValues: null, htmlAttributes: new { id = "allBookings" })</li>
+                                                    </ul>*@
+                                            </li>
+                                            <li>@Html.ActionLink("Booking Frequency", "CreateLine", "Voucher")</li>
+
+                                            <li>@Html.ActionLink("Cash Sheet", "StaffWiseReport", "Voucher")</li>
+
+                                            <li>@Html.ActionLink("Schedule", "Schedule", "Home")</li>
+                                                    }
+                                                    else if (Int32.Parse(userType) == DRIVER)
+                                                    {
+                                                        <li>@Html.ActionLink("Manifests", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "addLocations" })</li>
+                                                    }
+                                                    if (Int32.Parse(userType) != DRIVER)
+                                                    {
+                                                        <li>@Html.ActionLink("Add Booking", "AddBookingB", "Booking")</li>
+                                                    }
+
+                                                    @*<li>@Html.ActionLink("Booking Frequency", "CreateLine", "Voucher")</li>
+
+                                                        <li>@Html.ActionLink("Cash Sheet", "StaffWiseReport", "Voucher")</li>*@
+
+                                                    @*if (Int32.Parse(userType) != STAFF)
+                                                        {
+                                                            <li>@Html.ActionLink("Voucher Summary Sheet", "voucherShopwiseReport", "Voucher", new { staffId = 0, fromDate = "0", toDate = "0" }, null)</li>
+                                                        }*@
+                                                    }
+
+
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+
+
+    </header>
+    <div id="body">
+        @RenderSection("featured", required: false)
+        <section class="content-wrapper main-content clear-fix">
+            <div class="innerbody">
+                @RenderBody()
+            </div>
+        </section>
+    </div>
+    <footer style="bottom:0px !important;height: 35px;">
+        <div class="content-wrapper">
+            <div class="float-left">
+                <br />
+                <p>&copy; @DateTime.Now.Year - @company_name</p>
+            </div>
+        </div>
+    </footer>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <!-- For Validation -->
+    <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="~/Scripts/MvcFoolproofJQueryValidation.min.js"></script>
+
+
+    <script src="~/Scripts/jquery.dataTables.js"></script>
+    <script src="~/Assets/datatables/assets/lib/extras/TableTools/media/js/TableTools.min.js"></script>
+    <script src="~/Assets/datatables/assets/lib/extras/ColVis/media/js/ColVis.min.js"></script>
+    <script src="~/Assets/datatables/assets/custom/js/DT_bootstrap.js"></script>
+    <script src="~/Assets/datatables/assets/custom/js/datatables.init.js"></script>
+    <script src="~/Assets/loader/jquery.loader.js"></script>
+    <link href="~/Assets/loader/jquery.loader.css" rel="stylesheet" />
+    <script>
+        $(document).ready(function () {
+            $.widget('custom.mcautocomplete', $.ui.autocomplete, {
+                _renderMenu: function (ul, items) {
+                    var self = this,
+                        thead;
+
+                    if (this.options.showHeader) {
+                        table = $('<div class="ui-widget-header" style="width:100%"></div>');
+                        $.each(this.options.columns, function (index, item) {
+                            table.append('<span style="padding:0 4px;float:left;width:' + item.width + ';">' + item.name + '</span>');
+                        });
+                        table.append('<div style="clear: both;"></div>');
+                        ul.append(table);
+                    }
+                    $.each(items, function (index, item) {
+                        self._renderItem(ul, item);
+                    });
+                },
+                _renderItem: function (ul, item) {
+                    var t = '',
+                        result = '';
+
+                    $.each(this.options.columns, function (index, column) {
+
+                        t += '<span style="padding:0 4px;float:left;width:' + column.width + ';">' + item[column.valueField ? column.valueField : index] + '</span>'
+                    });
+
+                    result = $('<li></li>').data('item.autocomplete', item).append('<a class="mcacAnchor" >' + t + '<div style="clear: both;"></div></a>').appendTo(ul);
+                    return result;
+                }
+            });
+
+            var columns = [{
+                name: 'ID',
+                width: '50px'
+            },
+            {
+                name: 'Voucher',
+                width: '120px'
+            },
+            {
+                name: 'Name',
+                width: '235px'
+            },
+            {
+                name: 'Date',
+                width: '100px'
+            }];
+
+            var bookings = [];
+
+            $(".search-query").on('change keyup paste', function () {
+                var search = $(".search-query").val();
+                if (search.length > 1) {
+
+                    $.ajax({
+                        type: 'POST',
+                        traditional: true,
+                        url: '@Url.Action("SearchBookings", "Booking")',
+                        //data: { "search": $(".search-query").text() },
+                        data: { "search": search },
+                        success: function (resp) {
+                            bookings = [];
+                            $.each(resp, function (i, object) {
+                                bookings.push([object.BookingID, object.Voucher, object.PassengerName, object.Date]);
+                            })
+
+                            $('[data-booking="search"]').mcautocomplete({
+                                showHeader: true,
+                                columns: columns,
+                                source: bookings,
+                                select: function (event, ui) {
+                                    window.location.href = window.location.origin + '/Booking/EditBooking?bookingid=' + (ui.item ? ui.item[0] : '');
+                                    return false;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+        });
+
+    </script>
+    <script>
+        $(".tglbtn").click(function () {
+            $(".main-nav nav").slideToggle();
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

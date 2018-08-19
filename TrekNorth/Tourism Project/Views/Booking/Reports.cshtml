@@ -1,0 +1,159 @@
+﻿@model Tourism_Project.Models.Seat
+@{
+    ViewBag.Title = "Reports";
+}
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong></strong>
+        </div>
+    }
+    else if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while getting report(s).Try Again!
+        </div>
+    }
+}
+
+@using (Html.BeginForm("Reports", "Booking", FormMethod.Post, new { @class = "well form-inline" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Booking Form</legend>
+        <ol>
+            <li>
+                <br />
+                @Html.LabelFor(m => m.Tour)&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                        new { value = 1000 , text = ""  }
+                  },
+                  "value",
+                  "text",
+                   1000))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Date)&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Date, new { @class = "reportDate", @placeholder = "Enter Date..." })
+            </li>
+        </ol>
+      @if (Request.IsAuthenticated)
+      {
+          <input type="hidden" name="txtUser" id="txtUser" value="@User.Identity.Name.Split(',')[1]">
+      }
+
+    </fieldset>
+
+
+    <div id="result" style="max-height: 400px; overflow-y: auto;">
+
+    </div>
+
+    <button class="btn btn-primary" style="margin-top: 10px;" id="generateBtn">Generate</button>
+    <input type="button" class="btn btn-primary"  style="display:none; margin-top: 10px;" id="emailBtn" value="Email" formtarget="_blank"/>
+    @*<button class="btn btn-primary" style="margin-top: 10px;" id="emailBtn">Email</button>*@
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;" formtarget="_blank">Download</button>
+
+    @*<button type="submit" class="btn btn-primary" style="margin-top: 10px;">Email</button>*@
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $(function () {
+
+            $(".reportDate").datepicker({ dateFormat: 'dd/mm/yy' });
+
+            $('#generateBtn').bind('click', getReportView);
+
+            function getReportView(event) {
+                event.preventDefault();
+
+                $('#result').html('');
+                if ($('#Date').val() == "") {
+                    alert("Please select a date to see the result");
+                    return;
+                }
+
+                var data = {
+                    Date: $('#Date').val(),
+                    Tour: $('#Tour').val()
+                };
+                $.ajax({
+                    url: '@Url.Action("ReportsView", "Booking")',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    error: function (xhr) {
+                        if (xhr.status == 200) {
+                            $('#result').html(xhr.responseText);
+                            $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+                        }
+                        else
+                            alert('Error Found: ' + xhr.statusText);
+                    },
+                    success: function (result) {
+                    },
+                    async: true,
+                    processData: false
+                });
+
+                return false;
+            }
+
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp) {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value) {
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+                    })
+                    $('#Tour').prepend('<option value="300321">All Kuranda</option>');
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $(".reportDate").datepicker({ dateFormat: 'dd/mm/yy' });
+            $("#emailBtn").click(function () {
+                $('#result').html('');
+                if ($('#Date').val() == "") {
+                    alert("Please select a date to see the result");
+                    return;
+                }
+                var data = {
+                    Date: $('#Date').val(),
+                    Tour: $('#Tour').val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getEmail", "Booking")',
+                    data: {
+                        username: $('#txtUser').val(), Date: $('#Date').val(), Tour: $('#Tour').val()
+                    },
+                    success: function (data) {
+                        alert("Success");
+                    }
+                });
+            });
+        });
+
+    </script>
+
+}

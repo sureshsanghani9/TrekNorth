@@ -1,0 +1,568 @@
+﻿@model  IEnumerable<Tourism_Project.Models.Voucher>
+@using Tourism_Project.Models;
+
+@{
+    ViewBag.Title = "Shopwise Voucher Report";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+    Double total = 0;
+    Double coltotal = 0;
+    Double colpricewebdirect = 0;
+    Double colpriceshop = 0;
+    Double colprofitshop = 0;
+    Double colprofitwebdirect = 0;
+    Double AgentCollect = 0;
+    Double colprofit = 0;
+    double tempcal = 0;
+    int ad = 0;
+    int ch = 0;
+    int Infant = 0;
+
+    int? shid = null;
+
+    Double profit = 0;
+
+    // shop name and shop hours
+
+    int hour = 13;
+
+
+}
+
+<div id="div-voucher-report">
+
+
+    <h2 class="h2-heading">Voucher Report</h2>
+
+    @if (TempData["shopname"] != null)
+    {
+        @Html.Partial("_FilterVouchers", new Voucher())
+
+    }
+
+
+
+
+    @if (Model != null)
+    {
+        <hr />
+        <div class="tblresponsive">
+            <table cellspacing="1" style="overflow:scroll;" width="100%" class="tblreport">
+
+                <tr>
+                    <th>
+
+                        @Html.DisplayName("V No")
+                    </th>
+                    <th width="100px">
+                        @Html.DisplayName("Conformation Number for Tour Operator")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Booked By")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Tour Operator")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Tour")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Tour Code/Fare Basis")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Passenger Name")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Ad")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Ch")
+                    </th>
+                    <th>
+                        @Html.DisplayName("In")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Price Web Direct")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Profit From Direct")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Price from Shop's Sales")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Profit from Shop's Sales")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Profit %")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Payment Type")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Totals")
+                    </th>
+
+                </tr>
+
+
+                @foreach (var item in Model)
+                {
+
+                    <tr>
+                        <td>
+                            @{
+                    shid = item.shopId;
+                            }
+                            @Html.DisplayFor(modelItem => item.VoucherID)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ConfirmationNumber)
+                        </td>
+                        <td>
+
+                            @{
+                    string[] bokkedby = Convert.ToString(item.Create_By).Split(',');
+                            }
+
+
+                            @Html.Label(Convert.ToString(bokkedby[1]))
+
+
+
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.p_CompanyName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Tour)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FareBasis)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FullName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AdultCount)
+                            @{ ad += Convert.ToInt16(item.AdultCount);
+                            }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ChildrenCount)
+
+                            @{ ch += Convert.ToInt16(item.ChildrenCount);
+                            }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.InfantCount)
+
+                            @{ Infant += Convert.ToInt16(item.InfantCount);
+                            }
+
+                        </td>
+
+                        <td>
+
+                            @{
+                    if (item.salesfrom != null)
+                    {
+                        if (item.salesfrom.ToString().ToLower() != "walk in")
+                        {
+                            @Html.DisplayFor(modelItem => item.Price)
+                            colpricewebdirect += Convert.ToDouble(item.Price);
+                        }
+                        else
+                        {
+                            @*@Html.Label("0")*@
+                        }
+                    }
+                            }
+
+
+
+                        </td>
+                        <td>
+
+                            @{
+
+    if (item.salesfrom != null )
+    {
+
+
+        if (item.salesfrom.ToString().ToLower() != "walk in")
+        {
+
+            if (item.Discount.ToString() != "" ||  item.Discount != null)
+            {
+                {
+                            @Html.DisplayFor(modelItem => item.Commission)
+                    colprofitwebdirect += Convert.ToDouble(item.Commission);
+                }
+            }
+            else if (item.Discount.ToString() == "" || item.Discount == null)
+            {
+                {
+                    AgentCollect = Convert.ToDouble(Convert.ToDouble(item.Commission) - Convert.ToDouble(item.Discount));
+                            @Html.Raw(AgentCollect.ToString());
+                    colprofitshop += Convert.ToDouble(AgentCollect);
+
+                }
+            }
+
+
+
+        }
+
+                            }
+
+                            }
+                        </td>
+                        <td>
+                            @{
+                    if (item.salesfrom != null)
+                    {
+                        if (item.salesfrom.ToString().ToLower() == "walk in")
+                        {
+                            @Html.DisplayFor(modelItem => item.Price)
+                            colpriceshop += Convert.ToDouble(item.Price);
+                        }
+                        else
+                        {
+                            @*@Html.Label("0");*@
+                        }
+                    }
+
+                            }
+
+                        </td>
+                        <td>
+
+                            @{
+                    if (item.salesfrom != null )
+                    {
+                        if (item.salesfrom.ToString().ToLower() == "walk in")
+                        {
+
+                            if (item.Discount.ToString() != "" || item.Discount != null)
+                            {
+                                {
+                            @Html.DisplayFor(modelItem => item.Commission)
+                                    colprofitshop += Convert.ToDouble(item.Commission);
+                                }
+                            }
+                            else if (item.Discount.ToString() == "" || item.Discount == null)
+                            {
+                                {
+                                    AgentCollect = Convert.ToDouble(Convert.ToDouble(item.Commission) - Convert.ToDouble(item.Discount));
+                            @Html.Raw(AgentCollect.ToString());
+                                                                      colprofitshop += Convert.ToDouble(AgentCollect);
+
+                                }
+                            }
+
+
+
+                        }
+
+
+                    }
+
+                            }
+
+                        </td>
+                        <td>
+                            @{
+                    if (item.salesfrom != null )
+                    {
+                        if (item.salesfrom.ToString().ToLower() == "walk in")
+                        {
+                            if (item.Discount.ToString() != "" || item.Discount != null)
+                            {
+                                {
+                                    profit = Convert.ToDouble(Convert.ToDouble(item.Commission) / Convert.ToDouble(item.Price));
+
+                            @Html.Raw(profit.ToString());
+
+                                }
+                            }
+                            else if (item.Discount.ToString() == "" || item.Discount == null)
+                            {
+                                {
+                                    profit = Convert.ToDouble(Convert.ToDouble(AgentCollect) / Convert.ToDouble(item.Price));
+
+                            @Html.Raw(profit.ToString());
+
+                                }
+                            }
+                        }
+                        else if (item.salesfrom.ToString().ToLower() == "email/phone call")
+                        {
+                            if (item.Discount.ToString() != "")
+                            {
+                                {
+                                    profit = Convert.ToDouble(Convert.ToDouble(item.Commission) / Convert.ToDouble(item.Price));
+
+                            @Html.Raw(Convert.ToString(profit));
+
+                                }
+                            }
+                            else if (item.Discount.ToString() == "")
+                            {
+                                {
+                                    profit = Convert.ToDouble(Convert.ToDouble(AgentCollect) / Convert.ToDouble(item.Price));
+
+                            @Html.Raw(profit.ToString());
+                                }
+                            }
+                        }
+
+                    }
+                    colprofit += profit;
+                            }
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.paymenttype)
+                        </td>
+                        <td>
+                            @{
+                    if (item.paymenttype.ToString().ToLower() == "creditcard")
+                    {
+                        total = Convert.ToDouble(Convert.ToDouble(item.Price) + (Convert.ToDouble(item.Price) * 0.02));
+                            @Html.Raw("$" + total.ToString("F"));
+
+                                                            coltotal += total;
+                    }
+                    else
+                    {
+                            @Html.DisplayFor(modelItem => item.Price)
+                        coltotal += Convert.ToDouble(item.Price);
+                    }
+
+
+
+
+                            }
+
+                        </td>
+
+                        @*<td>
+                        @Html.ActionLink("Edit", "Edit", new { id = item.VoucherID }) |
+                        @Html.ActionLink("Details", "Details", new { id = item.VoucherID }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.VoucherID })
+                    </td>*@
+                        @{
+
+                    //double sum_of_Profit_from_Shop = 0;
+                    //sum_of_Profit_from_Shop += @Html.DisplayFor(modelItem => item.Commission);
+                    //  total += Convert.ToDecimal(item.Commission);
+                        }
+
+
+                    </tr>
+                }
+                <tr style="background-color:gray;color:white;">
+                    <td colspan="7" align="right">Total :</td>
+                    <td>
+                        @{
+                            @Html.Raw(ad);
+                        }
+                    </td>
+                    <td>
+                        @{
+                            @Html.Raw(ch);
+                        }
+                    </td>
+                    <td>
+                        @{
+                            @Html.Raw(Infant);
+                        }
+                    </td>
+                    <td>
+                        @{
+                            @Html.Raw("$" + colpricewebdirect.ToString("F"));
+                        }
+                    </td>
+                    <td>
+                        @{
+                            @Html.Raw("$" + colprofitwebdirect.ToString("F"));
+                        }
+                    </td>
+                    <td>
+                        @{
+                            @Html.Raw("$" + colpriceshop.ToString("F"));
+                        }
+                    </td>
+                    <td>
+                        @{
+                            @Html.Raw("$" + colprofitshop.ToString("F"));
+                        }
+                    </td>
+                    <td>
+                        @{
+                            @Html.Raw(colprofit + "%");
+                        }
+                    </td>
+                    <td></td>
+                    <td>
+                        @{
+                            @Html.Raw("$" + coltotal.ToString("F"));
+                        }
+                    </td>
+                </tr>
+            </table>
+            <table cellspacing="1" class="tblreport">
+                <tr style="background-color:lightgray;color:black;">
+                    <td >
+
+                        Shop Sale Profit per Hours :
+                    </td>
+                    <td >
+
+                        @{
+
+                                                                   if (shid == 3 || shid == 4)
+                                                                   {
+                                                                       hour = 12;
+
+                                                                   }
+                                                                   if (shid == null)
+                                                                   {
+                                                                       hour = 0;
+                                                                   }
+
+
+
+
+                                    @Html.Raw(colprofitshop) @Html.Label(" / ")
+                                    @Html.TextBox("txt_hour_shop", hour, new { @onkeydown = "return isNumeric(event.keyCode);", placeholder = "Hours", style = "width:50px;" })
+                                    @Html.Label("  ", "Hours")  @Html.Label(" = ")
+
+
+
+
+        if (hour != 0)
+        { // @Html.Raw(colprofitshop / hour)
+            tempcal = colprofitshop / hour;
+            string abc = Convert.ToString(Math.Round(tempcal, 2));
+                                    @Html.Label(" ", "$" + abc , new { id = "lblTotalProfit_shop" });
+        }
+        else
+        {
+                                    @Html.Raw(0);
+        }
+
+
+
+                        }
+                    </td>
+                </tr>
+
+
+                <tr style="background-color:lightgray;color:black; ">
+                    <td >
+
+                        Direct Profit per Hours :
+                    </td>
+                    <td id="webhour">
+                        @{
+
+        // if (Request.Form["ROUTE_GROUP_ID"] == "3" || Request.Form["ROUTE_GROUP_ID"] == "4")
+        if (shid == 3 || shid == 4)
+        {
+            hour = 12;
+
+        }
+        if (shid == null)
+        {
+            hour = 0;
+        }
+
+
+
+                                    @Html.Raw(colprofitwebdirect) @Html.Label(" / ")
+                                    @Html.TextBox("txt_hour", hour, new {@onkeydown="return isNumeric(event.keyCode);", placeholder = "Hours", style = "width:50px;" })
+                                    @Html.Label("  ","Hours") @Html.Label(" = ")
+
+
+
+
+        if (hour != 0)
+        {
+            tempcal = colprofitwebdirect / hour;
+            string abc = Convert.ToString(Math.Round(tempcal, 2));
+                                    @Html.Label(" ","$" + abc , new { id = "lblTotalProfit" });
+            //@Html.Raw((colprofitwebdirect / hour).ToString("F"),)
+
+
+        }
+        else
+        {
+                                    @Html.Raw(0);
+        }
+                        }
+                    </td>
+                </tr>
+
+            </table>
+                    </div>
+
+    }
+                else
+                {
+
+
+
+                }
+
+
+                <script>
+        $('#txt_hour').keyup(function () {
+            var h = $('#txt_hour').val();
+            //alert(h);
+
+            var stempcal = parseFloat(@colprofitwebdirect) / h;
+            //alert(stempcal);
+            $('#lblTotalProfit').text(stempcal.toFixed(2) + " $");
+
+
+        });
+        $('#txt_hour_shop').keyup(function () {
+            var h = $('#txt_hour_shop').val();
+            //alert(h);
+
+            var stempcal = parseFloat(@colprofitshop) / h;
+            //alert(stempcal);
+            $('#lblTotalProfit_shop').text(stempcal.toFixed(2)+ " $");
+
+
+        });
+
+
+        function isNumeric(keyCode) {
+            return (keyCode >= 96 && keyCode <= 105 || keyCode == 8 || keyCode == 46 || keyCode == 37 || keyCode == 39 || keyCode == 9 || keyCode >= 48 && keyCode <= 57)
+
+        }
+
+        // var commission = $('#Commission').val();
+                </script>
+
+
+
+
+
+
+                <div style="margin-top:10px;">
+                    @Html.ActionLink("Back to List", "Index")
+                </div>
+            </div>
+
+
+            @section Scripts {
+                @Scripts.Render("~/bundles/jqueryval")
+            }
+
+
+
+
+

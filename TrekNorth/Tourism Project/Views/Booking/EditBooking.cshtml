@@ -1,0 +1,1877 @@
+﻿@using MvcCheckBoxList.Model
+@model Tourism_Project.Models.BookingModel
+@{
+    ViewBag.Title = "Edit Booking";
+    var user = User.Identity.Name.Split(',');
+    TempData["UserId"] = Int32.Parse(user[0]);
+    var userType = user[2];//userid,username,usertype
+    int admin = 1, staff = 2, agent = 3;
+    TempData.Keep();
+}
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+
+</hgroup>
+<style type="text/css">
+    #lunchtr label {
+        margin-left: 5px;
+        margin-top: 2px;
+        vertical-align: top;
+    }
+
+    label {
+        /*width: 180px !important;*/
+        text-align: right;
+        line-height: 25px;
+    }
+
+    #tble_agent label {
+        width: auto !important;
+    }
+
+    .commissionTotal {
+        padding: 5px;
+        color: blue;
+    }
+
+    tr.separated td {
+        /* set border style for separated rows */
+        border-bottom: 1px dashed #DAA520 !important;
+    }
+
+    .booking_table td {
+        padding: 6px;
+    }
+
+    .booking_table tr td:first-child {
+        text-align: right;
+    }
+
+    #tble_agent {
+        width: 100%;
+    }
+
+    #span_agent, #span_Deposite {
+        width: 100%;
+        text-align: center;
+        display: block;
+        margin: 0 0 10px;
+        padding: 0 0 10px;
+        border-bottom: 1px dashed #DAA520 !important;
+    }
+
+    .agent_main_sec {
+        float: left;
+        margin-left: 10px;
+        margin-top: 14px;
+        background-color: #FFDEB2;
+        padding: 5px 10px;
+        border-radius: 10px;
+        /*width: 25%;*/
+        width: 46%;
+    }
+
+    .booking_sec_main {
+        float: left;
+        margin-left: 10px;
+        width: 50%;
+        margin-right: 10px;
+        margin-top: 14px;
+        background-color: #FFDEB2;
+        border-radius: 10px;
+    }
+    /*.tble_agent tbody tr td{
+        width:33%;
+    }*/
+    #AgentId {
+        display: none;
+    }
+
+    #tble_agent label {
+        padding-left: 0;
+    }
+
+    .full-width {
+        width: 100%;
+    }
+
+        .full-width .booking_table {
+            width: 50%;
+            float: left;
+        }
+
+    @@media (max-width:1170px) {
+        select {
+            width: 100%;
+            float: left;
+        }
+
+        .booking_sec_main {
+            width: 56%;
+            margin: 2%;
+            box-sizing: border-box;
+        }
+
+        .agent_main_sec {
+            width: 40%;
+            margin: 2% 0;
+            box-sizing: border-box;
+        }
+
+        .booking_sec_main.full-width {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width:767px) {
+        fieldset .row {
+            margin: 0px;
+        }
+
+        .booking_sec_main.full-width {
+            width: 96%;
+        }
+
+        .booking_sec_main table {
+            width: 96%;
+            margin: 2%;
+        }
+
+        .full-width .booking_table, .booking_sec_main, .agent_main_sec {
+            float: left;
+            width: 96%;
+            margin: 2%;
+        }
+    }
+
+    .disabledDiv {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+</style>
+
+@{
+    if (ViewBag.Status.Equals("true"))
+    {
+        <div class="alert alert-success" id="okDone">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> You have successfully update the booking.
+        </div>
+    }
+    else if (ViewBag.Status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while making booking.Try Again!:
+            <h2>@ViewBag.errora</h2>
+
+        </div>
+    }
+}
+
+@Html.HiddenFor(model => model.tid)
+@Html.HiddenFor(model => model.tc)
+@Html.HiddenFor(model => model.pl)
+@using (Html.BeginForm("EditBooking", "Booking", FormMethod.Post, new { @class = "well form-inline", @id = "editForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    @Html.HiddenFor(model => model.BookingID)  @*on 26-06-2015*@
+    @Html.HiddenFor(model => model.totalTourist)
+    <fieldset style="background-color: antiquewhite">
+        <legend>Booking Form</legend>
+        <table class="logintbl" style="width:100%;">
+            @{
+    if (Int32.Parse(userType) == admin || Int32.Parse(userType) == staff)
+    {
+        <tr style="display:inline-block;">
+            <td>
+                @Html.LabelFor(model => model.Agent, "Agent", new { @style = "width: 148px;    text-align: left; " })
+            </td>
+            <td colspan="4">
+                @Html.DropDownListFor(model => model.AgentId, (IEnumerable<SelectListItem>)ViewBag.Users, new { @class = "suggestions drprequired" })
+                @Html.TextBoxFor(m => m.AgentId, new { @class = "spanAgent", @style = "width:26px;", @readonly = "readonly" })
+                @*@Html.ValidationMessageFor(model => model.AgentId)*@
+                <label style="color: gray;" id="agentComments"></label>
+            </td>
+        </tr>
+    }
+    else
+    {
+        <tr style="display: none;">
+            <td>
+                @Html.LabelFor(model => model.AgentId, "Agent", new { @style = "width: 148px;    text-align: left; " })
+            </td>
+            <td colspan="4">
+                @Html.DropDownListFor(model => model.AgentId, (IEnumerable<SelectListItem>)ViewBag.Users, new { @class = "suggestions drprequired" })
+                @*@Html.ValidationMessageFor(model => model.AgentId)*@
+            </td>
+        </tr>
+    }
+            }
+            <tr style="display:none;">
+                <td>
+
+                    @Html.Label("voucher Id")
+                </td>
+                <td>
+                    @Html.TextBoxFor(mode => mode.voucherId, new { @style = "font-weight:bold", @readonly = true })
+                    @*@Html.EditorFor(model => model.voucherId, new { @style = "font-weight:bold", disabled = "disabled" })*@
+
+
+                </td>
+            </tr>
+            <tr style="display:inline-block;">
+                <td>
+
+                    @Html.Label("Booking Number")
+                </td>
+                <td>
+                    @Html.TextBox("txt_bookingId", (int)ViewBag.BookingID, new { @style = "font-weight:bold;", disabled = "disabled" })
+                </td>
+
+                <td>
+                    <div class="editor-label">
+                        @Html.Label("Login")
+                    </div>
+                </td>
+                <td>
+                    <div>
+
+                        @Html.TextBox("txt_loginname", (string)ViewBag.Username, new { @style = "font-weight:bold;width:200px;", disabled = "disabled" })
+                        @{if (ViewBag.UserId != null)
+                        {
+
+                        @Html.TextBox("txt_loginId", (int)ViewBag.UserId, new { @style = "font-weight:bold;width:50px;", disabled = "disabled" })
+                        }
+                        else
+                        {
+                        @Html.TextBox("txt_loginId", (int)TempData["UserId"], new { @style = "font-weight:bold;width:50px;", disabled = "disabled" })
+                        }
+                        }
+                    </div>
+                </td>
+
+                @*Changes made on 2016-06-17*@
+
+
+                @*End Changes*@
+
+                <td style="display:none">
+                    @Html.LabelFor(model => model.ConfirmationNumber)
+                </td>
+                <td style="display:none">
+                    @Html.EditorFor(model => model.ConfirmationNumber)
+                </td>
+
+            </tr>
+
+            @if (Int32.Parse(userType) == admin)
+            {
+                <tr style="display:inline-block;">
+                    <td>
+                        @Html.Label("Default Payment Method ")  @*@Html.LabelFor(model => model.PaymentType, "Payment Type")*@
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.PaymentType, new SelectList(new List<Object> { new { value = 2, text = "Agent (invoice)" }, new { value = 3, text = "Deposit Taken" } }, "value", "text", 0), new { @class = "chosen drprequired", @disabled = false })
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr style="display:inline-block;">
+                    <td>
+                        @Html.Label("Default Payment Method ") @*@Html.LabelFor(model => model.PaymentType, "Payment Type")*@
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.PaymentType, new SelectList(new List<Object> { new { value = 2, text = "Agent (invoice)" }, new { value = 3, text = "Deposit Taken" } }, "value", "text", 1), new { @class = "chosen drprequired", @disabled = false })
+                        <div style="position: absolute; width: 369px; height: 52px; margin-top: -40px; margin-left: -124px;" />
+                    </td>
+                </tr>
+            }
+            @Html.HiddenFor(model => model.PaymentType, new { @id = "Hidden_PaymentType" })
+        </table>
+
+
+        <div class="row">
+
+            <div class="booking_sec_main">
+
+                <table class="booking_table" style="width:100%;">
+
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.Tour)
+
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(model => model.Tour, (IEnumerable<SelectListItem>)ViewBag.Tours, new { @class = "chosen", @disabled = "disabled" })
+                            @Html.HiddenFor(model => model.Tour, new { @id = "Hidden_tour" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.TourCode, "Tour Code")
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(model => model.TourCode, (IEnumerable<SelectListItem>)ViewBag.TourCodes, new { @class = "chosen" })
+                            <br />
+                        </td>
+                    </tr>
+                    @*counts -- replaced class count to chnge on 25-06-2015  *@
+                    <tr>
+                        <td>
+                            <label for="Adults">Adults</label>
+                        </td>
+                        <td colspan="4">
+                            @*<input class="chnge input-medium valid" data-val="true" data-val-number="The field Adults must be a number." data-val-required="The Adults field is required." id="Adults" name="Adults" style="width: 70px" type="number" min="1" value="">*@
+                            @Html.TextBoxFor(m => m.Adults, new { @class = "chnge input-medium valid", @id = "Adults", @name = "Adults", @style = "width: 70px", @type = "number", @min = "1" })
+                            &nbsp; &nbsp; &nbsp; &nbsp;
+                            <label for="Children" style="width:150px">Children</label>
+                            &nbsp; &nbsp;
+                            @*<input class="chnge input-medium" data-val="false" data-val-number="The field Children must be a number." data-val-required="The Children field is required." id="Children" name="Children" style="width: 70px" type="number" min="1" value="">*@
+                            @Html.TextBoxFor(m => m.Children, new { @class = "chnge input-medium", @id = "Children", @name = "Children", @style = "width: 70px", @type = "number", @min = "0" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="FamilyChildren">Family Children</label>
+                        </td>
+                        <td colspan="4">
+
+                            @Html.TextBoxFor(m => m.FamilyChildren, new { @class = "chnge input-medium", @id = "FamilyChildren", @name = "FamilyChildren", @style = "width: 70px", @type = "number", @min = "0" })
+                            @*<input class="chnge input-medium" data-val="false" data-val-number="The field FamilyChildren must be a number." data-val-required="The FamilyChildren field is required." id="FamilyChildren" name="FamilyChildren" style="width:70px" type="number" min="1" value="">*@
+                            &nbsp; &nbsp; &nbsp; &nbsp;
+                            <label for="Infant" style="width:151px">Infant - Free Passenger</label>
+                            &nbsp; &nbsp;
+                            @Html.TextBoxFor(m => m.Infant, new { @class = "chnge input-medium", @id = "Infant", @name = "Infant", @style = "width: 70px", @type = "number", @min = "0" })
+                            @*<input class="chnge input-medium" data-val="false" data-val-number="The field Infant must be a number." data-val-required="The Infant field is required." id="Infant" name="Infant" style="width: 70px" type="number" min="1" value="">*@
+                            <br />
+                        </td>
+                    </tr>
+                    @*counts*@
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div style="margin: 0px 0px 7px 0px;visibility:hidden;" id="DIVchkGold">
+                                @Html.CheckBoxFor(model => model.isGoldClass, new { id = "chkGold" })
+
+                                <label style="color: white;padding: 0px 10px;line-height: 27px;float: left;background-color: goldenrod;border-radius: 0px;" for="chkGold">Gold Class</label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.Date)
+                        </td>
+                        <td>
+                            @Html.EditorFor(model => model.Date, new { @class = "datepick" })
+                            <span class="badge badge-info" id="seatslimit">0</span>
+                            <br />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="agent_main_sec @( (bool)ViewBag.DisablePaymentDetails ? "disabledDiv" : "" )">
+                <table id="tble_agent">
+                    <thead>
+                        <tr>
+                            <th colspan="2">
+                                <span id="span_agent" style="text-align:center;">Payment Details</span>
+                                <span id="span_Deposite" style="display:none;text-align:center;">Payment Details</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td width="33%">
+                                @Html.LabelFor(model => model.Price)
+                            </td>
+                            <td>
+                                <div class="input-prepend">
+                                    <span class="add-on">$</span>
+                                    @if ((bool)ViewBag.DisableTourPriceForStaff)
+                                    {
+                                        @Html.TextBoxFor(model => model.Price, new { @class = "span2 txtrequired", @readonly = "readonly" })
+                                    }
+                                    else
+                                    {
+                                        @Html.TextBoxFor(model => model.Price, new { @class = "span2 txtrequired" })
+                                    }
+                                </div>
+                            </td>
+
+                            <td >
+                                @Html.LabelFor(model => model.POB, new { @style = "color: blue;" })
+                            </td>
+                            <td >
+                                <div class="input-prepend">
+                                    <span class="add-on">$</span>
+                                    @if( (bool)ViewBag.DisablePaymentFields)
+                                    {
+                                        @Html.TextBoxFor(model => model.POB, new { @class = "span2 allownumericwithdecimal", @placeholder = "POB", @data_val = "false", @readonly = "readonly" })
+                                    }
+                                    else
+                                    {
+                                        @Html.TextBoxFor(model => model.POB, new { @class = "span2 allownumericwithdecimal", @placeholder = "POB", @data_val = "false" })
+                                    }
+                                    <br />
+                                </div>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                Discount @*@Html.Label("Discount")*@
+                            </td>
+                            <td>
+                                <div class="input-append">
+                                    @Html.TextBoxFor(model => model.Discount, new { @class = "span2", @placeholder = "Enter discount...", @data_val = "false" })
+                                    <span class="add-on">%</span>
+                                </div>
+                            </td>
+                            <td >
+                                @Html.LabelFor(model => model.CashPaid, new { @style = "color: blue;" })
+                            </td>
+                            <td >
+                                <div class="input-prepend">
+                                    <span class="add-on">$</span>
+                                    @if ((bool)ViewBag.DisablePaymentFields)
+                                    {
+                                        @Html.TextBoxFor(model => model.CashPaid, new { @class = "span2 allownumericwithdecimal", @placeholder = "Cash Paid", @data_val = "false", @readonly = "readonly" })
+                                    }
+                                    else
+                                    {
+                                        @Html.TextBoxFor(model => model.CashPaid, new { @class = "span2 allownumericwithdecimal", @placeholder = "Cash Paid", @data_val = "false" })
+                                    }
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                        @*//3. Sale Price*@
+                        <tr id="tr_SalePrice" style="display:none;">
+                            <td>
+                                @Html.Label("Sale Price")
+                            </td>
+                            <td>
+                                <div class="input-prepend">
+                                    <span class="add-on">$</span>
+                                    @Html.TextBoxFor(model => model.saleprice, new { style = "width: 50px;" })
+                                    <br />
+                                    @*@Html.ValidationMessageFor(model => model.Price)*@
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="vertical-align:initial;">
+                                Deposit   @*@Html.Label("Deposit")*@
+                            </td>
+                            <td>
+                                <div class="input-append">
+                                    @Html.TextBoxFor(model => model.Commission, new { @class = "span2", @readonly = "readonly" })
+                                    <span class="add-on">%</span>
+                                </div>
+                                <span class="commissionTotal"></span>
+                            </td>
+                            <td style="vertical-align: top;">
+                                @Html.LabelFor(model => model.CardPaid, new { @style = "color: blue;" })
+                            </td>
+                            <td class=" " style="vertical-align: top;">
+                                <div class="input-prepend">
+                                    <span class="add-on">$</span>
+                                    @if ((bool)ViewBag.DisablePaymentFields)
+                                    { 
+                                        @Html.TextBoxFor(model => model.CardPaid, new { @class = "span2 allownumericwithdecimal", @placeholder = "Card Paid", @data_val = "false", @readonly = "readonly" })
+                                    }
+                                    else 
+                                    {
+                                        @Html.TextBoxFor(model => model.CardPaid, new { @class = "span2 allownumericwithdecimal", @placeholder = "Card Paid", @data_val = "false" })
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                @Html.LabelFor(model => model.TotalPrice)
+                            </td>
+                            <td>
+                                <div class="input-prepend">
+                                    <span class="add-on">$</span>
+                                    @Html.TextBoxFor(model => model.TotalPrice, new { @class = "span2 txtrequired", @readonly = "readonly" })
+                                </div>
+                            </td>
+                            <td >
+                                @Html.LabelFor(model => model.InvoiceAgent, new { @style = "color: #4db14d;" })
+                            </td>
+                            <td >
+                                <div class="input-prepend">
+                                    <span class="add-on">$</span>
+                                    @if ((bool)ViewBag.DisablePaymentFields)
+                                    {
+                                        @Html.TextBoxFor(model => model.InvoiceAgent, new { @class = "span2 allownumericwithdecimal", @placeholder = "Invoice Agent", @data_val = "false", @readonly = "readonly" })
+                                    }
+                                    else
+                                    {
+                                        @Html.TextBoxFor(model => model.InvoiceAgent, new { @class = "span2 allownumericwithdecimal", @placeholder = "Invoice Agent", @data_val = "false" })
+                                    }
+                                    
+                                    <br />
+                                </div>
+                            </td>
+                        </tr>
+
+
+                        @* Changes Added on 14-09-2016*@
+                        <tr class="@( (bool)ViewBag.DisablePaymentFields ? "disabledDiv" : "") " style="display: none;">
+                            <td>
+                                Date Received
+                            </td>
+                            <td>
+                                @*@Html.EditorFor(model => model.dateReceived.ToString(""), new { @class = "datickddd" })*@
+                                @Html.EditorFor(m => m.dateReceived, "{0:dd/MM/yyyy}", new { @class = "datickddd" })
+                            </td>
+                            <td>
+                                Staff
+                            </td>
+                            <td>
+                                <div class="input-prepend">
+                                    @*<span class="add-on">$</span>*@
+                                    @Html.TextBoxFor(model => model.staff, new { @class = "span2", @placeholder = "Staff", @style = "width: 153px;" }))
+                                    <br />
+                                </div>
+                            </td>
+                        </tr>
+
+
+                        @* POB changes*@
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="booking_sec_main full-width">
+                <table class="booking_table">
+
+                    @*<li>
+                            <div class="editor-label">
+                                @Html.LabelFor(model => model.shopId, "Shop Name")
+
+                                @{if (TempData["Mshops"] != null)
+                                {
+
+                                    @Html.DropDownListFor(model => model.shopId, (IEnumerable<SelectListItem>)TempData["Mshops"], "--- Select ShopName ---");
+
+                                    @Html.ValidationMessageFor(model => model.shopId)
+
+                                }
+                                }
+                            </div>
+                        </li>
+                        <li>
+                            <div class="editor-label">
+                                @Html.Label("Sales From ")
+
+
+
+                                @Html.DropDownListFor(model => model.salesfrom, new[] {
+                                    new SelectListItem(){Text = "Walk In" , Value="Walk In"},
+                                    new SelectListItem(){Text ="Email/Phone Call" , Value = "Email/Phone Call"},
+                                }, "--- Select SalesFrom ---")
+
+                                @Html.ValidationMessageFor(model => model.salesfrom)
+
+                            </div>
+
+                        </li>*@
+                    <tr>
+
+                        <td style="display:none;">
+                            @Html.Label("Customer Payment Type ")
+                        </td>
+
+                        <td style="display:none;">
+                            @Html.DropDownListFor(model => model.custo_paymenttype, new List<SelectListItem>{
+                                        new SelectListItem {Text="Agent only" , Value="Agent only"},
+                                        new SelectListItem{Text= "Agent/POB",Value="Agent/POB"},
+                                        new SelectListItem{Text= "Reservation",Value="Reservation"},
+                                        new SelectListItem{Text= "POB only",Value="POB only"},
+                                    }, "--- Select Payment Type ---")
+                            @Html.ValidationMessageFor(model => model.custo_paymenttype)
+
+
+                        </td>
+
+                    </tr>
+
+                    <tr id="div_paymentmethod" style="display:none;">
+
+                        @*@if (Model != null && string.IsNullOrEmpty(Model.PaymentMethod))
+                            {*@
+                        <td>
+
+                            @Html.Label("Payment Method ")
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(model => model.PaymentMethod, new List<SelectListItem>{
+                                         new SelectListItem {Text="Cash" , Value="Cash"},
+                                        new SelectListItem{Text= "CreditCard",Value="CreditCard"},
+                                        new SelectListItem{Text= "Paypal",Value="Paypal"},
+                                        new SelectListItem{Text= "ETPOS",Value="ETPOS"},
+                                    }, "--- Select Payment Method ---")
+                            @*  @Html.ValidationMessageFor(model => model.custo_paymenttype)*@
+
+
+                        </td>
+                        @*}*@
+                    </tr>
+
+
+                    @*<tr style="margin-top: 10px">
+                            <td>
+                                @Html.LabelFor(model => model.Agent)
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(model => model.Agent, (IEnumerable<SelectListItem>)ViewBag.Users, new { @class = "suggestions" })
+
+                                @Html.TextBoxFor(m => m.AgentId, new { @class = "span2", @style = "width:20px;", @readonly = "readonly" })
+                            </td>
+                        </tr>*@
+
+                    <tr>
+                        <td>
+                            @Html.Label("Agent Voucher")
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(model => model.Voucher, new { @class = "txtrequired" })
+                        </td>
+                    </tr>
+
+                    @*<tr>
+                            <td>
+                                @Html.LabelFor(m => m.PaymentType)
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(model => model.PaymentType, new List<SelectListItem>{
+                                             new SelectListItem {Text="Agent (invoice)" , Value="2"},
+                                            new SelectListItem{Text= "Deposit Taken",Value="3"},
+                                        }, "--- Select Payment Type ---")
+
+                            </td>
+
+                        </tr>*@
+
+
+                    <tr>
+                        <td>
+                            @*@Html.LabelFor(model => model.Reference)*@
+                            Agent Reference
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(model => model.Reference)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.BookingPerson)
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(model => model.BookingPerson, new { @disabled = "disabled" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.BookingDate)
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.dateReceived, "{0:dd/MM/yyyy}", new { @disabled = "disabled" })
+                        </td>
+                    </tr>
+
+                </table>
+                <table class="booking_table">
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.pickuplocation)
+                        </td>
+                        @*@Html.DropDownListFor(model => model.pickuplocation, new SelectList(
+                            new List<Object>{
+                                 new { value = 10 , text = ""  }
+                            },
+                            "value",
+                            "text",
+                             Model.pl), new { @class = "chzn-select" })*@
+                        <td colspan="4">
+                            @Html.DropDownListFor(model => model.pickuplocation, new List<SelectListItem>{
+                                            new SelectListItem {Text="" , Value="10"}
+                                        }, "-- Please Select --", new { @class = "chzn-select" })
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.time, new { @style = "width:100px;" })
+                            @*@Html.TextBoxFor(model => model.time, new { @class = "span2", @style = "width:100px;", @readonly = "readonly" })*@
+
+                        </td>
+                        <td>
+                            @*@Html.DropDownListFor(model => model.time, (IEnumerable<SelectListItem>)ViewBag.PickupTimes, new { @style = "height: 25px; width: 65px;", @class = "chosen" })*@
+
+                            @Html.DropDownListFor(model => model.time, (IEnumerable<SelectListItem>
+                                )ViewBag.PickupTimes, "--Please Select--", new { @class = "form-control", id = "ddlTimeList" })
+                        </td>
+                    </tr>
+                    @*<tr>
+                            <td>
+                                @Html.LabelFor(model => model.Date)
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(model => model.Date, new { @class = "datepick", @data_date = "boardingdate" })
+                                <span class="badge badge-info" id="seatslimit">0</span>
+                            </td>
+                        </tr>*@
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.PassengerName)
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(model => model.PassengerName, new { @class = "txtrequired" })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.ContactDetails)
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(model => model.ContactDetails, new { @class = "input-validation-error phoneContact", @placeholder = "Enter contact number...", @style = "width:180px", @data_val = "false" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.LabelFor(model => model.Comments)
+                        </td>
+                        <td>
+                            @Html.TextAreaFor(model => model.Comments, new { @rows = 4, @cols = 40, @data_val = "false", @class = "input-validation-error", @placeholder = "Any comments..." })
+                        </td>
+                    </tr>
+
+
+                    <tr id="lunchtr" style="visibility:visible">
+                        <td>Lunch</td>
+                        <td style="display:none;">
+                            @*@Html.CheckBoxListFor(model => model.Postedlunchs.LunchIds,
+                                model => model.AvailableLunch,
+                                lunch => lunch.Id,
+                                lunch => lunch.Name,
+                                model => model.SelectedLunch,
+                                Position.Horizontal)*@
+                        </td>
+                        <td>
+                            <div style="float:left">
+                                <label>Fish</label><br />
+                                @Html.TextBoxFor(model => model.Fish, new { @class = "chnge input-medium valid", @id = "Fish", @name = "Fish", @style = "width: 70px", @type = "number", @min = "0" })
+                            </div>
+                            <div style="float:left">
+                                <label>Steak</label><br />
+                                @Html.TextBoxFor(model => model.Steak, new { @class = "chnge input-medium valid", @id = "Steak", @name = "Steak", @style = "width: 70px", @type = "number", @min = "0" })
+                            </div>
+                            <div style="float:left">
+                                <label>Vegetarian</label><br />
+                                @Html.TextBoxFor(model => model.Vegetarian, new { @class = "chnge input-medium valid", @id = "Vegetarian", @name = "Vegetarian", @style = "width: 70px", @type = "number", @min = "0" })
+
+                            </div>
+                        </td>
+
+                    </tr>
+
+                </table>
+            </div>
+
+
+        </div>
+    </fieldset>
+    <button type="submit" class="btn btn-primary" onclick="return ontestvalid(); return false;" style="margin-top: 10px;" id="addbooking">Update Booking</button>
+    <a target="_blank" style="margin-top: 10px;" id="lnkPrint" href="Bookings/@ViewBag.BookingID?print">Print</a>
+    @Html.ActionLink("Delete Booking", "disableBooking", "Booking", new { bid = Model.BookingID, tId = (Model.Tour == null ? 0 : Model.Tour), tdt = Model.Date, tseat = (Model.Adults + Model.FamilyChildren + Model.Children + Model.Infant) }, htmlAttributes: new { id = "DeleteBooking", style = "margin-top: 10px;color: #333;" })
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $('#DeleteBooking').click(function (e) {
+            if (!confirm("Are you sure you want to delete this booking? This operation can not be undone."))
+                e.preventDefault();
+        });
+        //------------------------------by yummy--------------------------------//
+        var comitionValue = 0;
+        var price = 0;
+        var priceChild = 0;
+        var priceFamilyChild = 0;
+        var goldPrice = 0;
+        var goldPriceChild = 0;
+        var goldPriceFamilyChild = 0;
+        function getTourPrices() {
+
+            price = 0;
+            priceChild = 0;
+            priceFamilyChild = 0;
+
+            jQuery.ajax({
+                url: '/TourCodePrice/GetTourPrice/?TourCodeID='
+                         + parseInt($('#TourCode option:selected').val()),
+                success: function (result) {
+                    var dataobject = new Object();
+                    dataobject = result;
+                    price = dataobject.Price;
+                    priceChild = dataobject.PriceChild;
+                    priceFamilyChild = dataobject.PriceFamilyChild;
+                    goldPrice = dataobject.GoldPrice;
+                    goldPriceChild = dataobject.GoldPriceChild;
+                    goldPriceFamilyChild = dataobject.GoldPriceFamilyChild;
+                },
+                async: false
+            });
+
+            return true;
+        }
+
+        $('.counts').change(function () {
+            console.log('aa');
+            //if(price != 0 && priceChild != 0 && priceFamilyChild != 0)
+            {
+                var totalPrice = 0;
+                if (!$('#chkGold').is(':checked')) {
+                    totalPrice = parseFloat($('#Adults').val() == "" ? 0 : $('#Adults').val()) * price;
+                    totalPrice += parseFloat($('#Children').val() == "" ? 0 : $('#Children').val()) * priceChild;
+                    totalPrice += parseFloat($('#FamilyChildren').val() == "" ? 0 : $('#FamilyChildren').val()) * priceFamilyChild;
+                }
+                else {
+                    totalPrice = parseFloat($('#Adults').val() == "" ? 0 : $('#Adults').val()) * goldPrice;
+                    totalPrice += parseFloat($('#Children').val() == "" ? 0 : $('#Children').val()) * goldPriceChild;
+                    totalPrice += parseFloat($('#FamilyChildren').val() == "" ? 0 : $('#FamilyChildren').val()) * goldPriceFamilyChild;
+                }
+                $('#Price').val(totalPrice);
+                calculate();
+
+            }
+        });
+
+
+
+        function getpaymentmethod(drop_paymentmethod_value) {
+
+            if (drop_paymentmethod_value == "Reservation") {
+                // $('#div_paymentmethod').removeAttr("style");
+            } else {
+                //$('#div_paymentmethod').css("display", "none");
+            }
+        }
+        $('#pickuplocation').change(function () {
+            getTourPrices();
+            BindDropdownTime();
+            //$.get('/Booking/Times?id=' + $('#pickuplocation').val(), function (a, b, c)
+            //{
+            //    $('#time').empty();
+            //    $('#time').append(a);
+            //    $('#time').chosen().change();
+            //    $("#time").trigger("liszt:updated");
+            //    $('#Date').change();
+            //});
+        });
+        $('#seatslimit').hide();
+        $('#Date').change(function () {
+            //if ($('.Date').val().trim() == '') {
+            //    $('#seatslimit').hide(); return;
+            //}
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getSeatsLimit", "Booking")',
+                data: { date: $(this).val(), tourid: $("#Tour option:selected").val() },
+                success: function (resp) {
+                    if (resp <= 0) {
+                        var adult = (isNaN(adult = parseInt($("#Adults").val(), 10)) ? 0 : adult);
+                        if (adult > 0) {
+                            alert("Seats are not enough for this booking.");
+                        }
+                        if ($('#seatslimit').hasClass('badge-info')) {
+                            $('#seatslimit').removeClass('badge-info');
+                            $('#seatslimit').addClass('badge-warning');
+                        }
+                    }
+                    else {
+                        var totalTourist = parseInt($("#totalTourist").val());
+                        var adult = (isNaN(adult = parseInt($("#Adults").val(), 10)) ? 0 : adult);
+                        var child = (isNaN(child = parseInt($("#FamilyChildren").val(), 10)) ? 0 : child);
+                        var FamilyChildren = (isNaN(FamilyChildren = parseInt($("#Children").val(), 10)) ? 0 : FamilyChildren);
+                        var Infant = (isNaN(Infant = parseInt($("#Infant").val(), 10)) ? 0 : Infant);
+                        var total = adult + child + FamilyChildren + Infant;
+
+                        console.log("totalTourist", totalTourist);
+                        console.log("actualLimit", resp);
+
+                        resp = totalTourist + resp;
+                        if (resp < total) {
+                            alert("Seats are not enough for this booking.");
+                        }
+
+                        if ($('#seatslimit').hasClass('badge-warning')) {
+                            $('#seatslimit').removeClass('badge-warning');
+                            $('#seatslimit').addClass('badge-info');
+                        }
+                    }
+                    $('#seatslimit').show();
+                    $('#seatslimit').html(resp);
+                }
+
+            });
+        });
+
+
+        //------------------------------END by yummy--------------------------------//
+
+        $(document).ready(function () {
+            $("#PaymentType").chosen();
+            setPaymentTypeColor();
+            //------------------------------by yummy--------------------------------//
+            //if ($('.datepick').val().trim() == '')
+            //    $('#seatslimit').hide();
+
+            //on2015-06-30
+            //if ($("#Agent option:selected").text() == "ATI")
+            if ($('#AgentId').val() == 12) {
+                $('#tr_SalePrice').removeAttr('style');
+                $('#span_agent').css('display', 'none');
+                $('#span_Deposite').css('display', 'block');
+
+            } else {
+                $('#tr_SalePrice').css('display', 'none');
+                $('#span_Deposite').css('display', 'none');
+                $('#span_agent').css('display', 'block');
+            }
+
+            if ($('#PaymentType').val() == 2) //Agent Invoice
+            {
+                //$('#Commission').val(0);
+                $("#Commission").prop("readonly", true);
+            }
+            else {
+                //$('#Commission').val(commisionvalue);
+                //$("#Commission").prop("readonly", false);
+            }
+            //End show section of Agent or Deposite
+
+            //End
+
+
+            bindEvents();
+            $(".suggestions").combobox();
+            $('#Date').datepicker({ dateFormat: 'dd/mm/yy' });
+            $('#dateReceived').datepicker({ dateFormat: 'dd/mm/yy' });
+            //$('#dateReceived .input-validation-error').removeClass('input-validation-error');
+            $('.chnge').change(function () {
+                //if(price != 0 && priceChild != 0 && priceFamilyChild != 0)
+                //{
+                var ajax1 = getTourPrices();
+                $.when(ajax1).done(function (data, textStatus, jqXHR) {
+                    var totalPrice = 0;
+                    //totalPrice = parseFloat($("#Price").val());
+                    //console.log(totalPrice);
+                    if (!$('#chkGold').is(':checked')) {
+
+                        totalPrice = parseFloat($('#Adults').val() == "" ? 0 : $('#Adults').val()) * price;
+                        totalPrice += parseFloat($('#Children').val() == "" ? 0 : $('#Children').val()) * priceChild;
+                        totalPrice += parseFloat($('#FamilyChildren').val() == "" ? 0 : $('#FamilyChildren').val()) * priceFamilyChild;
+                    }
+                    else {
+                        totalPrice = parseFloat($('#Adults').val() == "" ? 0 : $('#Adults').val()) * goldPrice;
+                        totalPrice += parseFloat($('#Children').val() == "" ? 0 : $('#Children').val()) * goldPriceChild;
+                        totalPrice += parseFloat($('#FamilyChildren').val() == "" ? 0 : $('#FamilyChildren').val()) * goldPriceFamilyChild;
+
+                    }
+                    $('#Price').val(totalPrice);
+
+
+                });
+                calculate();
+                // }
+            });
+            getpaymentmethod($('#custo_paymenttype').val());
+
+            $('#custo_paymenttype').change(function () {
+
+                getpaymentmethod($(this).val());
+            });
+            $('#chkGold').click(function () {
+
+                $('.chnge').change();
+
+            });
+
+
+            $('#TourCode').change(function () {
+                getCommission();
+                $('.chnge').change();
+                $('.datepick').change();
+            });
+
+            //------------------------------END by yummy--------------------------------//
+
+
+            //$('#seatslimit').hide();
+            $('#Tour').on('change', function () {
+
+                if ($('#Tour').val().toLowerCase().trim() == "1")//1 =cape tribulation
+                {
+                    $('#DIVchkGold').find('#chkGold').prop('checked', false);
+                    $('#DIVchkGold').css({ 'visibility': 'hidden' });
+
+                    $('#lunchtr').css({ 'visibility': 'visible' });
+                } else {
+
+                    $('#DIVchkGold').css({ 'visibility': 'visible' });
+                    $('#DIVchkGold').find('#chkGold').prop('checked', false);
+
+                    $('#lunchtr').css({ 'visibility': 'hidden' });
+                }
+
+
+                var tempId = $(this).val();
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+
+                    url: '@Url.Action("getTourCodes", "Booking")',
+                    data: { tourid: $(this).val() },
+                    success: function (resp) {
+                        $('#TourCode').empty();
+                        $.each(resp, function (i, value) {
+                            $('#TourCode').append('<option value=' + value['TourCode'] + '>' + value['tourcodevalues'] + '</option>');
+                            $("#TourCode").val($("#TourCode option:first").val());
+                            if (i == resp.length - 1) {
+                                $.ajax({
+                                    type: 'POST',
+                                    async: false,
+                                    url: '@Url.Action("getLocations", "Booking")',
+                                    data: { tourid: tempId, check: true },
+                                    success: function (respData) {
+                                        $('#pickuplocation').empty();
+                                        var optionhtml1 = '<option value="' +
+             "" + '">' + "--Please Select--" + '</option>';
+                                        $("#pickuplocation").append(optionhtml1);
+
+
+                                        $('#time').val('');
+                                        $.each(respData, function (index, value) {
+                                            if (index == 0) {
+                                                $.ajax({
+                                                    type: 'POST',
+                                                    async: false,
+                                                    url: '@Url.Action("getTimes", "Booking")',
+                                                    data: { pickupid: value['pickuplocation'] },
+                                                    success: function (resp) {
+                                                        $('#time').val('');
+                                                        $.each(resp, function (i, value) {
+                                                            $('#time').val(value['time']);
+                                                        })
+                                                    }
+
+                                                });
+                                            }
+
+
+                                            $('#pickuplocation').append('<option value=' + value['pickuplocation'] + '>' + value['location'] + '</option>');
+
+                                        })
+                                        $(".chzn-select").trigger("liszt:updated");
+                                        $('.datepick').change();
+                                    }
+
+                                });
+
+                            }
+                        })
+                    }
+                });
+
+                $('#TourCode').change();
+            });
+            //populate the tour drop down
+            @*var firstDropDownId = 0;
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp) {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value) {
+                        if (i == 0)
+                            firstDropDownId = value['Tour'];
+
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+
+                        if (i == resp.length - 1) {
+
+                            if (parseInt($('#tid').val()) > 0)
+                                $('#Tour').val($('#tid').val());
+
+                            $('.datepick').change();
+
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("getTourCodes", "Booking")',
+                                data: { tourid: $('#tid').val() },
+                                success: function (resp) {
+                                    $('#TourCode').empty();
+                                    $.each(resp, function (i, value) {
+                                        $('#TourCode').append('<option value=' + value['TourCode'] + '>' + value['tourcodevalues'] + '</option>');
+                                    })
+
+                                    if (parseInt($('#tc').val()) > 0)
+                                        $('#TourCode').val($('#tc').val());
+
+                                }
+
+                            });
+
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("getLocations", "Booking")',
+                                data: { tourid: $('#tid').val(), check: true },
+                                success: function (respData) {
+                                    $('#pickuplocation').empty();
+                                    $('#time').val('');
+                                    $.each(respData, function (index, value) {
+
+                                        if (index == 0) {
+                                            $.ajax({
+                                                type: 'POST',
+                                                traditional: true,
+                                                url: '@Url.Action("getTimes", "Booking")',
+                                                data: { pickupid: value['pickuplocation'] },
+                                                success: function (resp) {
+                                                    $('#time').val('');
+                                                    $.each(resp, function (i, value) {
+                                                        $('#time').val(value['time']);
+                                                    })
+                                                }
+
+                                            });
+                                        }
+                                        $('#pickuplocation').append('<option value=' + value['pickuplocation'] + '>' + value['location'] + '</option>');
+                                    })
+                                    if (parseInt($('#pl').val()) > 0)
+                                        $('.chzn-select').val($('#pl').val());
+                                    $(".chzn-select").trigger("liszt:updated");
+                                }
+
+                            });
+
+
+                        }
+                    })
+                }
+            });*@
+
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getLocations", "Booking")',
+                data: { tourid: $('#tid').val(), check: true },
+                success: function (respData) {
+                    $('#pickuplocation').empty();
+                    $('#time').val('');
+
+
+                    var optionhtml1 = '<option value="' +
+                "" + '">' + "--Please Select--" + '</option>';
+                    $("#pickuplocation").append(optionhtml1);
+
+                    $.each(respData, function (index, value) {
+
+                        if (index == 0) {
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("getTimes", "Booking")',
+                                data: { pickupid: value['pickuplocation'] },
+                                success: function (resp) {
+                                    $('#time').val('');
+                                    $.each(resp, function (i, value) {
+                                        $('#time').val(value['time']);
+                                    })
+                                }
+
+                            });
+                        }
+                        $('#pickuplocation').append('<option value=' + value['pickuplocation'] + '>' + value['location'] + '</option>');
+                    })
+                    if (parseInt($('#pl').val()) > 0)
+                        $('.chzn-select').val($('#pl').val());
+                    $(".chzn-select").trigger("liszt:updated");
+                }
+
+            });
+
+            $('.datepick').on('change', function () {
+                console.log('ddt');
+                if ($('.datepick').val().trim() == '') {
+                    $('#seatslimit').hide(); return;
+                }
+                $.ajax({
+
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getSeatsLimit", "Booking")',
+                    data: { date: $(this).val(), tourid: $("#Tour option:selected").val() },
+                    success: function (resp) {
+                        if (resp == 0) {
+
+                            if ($('#seatslimit').hasClass('badge-info')) {
+                                $('#seatslimit').removeClass('badge-info');
+                                $('#seatslimit').addClass('badge-warning');
+                            }
+                        }
+                        else {
+                            if ($('#seatslimit').hasClass('badge-warning')) {
+                                $('#seatslimit').removeClass('badge-warning');
+                                $('#seatslimit').addClass('badge-info');
+                            }
+                        }
+
+                        $('#seatslimit').show();
+                        $('#seatslimit').html(resp);
+                    },
+                    error: function (e) {
+                        console.log(e);
+                    }
+                });
+            });
+            $("#seatslimit").popover({ title: 'Booking Date', content: "Seats Available", trigger: 'hover' });
+
+            //$('[data-booking="search"]').mcautocomplete({
+
+            //    showHeader: true,
+            //    //columns: columns,
+            //    source: bookings,
+            //    select: function (event, ui)
+            //    {
+            //        window.location.href = window.location.origin + '/Booking/EditBooking?bookingid=' + (ui.item ? ui.item[0] : '');
+            //        return false;
+            //    }
+            //});
+
+
+
+            $('#Price').on('blur', function () {
+                if (parseFloat($(this).val())) {
+                    var price = parseFloat($(this).val());
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+                else
+                    $('#TotalPrice').val('');
+            });
+
+            $('#Discount').on('blur', function () {
+                if (parseFloat($(this).val()) && parseFloat($('#Price').val())) {
+                    var price = parseFloat($('#Price').val())
+                    var temp = price * (parseFloat($(this).val()) / 100);
+                    price = price - temp;
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+                else {
+                    var price = parseFloat($('#Price').val())
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+            });
+            $('#Commission').on('blur', function () {
+                if (parseFloat($(this).val()) && parseFloat($('#Price').val())) {
+                    var price = parseFloat($('#Price').val());
+                    var temp = price * (parseFloat($(this).val()) / 100);
+                    price = price - temp;
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+                else {
+                    var price = parseFloat($('#Price').val())
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+            });
+            $('#TotalPrice').on('blur', function () {
+
+                if (parseFloat($('#Price').val())) {
+                    var price = parseFloat($('#Price').val());
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $(this).val(price);
+                }
+                else
+                    $(this).val('');
+            });
+
+            @*$('#Agent').typeahead({
+                source: function (query, process)
+                {
+                    uid = [];
+                    map = {};
+                    $.ajax({
+                        type: 'POST',
+                        tradional: true,
+                        url: '@Url.Action("getAgents", "Booking")',
+                        success: function (resp)
+                        {
+                            $.each(resp, function (i, data)
+                            {
+                                map[data.Name] = data;
+                                uid.push(data.Name);
+                            });
+
+                            process(uid);
+                        }
+                    });
+                },
+                matcher: function (item)
+                {
+                    if (item.toLowerCase().indexOf(this.query.trim().toLowerCase()) != -1)
+                    {
+                        return true;
+                    }
+                },
+                sorter: function (items)
+                {
+                    return items.sort();
+                },
+                highlighter: function (item)
+                {
+                    var regex = new RegExp('(' + this.query + ')', 'gi');
+                    return item.replace(regex, "<strong>$1</strong>");
+                },
+                updater: function (item)
+                {
+                    selectedState = map[item].Commission;
+                    $('#Commission').val(map[item].Commission);
+                    $('#AgentId').val(map[item].ID);
+                    return item;
+                }
+            });*@
+
+
+
+
+            $(".chzn-select").chosen();
+
+            @*$('#pickuplocation').on('change', function ()
+            {
+
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getTimes", "Booking")',
+                    data: { pickupid: $(this).val() },
+                    success: function (resp)
+                    {
+                        $('#time').val('');
+                        $.each(resp, function (i, value)
+                        {
+                            $('#time').val(value['time']);
+                        })
+                        $('.datepick').change();
+                    }
+
+                });
+
+            });*@
+
+
+
+            if ($('#Tour').val().toLowerCase().trim() == "1")//1 =cape tribulation
+            {
+                // $('#DIVchkGold').find('#chkGold').prop('checked', false);
+                $('#DIVchkGold').css({ 'visibility': 'hidden' });
+
+                $('#lunchtr').css({ 'visibility': 'visible' });
+            } else {
+                $('#DIVchkGold').css({ 'visibility': 'visible' });
+                //  $('#DIVchkGold').find('#chkGold').prop('checked', true);
+
+                $('#lunchtr').css({ 'visibility': 'hidden' });
+            }
+
+
+
+
+        });
+
+        function bindEvents() {
+            $('#Price, #Commission, #Discount, #TotalPrice').keyup(calculate);
+
+
+
+
+            //on 2015-06-30
+            $('#PaymentType').change(function () {
+                var commisionvalue = comitionValue;
+                console.log("commvaue", comitionValue);
+
+                if ($('#PaymentType').val() == 2) //Agent Invoice
+                {
+                    // comitionValue = 0;
+                    $('#Commission').val(0);
+                    $("#Commission").prop("readonly", true);
+                    calculate();
+                }
+                else {
+                    comitionValue = commisionvalue;
+                    console.log(comitionValue);
+                    $('#Commission').val(commisionvalue);
+                    //$("#Commission").prop("readonly", false);
+                    calculate();
+                }
+
+            });
+            //End
+
+            $('#AgentId').change(function () {
+                setPaymentTypeColor();
+                //$.get('/Booking/Comments?id=' + $('#Agent').val(), function (a, b, c)
+                $.get('/Booking/Comments?id=' + $('#AgentId').val(), function (a, b, c) {
+                    if (a.split('|')[0] != "") {
+                        $('#agentComments').html(a.split('|')[0]);
+                        $('#agentComments').show();
+
+                    } else {
+                        $('#agentComments').hide();
+
+                    }
+
+                    var credit = a.split('|')[1];
+                    if (credit != "0") {
+                        $('#PaymentType').val(credit);
+                        setPaymentTypeColor();
+                        $('#Hidden_PaymentType').val(credit);
+
+                        if (credit == 3) {
+                            $('#POB').removeAttr('readonly');
+                        }
+                        else {
+                            $('#POB').val('0');
+                            $('#POB').prop('readonly', 'true');
+                        }
+
+                    } else {
+                        $('#PaymentType').val(3);
+                        setPaymentTypeColor();
+                        $('#Hidden_PaymentType').val(3);
+                        //pob
+                        $('#POB').removeAttr('readonly');
+                    }
+                    $('#PaymentType').chosen().change();
+                    $("#PaymentType").trigger("liszt:updated");
+                    setPaymentTypeColor();
+                });
+
+                //$('#AgentId').val($('#AgentId').val());
+                $('.spanAgent').val($('#AgentId').val());
+                /*
+                $('#AgentId').val($('#AgentId').val());
+                console.log("a1", $('#Agent').val());
+
+                */
+                console.log("a2", $('#AgentId').val());
+                //show section of Agent or Deposite
+                //if ($("#Agent option:selected").text() == "ATI")
+                if ($('#AgentId').val() == 12) {
+                    $('#tr_SalePrice').removeAttr('style');
+                    $('#span_agent').css('display', 'none');
+                    $('#span_Deposite').css('display', 'block');
+
+                } else {
+                    $('#tr_SalePrice').css('display', 'none');
+                    $('#span_Deposite').css('display', 'none');
+                    $('#span_agent').css('display', 'block');
+                }
+                //End show section of Agent or Deposite
+
+                $('#custo_paymenttype').val('Agent/POB');
+                $('#custo_paymenttype').chosen().change();
+                $("#custo_paymenttype").trigger("liszt:updated");
+
+                getCommission();
+
+            });
+            setPaymentTypeColor();
+        }
+
+        function getCommission() {
+            //UserID: $('#AgentId').val(),
+            console.log($('#AgentId').val());
+            var obj = {
+                UserID: $('#AgentId').val(),
+                TourCodeID: $('#TourCode').val()
+            };
+
+
+
+            $.ajax({
+                url: '@Url.Action("getAgentTourCommission", "AgentCommission")',
+                data: JSON.stringify(obj),
+                type: "POST",
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if (data != null) {
+                        $('#Commission').val(data);
+                        //$('#Commission1').val(data);
+                        comitionValue = $('#Commission').val();
+                        calculate();
+
+                    }
+                },
+                error: function (xhr) {
+
+                }
+            });
+
+        }
+
+        function BindDropdownTime() {
+
+            $('#ddlTimeList').empty();
+            var pickupId = $('#pickuplocation').val();
+            console.log("pickupId", pickupId);
+            var optionhtml1 = '<option value="' +
+                "" + '">' + "--Please Select--" + '</option>';
+            $("#ddlTimeList").append(optionhtml1);
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("getTimess", "Booking")',
+                data: { pickupid: pickupId },
+                success: function (data) {
+
+                    var jsdata = JSON.parse(data);
+
+                    $.each(jsdata, function (key, value) {
+                        $('#ddlTimeList').append($("<option></option>").val(value.timeId).html(value.time));
+                    });
+
+                    if (jsdata !== undefined && jsdata.length > 0) {
+                        $('#ddlTimeList').val(jsdata[0].timeId);
+                    }
+
+                    //console.log(data);
+                    //$('#ddlTimeList').empty();
+                    //var opt = new Option("1", "2");
+                    //$('#ddlTimeList').append(opt);
+
+                }
+            })
+        }
+
+
+
+        function calculate() {
+
+            if ($('#tr_SalePrice').css('display') == 'none') {
+                var price = parseFloat($('#Price').val());
+                var temp = 0;
+
+
+                //if (comitionValue != 0)
+                //{
+                //    $('#Commission').val(comitionValue);
+                //    console.log(comitionValue);
+                //}
+                //commented on 2015-07-01
+
+                //
+
+                //commented on 2015-07-01
+                // var temp = price * (parseFloat($('#Commission').val() == "" ? 0 : $('#Commission').val()) / 100);
+                var temp = price * (parseFloat($('#Commission').val() == "" ? 0 : $('#Commission').val()) / 100);
+                console.log("temp", temp);
+
+                price = price - temp;
+                if (!isNaN(temp))
+                    $('.commissionTotal').html('$ ' + (Math.round(temp * 100) / 100).toFixed(2));
+                else
+                    $('.commissionTotal').html('$ 0');
+                if (parseFloat($('#Discount').val())) {
+                    temp = price * (parseFloat($('#Discount').val()) / 100);
+                    price = price - temp;
+                }
+
+                if (!isNaN(temp))
+                    $('#TotalPrice').val(price);
+                else
+                    $('#TotalPrice').val('0');
+
+            } else {
+
+
+                //calculate for saleprice=tour price - discount;
+                var price_of_tour_for_saleprice = parseFloat($('#Price').val());
+
+                //  if (parseFloat($('#Discount').val())) {
+                var temp_for_saleprice = price_of_tour_for_saleprice * (parseFloat($('#Discount').val()) / 100);
+
+                price_of_tour_for_saleprice = price_of_tour_for_saleprice - temp_for_saleprice;
+
+                // }
+                if (!isNaN(temp_for_saleprice))
+                    $('#saleprice').val(price_of_tour_for_saleprice);
+                else
+                    $('#saleprice').val('0');
+
+                var temp_for_total_price = (parseFloat($('#saleprice').val() == "" ? 0 : $('#saleprice').val())) * (parseFloat($('#Commission').val() == "" ? 0 : $('#Commission').val()) / 100);
+
+                var price_for_totalprice = 0;
+                price_for_totalprice = (parseFloat($('#saleprice').val() == "" ? 0 : $('#saleprice').val())) - temp_for_total_price;
+                if (!isNaN(temp_for_total_price))
+                    $('.commissionTotal').html('$ ' + (Math.round(temp_for_total_price * 100) / 100).toFixed(2));
+                else
+                    $('.commissionTotal').html('$ 0');
+
+
+
+                if ((!isNaN(temp_for_total_price)) && temp_for_total_price != 0) {
+                    $('#TotalPrice').val(price_for_totalprice);
+                }
+                else {
+                    $('#TotalPrice').val('0');
+                }
+
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        var price = 0;
+        var priceChild = 0;
+        var priceFamilyChild = 0;
+        var goldPrice = 0;
+        var goldPriceChild = 0;
+        var goldPriceFamilyChild = 0;
+        //function getTourPrices()
+        //{
+        //    price = 0;
+        //    priceChild = 0;
+        //    priceFamilyChild = 0;
+        //    $.get('/TourCodePrice/GetTourPrice/?TourCodeID=' + parseInt($('#TourCode').val()), function (data)
+        //    {
+        //        price = data.Price;
+        //        priceChild = data.PriceChild;
+        //        priceFamilyChild = data.PriceFamilyChild;
+        //        goldPrice = data.GoldPrice;
+        //        goldPriceChild = data.GoldPriceChild;
+        //        goldPriceFamilyChild = data.GoldPriceFamilyChild;
+        //        $('.counts').change();
+        //    });
+        //}
+        //$('.counts').change(function ()
+        //{
+        //    //if(price != 0 && priceChild != 0 && priceFamilyChild != 0)
+        //    {
+        //        debugger;
+        //        var totalPrice = 0;
+        //        if (!$('#chkGold').is(':checked'))
+        //        {
+        //            totalPrice = parseFloat($('#Adults').val() == "" ? 0 : $('#Adults').val()) * price;
+        //            totalPrice += parseFloat($('#Children').val() == "" ? 0 : $('#Children').val()) * priceChild;
+        //            totalPrice += parseFloat($('#FamilyChildren').val() == "" ? 0 : $('#FamilyChildren').val()) * priceFamilyChild;
+        //        }
+        //        else
+        //        {
+        //            totalPrice = parseFloat($('#Adults').val() == "" ? 0 : $('#Adults').val()) * goldPrice;
+        //            totalPrice += parseFloat($('#Children').val() == "" ? 0 : $('#Children').val()) * goldPriceChild;
+        //            totalPrice += parseFloat($('#FamilyChildren').val() == "" ? 0 : $('#FamilyChildren').val()) * goldPriceFamilyChild;
+        //        }
+        //        $('#Price').val(totalPrice);
+        //        calculate();
+
+        //    }
+        //});
+
+    </script>
+
+
+    @*on 2015-09-01*@
+    <script>
+
+        function ontestvalid() {
+
+            var isValid = true;
+
+            var isPayablematch = true;
+            $("#editForm").find('input.txtrequired').each(function () {
+                if ($.trim($(this).val()) == '') {
+                    isValid = false;
+                    //$(this).next('.error').css("display", "block");
+                    $(this).css({
+                        "border": "1px solid red",
+                        "background": "#FFCECE"
+                    });
+                }
+                else {
+                    //$(this).next('.error').css("display", "none");
+                    $(this).css({
+                        "border": "",
+                        "background": ""
+                    });
+                }
+            });
+
+
+            //Agent
+            if ($("#AgentId").length == 0 || $("#AgentId").val() == '' || $("#AgentId").val() == null) {
+                isValid = false;
+                $("#editForm").find("#Agent").css({
+                    "border": "1px solid red",
+                    "background": "#FFCECE"
+                });
+            }
+            else {
+                $("#Agent").next().css({
+                    "border": "",
+                    "background": ""
+                });
+            }
+            //payable + pob validation started on 27-08-2016
+            var payable = parseFloat($('#TotalPrice').val());
+
+
+            if (payable != 0) {
+                var card = parseFloat($('#CardPaid').val());
+                var cash = parseFloat($('#CashPaid').val());
+                var invoiceagent = parseFloat($('#InvoiceAgent').val());
+                var pob = parseFloat($('#POB').val());
+                var totalvalues = GetValue(card) + GetValue(cash) + GetValue(invoiceagent) + GetValue(pob);
+
+                if (parseInt(payable) != parseInt(totalvalues)) {
+
+                    alert('Payable price must be equal to card price + cash price + invoice agent + POB');
+                    return false;
+                }
+            }
+            //End payable + pob validation
+
+            //time
+            if ($("#ddlTimeList").length == 0 || $("#ddlTimeList  option:selected").text() == "--Please Select--") {
+                isValid = false;
+            }
+
+            //Date
+            if ($('#Date').val() == "") {
+
+                isValid = false;
+
+                //var t = $("#querypagesection#datetime_dropdown").next('.error');
+                // $(mydropdown).next('.error').css("display", "block");
+                $("#editForm").find("#Date").css({
+                    "border": "1px solid red",
+                    "background": "#FFCECE"
+                });
+            }
+            else {
+                // $(mydropdown).next('.error').css("display", "none");
+                $("#editForm").find("#Date").css({
+                    "border": "",
+                    "background": ""
+                });
+            }
+
+            var tourPrice = parseInt($('#Price').val() == "" ? 0 : $('#Price').val());
+
+            if (tourPrice <= 0) {
+                isValid = false;
+            }
+
+            if (isValid == false) {
+                alert("Please fill required fields");
+            }
+            return isValid;
+        }
+
+
+        function GetValue(value) {
+            if (isNaN(value)) {
+                return 0;
+            }
+            return value;
+        }
+
+
+        //float numeric validaiton
+        $('.allownumericwithdecimal').keypress(function (event) {
+            var $this = $(this);
+            if ((event.which != 46 || $this.val().indexOf('.') != -1) &&
+               ((event.which < 48 || event.which > 57) &&
+               (event.which != 0 && event.which != 8))) {
+                event.preventDefault();
+            }
+
+            var text = $(this).val();
+            if ((event.which == 46) && (text.indexOf('.') == -1)) {
+                setTimeout(function () {
+                    if ($this.val().substring($this.val().indexOf('.')).length > 3) {
+                        $this.val($this.val().substring(0, $this.val().indexOf('.') + 3));
+                    }
+                }, 1);
+            }
+
+            if ((text.indexOf('.') != -1) &&
+                (text.substring(text.indexOf('.')).length > 2) &&
+                (event.which != 0 && event.which != 8) &&
+                ($(this)[0].selectionStart >= text.length - 2)) {
+                event.preventDefault();
+            }
+        });
+        // end float validation
+
+        function setPaymentTypeColor() {
+            if ($("#PaymentType_chzn").find("span").html() == "Agent (invoice)") {
+                $("#PaymentType_chzn").find("span").css("color", "#4db14d");
+            }
+            if ($("#PaymentType_chzn").find("span").html() == "Deposit Taken") {
+                $("#PaymentType_chzn").find("span").css("color", "blue");
+            }
+        }
+    </script>
+    @*on End 2015-09-01*@
+
+}

@@ -1,0 +1,88 @@
+﻿@model Tourism_Project.Models.Company
+
+@{
+    ViewBag.Title = "Add Company";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+}
+<style>
+    .commission > input {
+        width: 40px;
+    }
+
+</style>
+<h2>Add Company</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary(true)
+    
+    @Html.HiddenFor(model => model.CompanyID)
+ <fieldset>
+        <legend>Company</legend>
+        <table>
+            <colgroup>
+                <col style="width: 50px; text-align: right;" />
+                <col />
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Name)
+
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.Name)
+                        @Html.ValidationMessageFor(model => model.Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Email)
+
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.Email)
+                        @Html.ValidationMessageFor(model => model.Email)
+
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Phone)
+
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.Phone)
+                        @Html.ValidationMessageFor(model => model.Phone)
+
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Commission)
+
+                    </td>
+
+                    <td class="editor-field commission">
+                        @Html.EditorFor(model => model.Commission)
+                        <span>%</span>
+                        @Html.ValidationMessageFor(model => model.Commission)
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>
+            <input type="submit" value="Create" class="btn btn-large btn-block btn-primary"/>
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

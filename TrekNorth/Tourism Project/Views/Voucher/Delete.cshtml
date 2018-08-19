@@ -1,0 +1,307 @@
+﻿@model Tourism_Project.Models.Voucher
+@{
+    ViewBag.Title = "Delete";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+}
+<style>
+    .formTable td {
+        padding: 5px 10px;
+    }
+</style>
+<h2>Delete Voucher</h2>
+
+<h3>Are you sure?</h3>
+<fieldset>
+    <legend>Voucher</legend>
+
+    <table align="center" class="formTable">
+        <colgroup>
+            <col align="right">
+        </colgroup>
+        <tbody>
+            <tr>
+                <td align="right">@using (Html.BeginForm())
+                                  {
+                    <p>
+                        <input type="submit" value="Delete"  class="btn btn-large btn-block btn-primary" />
+                    </p>
+                                  }</td>
+                <td>@using (Html.BeginForm())
+                    {
+                    <p>
+                        @Html.ActionLink("Back to List", "Index")
+                    </p>
+                    }</td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.VoucherID)
+                    </div>
+                </td>
+                <td>
+                    <div style="font-weight: bold;">
+                        @Html.DisplayFor(model => model.VoucherID, new { @style = "font-weight:bold" })
+                    </div>
+                </td>
+            </tr>
+            <tr>
+
+                <td align="right">
+                    <div class="editor-label">
+                        Company
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @ViewBag.CompanyName
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Travel Date
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.TravelDateString)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.Tour)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.Tour)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Fare Basis
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.FareBasis)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        First Name
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.FirstName)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Last Name
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.LastName)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Contact
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.RoomNumber)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Adult(s)
+                    </div>
+                </td>
+                <td>
+                    <span class="editor-field counts">
+                        @Html.DisplayFor(model => model.AdultCount, new { @class = "counts" })
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Children
+                    </div>
+                </td>
+                <td>
+                    <span class="editor-field counts">
+                        @Html.DisplayFor(model => model.ChildrenCount, new { @class = "counts" })
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Infant(s)
+                    </div>
+                </td>
+                <td>
+                    <span class="editor-field counts">
+                        @Html.DisplayFor(model => model.InfantCount, new { @class = "counts" })
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Pickup Location
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.PickupLocation)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.ConfirmationNumber)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.ConfirmationNumber)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.Comments)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.Comments)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Price
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        <span class="price">@Html.DisplayFor(model => model.Price)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Levy
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        <span class="levy">@Html.DisplayFor(model => model.Levy)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Balance to Pay($)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        <span id="total">@Html.DisplayFor(model => model.BalanceToPay)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Agent Deposit
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+
+                        <span class="commision">@Html.DisplayFor(model => model.Commission)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        DC
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+
+                        <span class="discount">@Html.DisplayFor(model => model.Discount)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Agent Collects($)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        <span id="totalOperator">@Html.DisplayFor(model => model.AgentCollects)</span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        calculateFinancials();
+        $('.counts').each(function () {
+            if ($(this).html().trim() == "")
+                $(this).html('0');
+        });
+    });
+    function calculateFinancials() {
+        //var price = $(".price").html().substring(1);
+        //var levy = $('.levy').html().substring(1);
+        //var commission = $('.commision').html().substring(1);
+        //var discount = $('.discount').html().substring(1);
+        //$('#total').html('$' + (parseFloat(price) + parseInt(levy) - parseFloat(commission)).toString());
+        ////$('#totalOperator').val(parseInt(price) - (parseInt(commission) * parseInt(price) / 100) + parseInt(levy));
+        //$('#totalOperator').html('$' + (parseFloat(commission) - parseFloat(discount)).toString());
+    }
+    function isEmpty(a) {
+        if (a == "" || a == " ")
+            return 0;
+        else {
+            return parseInt(a);
+        }
+    }
+</script>
+

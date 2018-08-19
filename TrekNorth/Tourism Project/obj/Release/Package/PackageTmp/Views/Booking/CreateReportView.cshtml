@@ -1,0 +1,96 @@
+﻿@model List<Tourism_Project.Models.BookingModel>
+@{
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+    int count = 1;
+}
+
+<style>
+    td {
+        border: 1px solid rgb(241, 211, 165);
+        padding: 5px;
+    }
+
+    .cells {
+        font-weight: bold;
+    }
+</style>
+@if (Model != null)
+{
+    <table style="width:100%;">
+        <tr>
+            <td class="cells">Index</td>
+            <td class="cells">Time</td>
+            <td class="cells">Location</td>
+            <td class="cells">Name</td>
+            <td class="cells">Ad</td>
+            <td class="cells">Ch</td>
+            <td class="cells">FCh</td>
+            <td class="cells">FOC</td>
+            <td class="cells">Tour Code</td>
+            <td class="cells">Tour Price</td>
+            <td class="cells">POB</td>
+            <td class="cells">Agent Invoice</td>
+            <td class="cells">Contact</td>
+            <td width="10px" class="cells">Lunch(F,S,V)</td>
+            <td class="cells" width="320px">Comments</td>
+        </tr>
+        @{
+            float total = 0;
+            int totalAdults = 0;
+            int totalChildren = 0;
+            int totalFamilyChildren = 0;
+            int totalInfant = 0;
+            float pob = 0;
+            float invoiceAgent = 0;
+        }
+
+
+
+        @foreach (var report in Model)
+        {
+            <tr>
+                <td>@report.BookingID</td>
+                <td>@report.time</td>
+                <td>@report.location</td>
+                <td>@report.PassengerName</td>
+                <td>@report.Adults</td>
+                <td>@report.Children</td>
+                <td>@report.FamilyChildren</td>
+                <td>@report.Infant</td>
+                <td>@report.tourcodevalues</td>
+                <td>$@report.TotalPrice</td>
+                <td>$@report.POB</td>
+                <td>@report.InvoiceAgent</td>
+                <td>@report.ContactDetails</td>
+                <td>@report.Lunch</td>
+                <td>@report.Comments</td>
+            </tr>
+            total += @report.TotalPrice;
+            totalAdults += @report.Adults;
+            totalChildren += @report.Children;
+            totalFamilyChildren += @report.FamilyChildren;
+            totalInfant += @report.Infant;
+
+            pob += (float)@report.POB;
+            invoiceAgent+=(float)@report.InvoiceAgent;
+            count++;
+        }
+
+        <tr>
+
+            <td align="right" colspan="4" class="cells">Totals</td>
+            <td>@totalAdults</td>
+            <td>@totalChildren </td>
+            <td>@totalFamilyChildren</td>
+            <td>@totalInfant </td>
+            <td />
+            <td>$@total</td>
+            <td>$@pob</td>
+            <td>$@invoiceAgent</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+
+    </table>
+            }

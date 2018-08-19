@@ -1,0 +1,641 @@
+﻿@model Tourism_Project.Models.Voucher
+
+@{
+    ViewBag.Title = "Make a Booking";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+    <script src="@Url.Content("~/Scripts/Chosen/chosen.jquery.js")"></script>
+
+}
+
+
+<h2 class="h2-heading">Make a Booking</h2>
+<script>
+    function updateTravelDate()
+    {
+        //var valid = false;
+
+        //var cardPaid = $("#cardPaid").val();
+        //var cashPaid = $("#cashPaid").val();
+        //var total = $('#total').val();
+        //var totalPaid = 0;
+
+        //console.log(cardPaid);
+        //console.log(cashPaid);
+        //console.log(total);
+        //if ((cardPaid != "" && cardPaid != null))
+        //{
+        //    totalPaid = parseInt(cardPaid);
+        //}
+        //if ((cashPaid != ""))
+        //{
+        //    totalPaid = totalPaid + parseInt(cashPaid);
+        //}
+
+        //if (totalPaid > 0)
+        //{
+        //    //alert(totalPaid);
+        //    if (totalPaid == total)
+        //    {
+        //        valid = true;
+        //    }
+        //    else
+        //    {
+        //        alert("Pay on Borad must match ");
+        //        return false;
+        //    }
+        //}
+        //else
+        //{
+        //    alert("Please fill card Payment or cash payment");
+        //    return false;
+        //}
+
+        if ($(".hasDatepicker").val() != "")
+        {
+            document.getElementById('TravelDate').value = moment($(".hasDatepicker").datepicker("getDate")).format("MM/DD/YYYY");
+
+            console.log(document.getElementById('TravelDate').value);
+            document.forms[0].submit();
+        }
+        else
+        {
+            alert("please Fill Travel Date");
+            return false;
+        }
+    }
+
+
+</script>
+
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.VoucherBookingID)
+    @Html.HiddenFor(model => model.VoucherID)
+    <style>
+        input[type="number"] {
+            width: 44px !important;
+        }
+
+        input[type="text"], input[type="date"] {
+            width: 300px;
+        }
+
+        select {
+            width: 314px;
+            height: 32px;
+            border: 2px solid #BDC3C7;
+        }
+
+        textarea {
+            width: 290px;
+            height: 100px;
+        }
+
+        .prices input {
+            width: 50px !important;
+        }
+    </style>
+    <style>
+        .label {
+            text-align: right;
+            min-width: 140px;
+        }
+
+        @@media(max-width:768px) {
+            .chzn-container, input[type="text"], input[type="date"], textarea {
+                max-width: 80% !important;
+            }
+
+            table td, .editor-label {
+                display: block;
+                text-align: left;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .top-menu-voucher {
+                position: relative !important;
+                float: right;
+                right: 0;
+                top: -27px;
+            }
+
+            #body {
+                float: left;
+                width: 100%;
+            }
+
+            .demo-logo {
+                width: auto !important;
+                float: left;
+            }
+
+            body {
+                margin: 0;
+            }
+
+            /*#body {
+                padding: 10px;
+            }*/
+        }
+
+        @@media(max-width:460px) {
+
+            #body {
+                margin-top: 50px;
+            }
+        }
+    </style>
+    <div style="margin-top:2%;">
+        <table align="center" cellpadding="5">
+            <tbody>
+                <colgroup>
+                    <col align="right">
+                </colgroup>
+                <tr>
+                    <td align="right" style="min-width: 140px;">
+                        <div class="editor-label">
+                            @Html.LabelFor(model => model.VoucherID)
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: bold;">
+                            @Html.TextBoxFor(model => model.VoucherID, new { @style = "font-weight:bold", disabled = "disabled" })
+                        </div>
+                    </td>
+                </tr>
+
+
+                <tr>
+
+                    <td align="right">
+                        <div class="editor-label">
+
+                            @Html.LabelFor(model => model.CompanyID, "Company ")
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="editor-field">
+                            @{if (TempData["Companies"] != null)
+                            {
+                                @Html.DropDownListFor(model => model.CompanyID, (IEnumerable<SelectListItem>)TempData["Companies"], "--- Select CompanyName ---")
+                            }
+                            }
+                            @Html.ValidationMessageFor(model => model.CompanyID)
+                            <span id="commissiondiv" style="display: none;">
+                                <input disabled="disabled" id="companyCommission" style="width: 40px !important; height: 30px;" />
+                            </span>
+                            <span id="phonediv" style="display: none;margin-left:10px;">
+                                <input disabled="disabled" id="companyPhone" style="width: 300px !important; height: 30px; border: 0; background: none; font-weight: bold;" />
+                            </span>
+
+                        </div>
+                    </td>
+                </tr>
+
+
+                @*<tr>
+
+                        <td align="right">
+                            <div class="editor-label">
+                                @Html.Label("Shop Name ")
+                            </div>
+                        </td>
+                        <td>
+                            <div class="editor-field">
+                                @{if (TempData["shopname"] != null)
+                                {
+
+
+
+                                    @Html.DropDownListFor(model => model.shopId, (IEnumerable<SelectListItem>)TempData["shopname"], "--- Select ShopName ---");
+
+                                    @Html.ValidationMessageFor(model => model.shopId)
+
+                                }
+                                }
+                            </div>
+                        </td>
+
+                    </tr>*@
+                @*<tr>
+
+                        <td align="right">
+                            <div class="editor-label">
+                                @Html.Label("Sales From ")
+                            </div>
+                        </td>
+                        <td>
+                            <div class="editor-field">
+
+
+
+
+                                @Html.DropDownListFor(model => model.salesfrom, new[] {
+                            new SelectListItem(){Text = "Walk In" , Value="Walk In"},
+                            new SelectListItem(){Text ="Email/Phone Call" , Value = "Email/Phone Call"},
+                        }, "--- Select SalesFrom ---")
+
+
+                                @Html.ValidationMessageFor(model => model.salesfrom)
+
+
+                            </div>
+                        </td>
+
+                    </tr>*@
+
+                @* remove for hosting purpose
+                        <tr>
+
+                        <td align="right">
+                            <div class="editor-label">
+
+                                @Html.Label("Payment Type ")
+                            </div>
+                        </td>
+                        <td>
+                            <div class="editor-field">
+
+
+                                @Html.DropDownListFor(model => model.paymenttype, new List<SelectListItem>{
+                                            new SelectListItem {Text="Cash" , Value="Cash"},
+                                            new SelectListItem{Text= "CreditCard",Value="CreditCard"},
+                                            new SelectListItem{Text= "Paypal",Value="Paypal"},
+                                            new SelectListItem{Text= "ETPOS",Value="ETPOS"},
+                                        }, "--- Select Payment Type ---")
+                                @Html.ValidationMessageFor(model => model.paymenttype)
+
+
+                            </div>
+                        </td>
+
+                    </tr>
+                *@
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            @Html.Label("Travel Date ")
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @*@Html.TextBoxFor(model => model.TravelDate)
+                                @Html.ValidationMessageFor(model => model.TravelDate)*@
+                            @Html.TextBoxFor(model => model.TravelDate, "{0:dd/MM/yyyy}")
+                            @Html.HiddenFor(model => model.TravelDate)
+                            @Html.ValidationMessageFor(model => model.TravelDate)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            @Html.LabelFor(model => model.Tour)
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.Tour)
+                            @Html.ValidationMessageFor(model => model.Tour)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Fare Basis
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.FareBasis)
+                            @Html.ValidationMessageFor(model => model.FareBasis)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+
+
+                            @Html.Label("First Name ")
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+
+
+                            @Html.EditorFor(model => model.FirstName)
+                            @Html.ValidationMessageFor(model => model.FirstName)
+
+
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Last Name
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.LastName)
+                            @Html.ValidationMessageFor(model => model.LastName)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Contact
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.RoomNumber)
+                            @Html.ValidationMessageFor(model => model.RoomNumber)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Adult(s)
+                        </div>
+                    </td>
+                    <td>
+                        <span class="editor-field counts">
+                            @Html.EditorFor(model => model.AdultCount, new { @class = "counts" })
+                            @Html.ValidationMessageFor(model => model.AdultCount)
+                            <span style="zoom: 2;">|</span>
+                            Children
+                            @Html.EditorFor(model => model.ChildrenCount, new { @class = "counts" })
+                            @Html.ValidationMessageFor(model => model.ChildrenCount)
+                            <span style="zoom: 2;">|</span>
+                            Infant(s)
+                            @Html.EditorFor(model => model.InfantCount, new { @class = "counts" })
+                            @Html.ValidationMessageFor(model => model.InfantCount)
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Pickup Location
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.PickupLocation)
+                            @Html.ValidationMessageFor(model => model.PickupLocation)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            @Html.LabelFor(model => model.ConfirmationNumber)
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.ConfirmationNumber)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            @Html.LabelFor(model => model.Comments)
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.TextAreaFor(model => model.Comments)
+                            @Html.ValidationMessageFor(model => model.Comments)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            @Html.Label("Price ")
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field prices">
+
+
+
+                            @Html.EditorFor(model => model.Price)
+                            @Html.ValidationMessageFor(model => model.Price)
+
+
+                            <spna style="margin-left:10px;">
+                                Levy
+                                @Html.EditorFor(model => model.Levy)
+                                @Html.ValidationMessageFor(model => model.Levy)
+                            </spna>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            DC($)
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field prices">
+                            @Html.EditorFor(model => model.Discount)
+                            @Html.ValidationMessageFor(model => model.Discount)
+                            <span style="margin-left: 10px;">
+                                Pay on Board($)
+                                <input id="total" disabled="disabled" />
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Agent Deposit
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field prices">
+                            @Html.EditorFor(model => model.Commission)
+                            @Html.ValidationMessageFor(model => model.Commission)
+                            <span style="margin-left: 10px;">
+                                Agent Collects($)
+                                <input id="totalOperator" disabled="disabled" />
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                @*on 2015-05-28*@
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Cash Paid
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field prices">
+
+                            @Html.TextBoxFor(model => model.cashPaid, new { @Value = '0' })
+                            @Html.ValidationMessageFor(model => model.cashPaid)
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Card Paid
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field prices">
+                            @Html.TextBoxFor(model => model.cardPaid, new { @Value = '0' })
+                            @Html.ValidationMessageFor(model => model.cardPaid)
+                        </div>
+                    </td>
+                </tr>
+
+
+                @*End 2015-05-28*@
+
+                <tr>
+                    <td></td>
+                    <td>
+                        <p>
+                            <input type="submit" value="Create" class="btn btn-large btn-block btn-primary" onclick="updateTravelDate(); return false;" />
+
+                        </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    @*<script src="~/Scripts/globalize/globalize.js"></script>
+
+        <script src="~/Scripts/globalize/cultures/globalize.culture.en-AU.js"></script>*@
+    <script>
+        var companyCommissionPercentage = 0;
+        $(document).ready(function ()
+        {
+            //$.validator.methods.date = function (value, element) {
+            //    alert(hi);
+            //    Globalize.culture("en-AU");
+            //    alert(hi);
+            //    // you can alternatively pass the culture to parseDate instead of
+            //    // setting the culture above, like so:
+            //    // parseDate(value, null, "en-AU")
+            //    return this.optional(element) || Globalize.parseDate(value) !== null;
+            //}
+
+            //    $('#TravelDate').datepicker({ dateFormat: "dd-MM-yy" });
+
+            window.setTimeout(function ()
+            {
+                $("select").chosen();
+            }, 100);
+
+
+            $.validator.addMethod('date', function (value, element)
+            {
+                if (this.optional(element))
+                {
+                    return true;
+                }
+                var valid = true;
+                try
+                {
+                    $.datepicker.parseDate('dd/mm/yy', value);
+                }
+                catch (err)
+                {
+                    valid = false;
+                }
+                return valid;
+            });
+            $('#TravelDate').datepicker({ dateFormat: 'dd/mm/yy' });
+
+
+            $('#CompanyID').change(function ()
+            {
+                $.get('/Company/CommisionAndPhone/' + $(this).val(), function (data)
+                {
+                    console.log(data);
+                    var Details = $.parseJSON(data);
+
+                    companyCommissionPercentage = parseInt(Details.Details[0].Commission);
+                    var companyPhone = (Details.Details[0].Phone == "") ? '' : 'Ph:' + Details.Details[0].Phone + '';
+                    $('#companyCommission').val(companyCommissionPercentage.toString() + '%');
+                    $('#commissiondiv').show();
+
+                    $('#companyPhone').val(companyPhone);
+                    $('#phonediv').show();
+                });
+            });
+            /////////////////////////////////////////
+            $('#Price').keyup(function ()
+            {
+                if (companyCommissionPercentage != 0)
+                    $('#Commission').val(parseInt($(this).val()) * companyCommissionPercentage / 100);
+                calculateFinancials();
+            });
+            /////////////////////////////////////////
+            $('#Levy').keyup(calculateFinancials);
+            $('#Commission').keyup(calculateFinancials);
+            $('#Discount').keyup(calculateFinancials);
+            $('#Commission').change(calculateFinancials);
+
+
+        });
+
+        function calculateFinancials()
+        {
+            var price = $("#Price").val();
+            var levy = $('#Levy').val();
+            var commission = $('#Commission').val();
+            var discount = $('#Discount').val();
+
+            //var paid_card_card = parseFloat($('#cardPaid').val()) + parseFloat($('#cashPaid').val());
+
+
+            price = isEmpty(price);
+            levy = isEmpty(levy);
+            commission = isEmpty(commission);
+            discount = isEmpty(discount);
+
+            $('#total').val((parseFloat(price) + parseFloat(levy) - parseFloat(commission)));
+
+
+            //$('#totalOperator').val(parseInt(price) - (parseInt(commission) * parseInt(price) / 100) + parseInt(levy));
+            $('#totalOperator').val(parseFloat(commission) - parseFloat(discount));
+        }
+
+        function isEmpty(a)
+        {
+            if (a == "" || a == " ")
+                return 0;
+            else
+            {
+                return parseFloat(a);
+            }
+        }
+    </script>
+    <br />
+    <div>
+        @Html.ActionLink("Back to List", "Index")
+    </div>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

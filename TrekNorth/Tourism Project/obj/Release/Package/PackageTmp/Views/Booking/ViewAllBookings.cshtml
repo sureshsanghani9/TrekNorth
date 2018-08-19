@@ -1,0 +1,206 @@
+﻿@{
+    ViewBag.Title = "Bookings";
+}
+@{ 
+    string status = ViewBag.Status;
+    if (status.Equals("error"))
+    {
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error!</strong> an error occured while retrieving booking(s).Try Again!  
+    </div> 
+    }          
+}
+<h2 style="margin-left:0px">@ViewBag.Title</h2>
+
+<div class="tblcontainer">
+
+    <table class="table table-striped tablesorter" style="background-color: antiquewhite; " data-table="booking" id="tblbooking">
+        <colgroup>
+            <col style="width: 170px;">
+            <col style="width: 170px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            @*<col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">*@
+        </colgroup>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Agent</th>
+                <th>Voucher</th>
+                @*<th>Reference</th>*@
+                <th>Date</th>
+                <th>Tour</th>
+                @*<th>Tour Code</th>
+    <th>PickUp Location</th>
+    <th>Time</th>*@
+                <th>Passenger</th>
+                <th>Adults</th>
+                <th>Family Children</th>
+                <th>Children</th>
+                <th>Infant</th>
+                <th>Tour Price</th>
+                <th>DC</th>
+                <th>Commission</th>
+                <th>Total Price</th>
+                <th>Booked By</th>
+                @*<th>Contact</th>
+                    <th>Comments</th>*@
+                <th>Edit</th>
+                <th>Print</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @{
+                int id = 1;
+                bool check = false;
+                var style = "";
+                var stylerow = "";
+                var text = "Edit";
+                var textdel = "Delete";
+            }
+            @foreach (var booking in Model)
+            {
+                if (booking.isDeleted)
+                {
+
+                    text = "Cancel";
+                    textdel = "Cancel";
+                    style = "pointer-events: none;cursor: default;";
+                    stylerow = "style=color:black!important;background-color:#FFDEB2!important;";
+                }
+                else
+                {
+                    textdel = "Delete";
+                    text = "Edit";
+                    style = "display:block;";
+                    stylerow = "";
+                }
+
+                <tr>
+                    <td @stylerow>@booking.BookingID</td>
+                    <td @stylerow>@booking.Agent</td>
+                    <td @stylerow>@booking.Voucher</td>
+                    @*<td>@booking.Reference</td>*@
+                    <td @stylerow>@booking.Date</td>
+                    <td @stylerow>@booking.tourname</td>
+                    @*<td>@booking.TourCode</td>
+    <td>@booking.pickuplocation</td>
+                        <td>@booking.time</td>*@
+                    <td @stylerow>@booking.PassengerName</td>
+                    <td @stylerow>@booking.Adults</td>
+                    <td @stylerow>@booking.FamilyChildren</td>
+                    <td @stylerow>@booking.Children</td>
+                    <td @stylerow>@booking.Infant</td>
+                    <td @stylerow>@booking.Price</td>
+                    <td @stylerow>@booking.Discount</td>
+                    <td @stylerow>@booking.Commission</td>
+                    <td @stylerow>@booking.TotalPrice</td>
+                    <td @stylerow>@booking.name</td>
+                  
+                    @*<td>@booking.ContactDetails</td>
+                        <td>@booking.Comments</td>*@
+                    <td>@Html.ActionLink(text, "EditBooking", "Booking", new { bookingid = @booking.BookingID }, htmlAttributes: new { id = "EditBooking", style })</td>
+                    <td><a target="_blank" style="margin-top: 10px;" id="lnkPrint" href="Bookings/@booking.BookingID?print">Print</a></td>
+                    <td>@Html.ActionLink(textdel, "DeleteBooking", "Booking", new { bid = @booking.BookingID, tId = @booking.TourCode, tdt = @booking.Date, tseat = (@booking.Adults + @booking.FamilyChildren + @booking.Children + @booking.Infant) }, htmlAttributes: new { id = "DeleteBooking", @class = "DeleteBooking", style })</td>
+                </tr>
+                id = id + 1;
+                check = true;
+            }
+            @{
+                if (!check)
+                {
+                    <div class="alert alert-info">
+                        <a class="close" data-dismiss="alert">×</a>
+                        <strong>Information!</strong> no bookings are available!
+                    </div>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadBooking();
+            $("[data-table='booking']").tablesorter();
+            $('.DeleteBooking').click(function (e) {
+                if (!confirm("Are you sure you want to delete this booking? This operation can not be undone."))
+                    e.preventDefault();
+            });
+        });
+
+
+        function loadBooking() {
+            $('#tblbooking').dataTable({
+                "oLanguage": { "sSearch": "" },
+                "iDisplayLength": 25,
+                "aaSorting": [[0, "DESC"]],
+                "sDom": 'fltip',
+                "sPaginationType": "full_numbers",
+                "sPaginationType": "bootstrap",
+                //"paging":   false,
+                //"ordering": false,
+                //"info":     false,
+                "aoColumns": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+                ],
+                // sDom Description
+                // =====================
+                //'l' - Length changing
+                //'f' - Filtering input
+                //'t' - The table!
+                //'i' - Information
+                //'p' - Pagination
+                //'r' - pRocessing
+                "fnInitComplete": function (oSettings, json) {
+                    $.loader({
+                        className: "blue-with-image",
+                        content: ''
+                    });
+                }
+            });
+            //$('#tblAgents').removeClass("dataTable");
+            $('.dataTables_filter input').attr("placeholder", "Search Passenger Name");
+            $('.dataTables_info').css("clear", "both");
+            setTimeout(function () { $.loader('close'); }, 1000);
+        }
+
+    </script>
+
+}

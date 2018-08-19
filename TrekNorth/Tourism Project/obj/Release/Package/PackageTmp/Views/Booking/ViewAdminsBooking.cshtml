@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "Admins Bookings";
+}
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            @*<strong>Error!</strong> an error occured while retrieving Agent's booking(s).Try Again!*@
+            <strong>Here are The List of Admin's Bookings</strong>
+        </div>
+    }
+}
+<style>
+    .tblcon {
+        width: 100%;
+        float: left;
+        overflow: auto;
+    }
+</style>
+<h2>@ViewBag.Title</h2>
+<div class="tblcon">
+    <table class="table table-striped" style="background-color: antiquewhite">
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>Reference</th>
+                <th>Date</th>
+                <th>Tour Code</th>
+                <th>Passenger</th>
+                <th>Adults</th>
+                <th>Family Children</th>
+                <th>Children</th>
+                <th>Infant</th>
+                <th>Price</th>
+                <th>DC</th>
+                <th>Commission</th>
+                <th>Contact</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int id = 1;
+                bool check = false;
+            }
+            @foreach (var booking in Model)
+            {
+                <tr>
+                    <td>@id</td>
+                    <td>@booking.Reference</td>
+                    <td>@booking.Date</td>
+                    <td>@booking.TourCode</td>
+                    <td>@booking.PassengerName</td>
+                    <td>@booking.Adults</td>
+                    <td>@booking.FamilyChildren</td>
+                    <td>@booking.Children</td>
+                    <td>@booking.Infant</td>
+                    <td>@booking.Price</td>
+                    <td>@booking.Discount</td>
+                    <td>@booking.Commission</td>
+                    <td>@booking.ContactDetails</td>
+                    <td>@booking.Comments</td>
+                </tr>
+                id = id + 1;
+                check = true;
+            }
+            @{
+                if (!check)
+                {
+                    <div class="alert alert-info">
+                        <a class="close" data-dismiss="alert">×</a>
+                        <strong>Information!</strong> no bookings are available for this admin!
+                    </div>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+

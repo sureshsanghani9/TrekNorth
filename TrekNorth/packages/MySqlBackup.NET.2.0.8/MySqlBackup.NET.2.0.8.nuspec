@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>MySqlBackup.NET</id>
+    <version>2.0.8</version>
+    <title>MySqlBakcup.NET</title>
+    <authors>adriancs</authors>
+    <owners>adriancs</owners>
+    <licenseUrl>https://mysqlbackupnet.codeplex.com/license</licenseUrl>
+    <projectUrl>https://mysqlbackupnet.codeplex.com/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A tool to backup and restore MySQL database in C#/VB.NET/ASP.NET.</description>
+    <summary>A tool to backup and restore MySQL database in C#/VB.NET/ASP.NET.</summary>
+    <releaseNotes>Fix bug: Parsing error occur when exporting timestamp value. This problem occured after adding the support for exporting time fraction.
+Modify: Change export behavior for exporting tables that contain only primary keys when using RowsExportMode = OnDuplicateKeyUpdate.</releaseNotes>
+    <copyright>Released to Public Domain</copyright>
+    <tags>MySql Backup Restore Export Import C# VB.NET ASP.NET</tags>
+    <dependencies>
+      <dependency id="MySql.Data" version="6.9.5" />
+    </dependencies>
+  </metadata>
+</package>

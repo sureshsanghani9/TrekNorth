@@ -1,0 +1,218 @@
+﻿@model Tourism_Project.Models.Seat
+@{
+    ViewBag.Title = "Seats";
+}
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while retrieving seat(s).Try Again!
+        </div>
+    }
+}
+<h2>@ViewBag.Title</h2>
+<style>
+    .dataTables_length {
+        float: right !important;
+    }
+
+    #ddlDataLength {
+        margin-left: 20px;
+    }
+
+    .lblblk {
+        float: right;
+        text-align: right;
+    }
+
+    .firstblk {
+        float: left;
+    }
+
+    @@media(max-width:460px) {
+        .firstblk, .lblblk, #tblSeats_filter, #tblSeats, #tblSeats_length {
+            width: 100%;
+            float: left;
+            text-align: left;
+        }
+
+            #txtTourDate, #tblSeats_length select, #Tour {
+                float: right !important;
+                height: 26px;
+                line-height: 26px;
+                padding: 0;
+                width: 60%;
+            }
+    }
+</style>
+<div class="firstblk">
+
+    <label for="Tour" style="float: left; margin-top: 5px;">Select Tour </label>
+    @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                       new { value = 1000 , text = "Cape Tribulation Manifest"  }
+                  },
+                  "value",
+                  "text",
+                                   1000), htmlAttributes: new { style = "float: left; margin-left: 20px;" })
+</div>
+<div class="lblblk">
+    <label for="Tour" style="float: left; margin-top: 5px;">Date </label>
+    <input type="text" id="txtTourDate" style="margin-left: 20px;">
+</div>
+<div style="clear: both;"></div>
+<table id="tblSeats" class="table table-striped" data-table="seats" style="background-color: antiquewhite">
+    <thead>
+        <tr>
+            <th>Index</th>
+            <th>Date</th>
+            <th>Seats Available</th>
+        </tr>
+    </thead>
+    <tbody id="seatsbody"></tbody>
+</table>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+
+        $(function ()
+        {
+
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp)
+                {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value)
+                    {
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+                        if (i == 0)
+                        {
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("getSeats", "Booking")',
+                                data: { tourid: value['Tour'] },
+                                success: function (resp)
+                                {
+                                    if (resp.length == 0)
+                                    {
+                                        $("#Tour").append('<div class="alert alert-info"><a class="close" data-dismiss="alert">×</a><strong>Information!</strong> no seats are available! </div>');
+                                    }
+                                    $('#seatsbody').empty();
+                                    $.each(resp, function (i, value)
+                                    {
+                                        $('#seatsbody').append("<tr><td>" + (i + 1) + "</td><td>" + value['Date'] + "</td><td>" + value['available'] + "</td></tr>");
+                                    });
+                                    loadSeats();
+                                }
+                            })
+                        }
+                    })
+                }
+            });
+
+            $('#Tour').on('change', function ()
+            {
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getSeats", "Booking")',
+                    data: { tourid: $(this).val() },
+                    success: function (resp)
+                    {
+                        if (resp.length == 0)
+                        {
+                            $("#Tour").append('<div class="alert alert-info"><a class="close" data-dismiss="alert">×</a><strong>Information!</strong> no seats are available! </div>');
+                        }
+                        $('#seatsbody').empty();
+                        $.each(resp, function (i, value)
+                        {
+                            $('#seatsbody').append("<tr><td>" + (i + 1) + "</td><td>" + value['Date'] + "</td><td>" + value['available'] + "</td></tr>");
+                        });
+                        //loadSeats();
+                        $('#tblSeats').fnDraw();
+                    }
+                })
+            });
+        });
+
+        function loadSeats()
+        {
+            var dataTable = $('#tblSeats').dataTable({
+                "oLanguage": { "sSearch": "" },
+                "iDisplayLength": 25,
+                "aaSorting": [[0, "asc"]],
+                "sDom": 'fltip',
+                "sPaginationType": "full_numbers",
+                "sPaginationType": "bootstrap",
+                "aoColumns": [
+                null,
+                null,
+                null,
+                ],
+                // sDom Description
+                // =====================
+                //'l' - Length changing
+                //'f' - Filtering input
+                //'t' - The table!
+                //'i' - Information
+                //'p' - Pagination
+                //'r' - pRocessing
+
+                "fnInitComplete": function (oSettings, json)
+                {
+                    $.loader({
+                        className: "blue-with-image",
+                        content: ''
+                    });
+                }
+            });
+            //$('#tblLocations').removeClass("dataTable");
+            $('.dataTables_filter input').attr("placeholder", "Search Date");
+            $('.dataTables_filter input').css("display", "none");
+            $('.dataTables_info').css("clear", "both");
+            setTimeout(function () { $.loader('close'); }, 1500);
+            $('#txtTourDate').datepicker({ dateFormat: 'dd/mm/yy' });
+            $("#txtTourDate").keyup(function ()
+            {
+                dataTable.fnFilter(this.value, $(this).attr('id'));
+                console.log(this.value);
+            });
+            $("#txtTourDate").change(function ()
+            {
+                //dataTable.fnFilter(this.value, $("#txtTourDate").index(this));
+                dataTable.fnFilter(this.value, 1);
+                console.log(this.value);
+            });
+            var asInitVals = new Array();
+            $("#txtTourDate").each(function (i)
+            {
+                asInitVals[i] = this.value;
+            });
+
+            $("#txtTourDate").focus(function ()
+            {
+                if (this.className == "search_init")
+                {
+                    this.className = "";
+                    this.value = "";
+                }
+            });
+
+            $("#txtTourDate").blur(function (i)
+            {
+                if (this.value == "")
+                {
+                    this.className = "search_init";
+                    this.value = asInitVals[$("#txtTourDate").index(this)];
+                }
+            });
+        }
+
+    </script>
+}

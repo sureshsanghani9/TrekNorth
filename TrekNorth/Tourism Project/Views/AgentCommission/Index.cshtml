@@ -1,0 +1,236 @@
+﻿@using System.Configuration
+@model IEnumerable<Tourism_Project.Models.AgentTourCommission>
+
+@{
+    ViewBag.Title = "Set Commissions";
+
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+
+}
+
+@section Scripts
+    {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/ComboBox.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".suggestions").combobox();
+            $('input').val('');
+            $('#tourCodeId').next().attr('placeholder', 'Tour Code');
+            $('#userId').next().attr('placeholder', 'User');
+        });
+    </script>
+}
+
+@using (Html.BeginForm())
+{
+    <div style="margin: 0 auto; text-align: center; width: 670px;">
+        @Html.DropDownList("userId", (IEnumerable<SelectListItem>)ViewBag.Users, new { @class = "suggestions" })
+
+        @Html.DropDownList("tourCodeId", (IEnumerable<SelectListItem>)ViewBag.TourCodes, new { @class = "suggestions" })
+
+        <input type="text" id="commission" placeholder="" />
+
+        <button id="btnAddUpdate" class="btn btn-primary">
+            Add
+        </button>
+    </div>
+
+}
+<div class="allVouchers">
+
+    <table style="margin: 0 auto;" class="tblVouchers">
+
+        <thead>
+            <tr>
+                <th>
+                    User
+                </th>
+                <th>
+                    Tour Code
+                </th>
+                <th>
+                    Commission
+                </th>
+            </tr>
+        </thead>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.UserName</td>
+                <td>@item.TourCodeName</td>
+                <td>@item.Commission</td>
+            </tr>
+        }
+    </table>
+
+</div>
+<div id="popup"></div>
+<div id="loader" class="loader">
+    <div class="loader-overlay"></div>
+    <img src="~/Images/loader.gif" class="loader-img" />
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $(document).ajaxStart(function () {
+            $('#sideLoader').show();
+        }).ajaxStop(function () {
+            $('#sideLoader').hide();
+        });
+        @*$('#companies').val('@ViewBag.Company');
+        $('#txtTravelDate').val('@ViewBag.Travel_Date');
+        $('#txtVoucherID').val('@ViewBag.Voucher_ID');
+        if (!$.browser.safari)
+            $('#txtTravelDate').datepicker({ dateFormat: 'dd-mm-yy' });
+        $('#lbSearch').click(function () {
+            $('#loader').show();
+            window.location = "?Voucher_ID=" + $('#txtVoucherID').val() + "&Company=" + $('#companies').val() + "&Travel_Date=" + $('#txtTravelDate').val();
+        }); $
+        ('#lbClear').click(function () {
+            $('#loader').show();
+            window.location = "/Voucher";
+        });
+
+
+
+        (function ($) {
+            var opt;
+            $.fn.jqprint = function (options) {
+                opt = $.extend({}, $.fn.jqprint.defaults, options);
+
+                var $element = (this instanceof jQuery) ? this : $(this);
+
+                if (opt.operaSupport && $.browser.opera) {
+                    var tab = window.open("", "jqPrint-preview");
+                    tab.document.open();
+
+                    var doc = tab.document;
+                } else {
+                    var $iframe = $("<iframe  />");
+
+                    if (!opt.debug) {
+                        $iframe.css({ position: "absolute", width: "0px", height: "0px", left: "-600px", top: "-600px" });
+                    }
+
+                    $iframe.appendTo("body");
+                    var doc = $iframe[0].contentWindow.document;
+                }
+
+                if (opt.importCSS) {
+                    if ($("link[media=print]").length > 0) {
+                        $("link[media=print]").each(function () {
+                            doc.write("<link type='text/css' rel='stylesheet' href='" + $(this).attr("href") + "' media='print' />");
+                        });
+                    } else {
+                        $("link").each(function () {
+                            doc.write("<link type='text/css' rel='stylesheet' href='" + $(this).attr("href") + "' />");
+                        });
+                    }
+                }
+
+                if (opt.printContainer) {
+                    doc.write($element.outer());
+                } else {
+                    $element.each(function () { doc.write($(this).html()); });
+                }
+
+                doc.close();
+
+                (opt.operaSupport && $.browser.opera ? tab : $iframe[0].contentWindow).focus();
+                setTimeout(function () {
+                    (opt.operaSupport && $.browser.opera ? tab : $iframe[0].contentWindow).print();
+                    if (tab) {
+                        tab.close();
+                    }
+                }, 1000);
+            };
+
+            $.fn.jqprint.defaults = {
+                debug: false,
+                importCSS: true,
+                printContainer: true,
+                operaSupport: true
+            };
+
+            // Thanks to 9__, found at http://users.livejournal.com/9__/380664.html
+            jQuery.fn.outer = function () {
+                return $($('<div></div>').html(this.clone())).html();
+            };
+        })(jQuery);
+
+
+        if (window.location.toString().search('print') != -1) {
+            $('.allVouchers').jqprint();
+        }
+        $("select").chosen({ width: '200px' });
+    });
+    function GetVoucher(a) {
+        $('#loader').show();
+        $.get('/Voucher/Edit/' + a, function (data) {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Edit",
+                width: width,
+                height: height,
+                modal: true
+            });
+            window.setTimeout(function () {
+                $('#loader').hide();
+            }, 200);
+            $('#popup').scrollTop(0);
+        });
+    }
+
+    function ViewVoucher(a) {
+        $('#loader').show();
+        $.get('/Voucher/Details/' + a, function (data) {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Voucher Details",
+                width: width,
+                height: height,
+                modal: true
+            });
+            window.setTimeout(function () {
+                $('#loader').hide();
+            }, 200);
+            $('#popup').scrollTop(0);
+        });
+    }
+
+    function DeleteVoucher(a) {
+        $('#loader').show();
+        $.get('/Voucher/Delete/' + a, function (data) {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Delete",
+                width: width,
+                height: height,
+                modal: true
+            });
+            window.setTimeout(function () {
+                $('#loader').hide();
+            }, 200);
+            $('#popup').scrollTop(0);
+        });
+    }
+
+    function AddVoucher(a) {
+        $('#loader').show();
+        var a = $.get('/Voucher/Create/', function (data) {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Add",
+                width: width,
+                height: height,
+                modal: true
+            });
+            window.setTimeout(function () {
+                $('#loader').hide();
+            }, 100);
+            $('#popup').scrollTop(0);
+        });
+    }*@
+</script>

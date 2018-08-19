@@ -1,0 +1,107 @@
+﻿@model Tourism_Project.Models.BookingModel
+@{
+    ViewBag.Title = "Add Tour";
+}
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> Tour has been added.
+        </div>
+    }
+    else if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while entering Tour.Try Again!
+        </div>
+    }
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#modal-1').modal({ keyboard: false, backdrop: 'static' });
+        $('#modal-1').on('show.bs.modal', function () {
+            $(this).find('.modal-dialog').css({
+                'margin-top': function () {
+                    return -($(this).outerHeight() / 2);
+                },
+                'margin-left': function () {
+                    return -($(this).outerWidth() / 2);
+                }
+            });
+        }).modal('show').after(function () {
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp) {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value) {
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+                    })
+                }
+            });
+        });
+    });
+
+    function cancelClick() {
+        $(".modal-backdrop.in").remove();
+    }
+</script>
+
+<button aria-hidden="true" data-dismiss="modal" class="close" type="button" onclick="cancelClick();">×</button>
+
+@using (Ajax.BeginForm("AddTour", "Booking", new AjaxOptions
+{
+    InsertionMode = InsertionMode.Replace,
+    HttpMethod = "POST",
+    OnSuccess = "reloadLocations"
+}, new { @class = "well form-inline", @id = "addTourForm" }))
+{
+
+    @*@using (Html.BeginForm("AddLocations", "Booking", FormMethod.Post, new { @class = "well form-inline" }))
+        {*@
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Tour Form</legend>
+        <ol>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Tour)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                       new { value = 1000 , text = "Cape Tribulation Manifest"  }
+                  },
+                  "value",
+                  "text",
+                   1000))
+            </li>
+            <li>
+                @Html.LabelFor(m => m.tourcodevalues)
+                @Html.TextBoxFor(m => m.tourcodevalues, new { @placeholder = "Enter Tour Code Values" })
+            </li>
+        </ol>
+    </fieldset>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Add Tour</button>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            $(function () {
+
+
+
+            });
+        });
+    </script>
+}

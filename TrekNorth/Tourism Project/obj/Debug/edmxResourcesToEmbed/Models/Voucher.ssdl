@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="VoucherModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="Companies">
+    <Key>
+      <PropertyRef Name="CompanyID" />
+    </Key>
+    <Property Name="CompanyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="Email" Type="varchar" MaxLength="100" />
+    <Property Name="Phone" Type="varchar" MaxLength="100" />
+    <Property Name="Commission" Type="decimal" Precision="18" Scale="0" />
+    <Property Name="Create_By" Type="varchar" MaxLength="25" Nullable="false" />
+    <Property Name="Create_Date" Type="datetime" Nullable="false" />
+    <Property Name="Modify_By" Type="varchar" MaxLength="25" />
+    <Property Name="Modify_Date" Type="datetime" />
+    <Property Name="IsActive" Type="bit" Nullable="false" />
+  </EntityType>
+  <EntityType Name="demo">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="row" Type="nchar" MaxLength="10" />
+    <Property Name="col" Type="nchar" MaxLength="10" />
+    <Property Name="data" Type="varchar(max)" />
+    <Property Name="colors" Type="nvarchar(max)" />
+  </EntityType>
+  <EntityType Name="Vouchers">
+    <Key>
+      <PropertyRef Name="VoucherBookingID" />
+    </Key>
+    <Property Name="VoucherBookingID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="VoucherID" Type="varchar" MaxLength="50" />
+    <Property Name="CompanyID" Type="int" Nullable="false" />
+    <Property Name="TravelDate" Type="datetime" />
+    <Property Name="Tour" Type="varchar" MaxLength="500" />
+    <Property Name="FareBasis" Type="varchar" MaxLength="100" />
+    <Property Name="FirstName" Type="varchar" MaxLength="50" />
+    <Property Name="LastName" Type="varchar" MaxLength="50" />
+    <Property Name="RoomNumber" Type="varchar" MaxLength="50" />
+    <Property Name="AdultCount" Type="int" />
+    <Property Name="ChildrenCount" Type="int" />
+    <Property Name="InfantCount" Type="int" />
+    <Property Name="PickupLocation" Type="varchar" MaxLength="500" />
+    <Property Name="UserID" Type="int" />
+    <Property Name="Comments" Type="varchar" MaxLength="500" />
+    <Property Name="Price" Type="decimal" Precision="18" Scale="5" />
+    <Property Name="Levy" Type="decimal" Precision="18" Scale="5" />
+    <Property Name="Discount" Type="decimal" Precision="18" Scale="5" />
+    <Property Name="Commission" Type="decimal" Precision="18" Scale="5" />
+    <Property Name="Create_By" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="Create_Date" Type="datetime" Nullable="false" />
+    <Property Name="Modify_By" Type="varchar" MaxLength="50" />
+    <Property Name="Modify_Date" Type="datetime" />
+    <Property Name="IsActive" Type="bit" Nullable="false" />
+    <Property Name="ConfirmationNumber" Type="varchar" MaxLength="500" />
+    <Property Name="paymenttype" Type="nvarchar" MaxLength="50" />
+    <Property Name="salesfrom" Type="nvarchar" MaxLength="50" />
+    <Property Name="cashPaid" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="cardPaid" Type="decimal" Precision="18" Scale="2" />
+  </EntityType>
+  <Association Name="FK_Vouchers_Companies">
+    <End Role="Companies" Type="Self.Companies" Multiplicity="1" />
+    <End Role="Vouchers" Type="Self.Vouchers" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Companies">
+        <PropertyRef Name="CompanyID" />
+      </Principal>
+      <Dependent Role="Vouchers">
+        <PropertyRef Name="CompanyID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="VoucherModelStoreContainer">
+    <EntitySet Name="Companies" EntityType="Self.Companies" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="demo" EntityType="Self.demo" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Vouchers" EntityType="Self.Vouchers" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="FK_Vouchers_Companies" Association="Self.FK_Vouchers_Companies">
+      <End Role="Companies" EntitySet="Companies" />
+      <End Role="Vouchers" EntitySet="Vouchers" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

@@ -1,0 +1,192 @@
+﻿@model Tourism_Project.Models.Voucher
+
+@{
+    ViewBag.Title = "Report";
+    Layout = "~/Views/Shared/VoucherMasterpage.cshtml";
+}
+<h2>Summary Report</h2>
+<style>
+    .chzn-container {
+        width: 206px !important;
+    }
+
+    .suggestions {
+        height: 40px;
+        width: 205px;
+    }
+
+    .chosen{
+        height: 38px;
+        width: 205px;
+    }
+</style>
+@using (Html.BeginForm())
+{
+    <fieldset>
+        <table align="center">
+            <tbody>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            @Html.LabelFor(model => model.CompanyID, "Company")
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.DropDownListFor(model => model.CompanyID, (IEnumerable<SelectListItem>)ViewBag.Companies, new { @class = "chosen" })
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            @Html.LabelFor(model => model.Tour)
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.DropDownListFor(model => model.Tour, (IEnumerable<SelectListItem>)ViewBag.Tours, new { @class = "suggestions" })
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Travel Date From
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @*@Html.EditorFor(model => model.TravelDateFrom_Report)*@
+                            @Html.TextBox("txt_TravelDateFrom_Report")
+                            <input type="hidden" id="TravelDateFrom_Report" name="TravelDateFrom_Report">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Travel Date To
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @*@Html.EditorFor(model => model.TravelDateTo_Report)*@
+                            @Html.TextBox("txt_TravelDateTo_Report")
+                            <input type="hidden" id="TravelDateTo_Report" name="TravelDateTo_Report">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Entered Date From
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @*@Html.EditorFor(model => model.EnteredDateFrom_Report)*@
+                            @Html.TextBox("txt_EnteredDateFrom_Report")
+                            <input type="hidden" id="EnteredDateFrom_Report" name="EnteredDateFrom_Report">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <div class="editor-label">
+                            Entered Date To
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @*@Html.EditorFor(model => model.EnteredDateTo_Report)*@
+                            @Html.TextBox("txt_EnteredDateTo_Report")
+                            <input type="hidden" id="EnteredDateTo_Report" name="EnteredDateTo_Report">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: center;">
+                        <p>
+                            <input type="submit" value="Download" class="btn btn-large btn-block btn-info" style="cursor: pointer; width: 115px; margin-top: -1px; height: 45px;" />
+                        </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </fieldset>
+}
+<div id="loader" class="loader">
+    <div class="loader-overlay"></div>
+    <img src="~/Images/loader.gif" class="loader-img" />
+</div>
+<div>
+    @Html.ActionLink("Back to Feed", "Index")
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/ComboBox.js"></script>
+    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script>
+        function convertdateFormat(oDate)
+        {
+            console.log("oDate", $(oDate).val());
+            if ($(oDate).val() != "")
+            {
+                return moment($(oDate).datepicker("getDate")).format("MM/DD/YYYY");
+            }
+        }
+
+        $(document).ready(function ()
+        {
+            window.setTimeout(function ()
+            {
+                $(".chosen").chosen({ allow_single_deselect: true });
+                $(".suggestions").combobox();
+            }, 100);
+
+            //if (!$.browser.safari)
+            {
+
+                /*commented on 17-08-2015
+                $('#TravelDateFrom_Report').datepicker({ dateFormat: 'dd/mm/yy' });
+                $('#TravelDateTo_Report').datepicker({ dateFormat: 'dd/mm/yy' });
+                $('#EnteredDateFrom_Report').datepicker({ dateFormat: 'dd/mm/yy' });
+                $('#EnteredDateTo_Report').datepicker({ dateFormat: 'dd/mm/yy' });
+                */
+
+                $('#txt_TravelDateFrom_Report').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+                {
+                    $('#TravelDateFrom_Report').val(convertdateFormat('#txt_TravelDateFrom_Report'));
+                });
+                $('#txt_TravelDateTo_Report').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+                {
+                    $('#TravelDateTo_Report').val(convertdateFormat('#txt_TravelDateTo_Report'));
+                });
+
+
+                $('#txt_EnteredDateFrom_Report').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+                {
+                    $('#EnteredDateFrom_Report').val(convertdateFormat('#txt_EnteredDateFrom_Report'));
+                });
+                $('#txt_EnteredDateTo_Report').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+                {
+                    $('#EnteredDateTo_Report').val(convertdateFormat('#txt_EnteredDateTo_Report'));
+                });
+
+            }
+
+        });
+
+        function ShowLoader()
+        {
+            $('#loader').show();
+        }
+        function HideLoader()
+        {
+            $('#loader').hide();
+        }
+
+        window.addEventListener('keydown', function (e) { if (e.keyCode == 27) HideLoader(); });
+    </script>
+}

@@ -1,0 +1,118 @@
+﻿@model IEnumerable<Tourism_Project.Models.AvailabilityModel>
+
+@{
+    ViewBag.Title = "Availability";
+    int rowCount = 0;
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    .table-data td {
+        min-width: 75px;
+        border: 1px solid gray;
+        padding: 2px 5px !important;
+    }
+
+    .table-data {
+        background-color: white;
+        color: gray;
+    }
+
+        .table-data td:hover {
+            background-color: white !important;
+        }
+
+    .seat {
+        background-color: yellow;
+        text-align: center;
+    }
+
+    .noseat {
+        background-color: yellow;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .date, .name {
+        background-color: antiquewhite;
+    }
+
+    .finished {
+        background-color: darkred;
+        color: white;
+    }
+</style>
+<div id="page">
+    <h2>Seats Availability</h2>
+    <h3>Seats available per Date per Tour</h3>
+
+
+    <fieldset>
+        <legend>AvailabilityModel</legend>
+        <input type="text" id="txtDate" />
+        <div style="width: 1000px; margin: 0 auto; padding: 5px; overflow: auto;">
+            <table width="100%" class="table-data">
+                <tr>
+                    <td style="background-color: black; color: white;">Chart</td>
+                    @{
+                        foreach (var date in ViewBag.Dates)
+                        {
+                            <td class="date">@date</td>
+                        }
+                    }
+                </tr>
+                @{
+                    for (int a = 0; a < ViewBag.Names.Count; a++)
+                    {
+                        <tr>
+                            <td style="min-width: 170px;" class="name">@ViewBag.Names[a]</td>
+                            @{
+                        for (int b = 0; b < ViewBag.Dates.Count; b++)
+                        {
+
+                            if (Model.SingleOrDefault(x => x.TourName == ViewBag.Names[a] && x.Date == ViewBag.Dates[b]) == null)
+                            {
+                                if (ViewBag.Names[a].ToString().Contains("Cape Tribulation"))
+                                {
+                                    <td class="noseat" title="@ViewBag.Names[a]">16</td>
+                                }
+                                else
+                                {
+                                    <td class="noseat" title="@ViewBag.Names[a]">24</td>
+                                }
+                            }
+                            else
+                            {
+                                if (Model.SingleOrDefault(x => x.TourName == ViewBag.Names[a] && x.Date == ViewBag.Dates[b]).Seat == 0)
+                                {
+                                    <td class="finished" title="@ViewBag.Names[a]">Finished</td>
+                                }
+                                else
+                                {
+                                    <td class="seat" title="@ViewBag.Names[a]">@Model.SingleOrDefault(x => x.TourName == ViewBag.Names[a] && x.Date == ViewBag.Dates[b]).Seat</td>
+                                }
+                            }
+                        }
+                            }
+                        </tr>
+                        rowCount++;
+                    }
+                }
+            </table>
+        </div>
+    </fieldset>
+    <script src="~/Scripts/jquery-1.7.1.min.js"></script>
+    <script src="~/Scripts/jquery-ui-1.8.20.min.js"></script>
+    <script>
+        $('#txtDate').datepicker({ dateFormat: 'dd-mm-yy' });
+        $('#txtDate').unbind('change').change(function () {
+            var value = $(this).val();
+            $.get('/Booking/AvailabilityByDate/' + $(this).val().replace('/', '-').replace('/', '-'), function (result) {
+                $('#page').html(result);
+                $('#txtDate').val(value);
+            });
+        });
+    </script>
+
+</div>

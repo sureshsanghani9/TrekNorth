@@ -1,0 +1,963 @@
+﻿@{
+    ViewBag.Title = "Roster";
+}
+
+<h2>Schedule</h2>
+@{
+
+    var user = User.Identity.Name.Split(',');
+    var userType = user[2];//userid,username,usertype
+    int admin = 1, staff = 2, agent = 3;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title id='Description'>In this demo is illustrated how to use the jqxGrid's unbound mode feature to create a Spreadsheet.</title>
+    <link href="~/Content/jqx.base.css" rel="stylesheet" />
+    @section scripts{
+        <script src="~/scripts/jquery-1.11.1.min.js"></script>
+        <script src="~/scripts/jqx-all.js"></script>
+        <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+        <script src="~/Scripts/jqxcolorpicker.js"></script>
+
+        <script type="text/javascript">
+            var arrSchedule = [];
+            function LoadScheduleStyle() {
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("LoadScheduleStyle", "Home")',
+                    async: false,
+                    success: function (response) {
+                        $.each(response, function (i, value) {
+                            arrSchedule.push({
+                                rcfield: value.rcfield.trim(),
+                                colors: value.colors,
+                                row: value.row,
+                                col: value.col
+                            });
+
+                        });
+                    }
+                });
+            }
+            function getTextElementByColor(color) {
+                if (color == 'transparent' || color.hex == "") {
+                    return $("<div style='text-shadow: none; position: relative; padding-bottom: 2px; margin-top: 2px;'>transparent</div>");
+                }
+                var element = $("<div style='text-shadow: none; position: relative; padding-bottom: 2px; margin-top: 2px;'>#" + color.hex + "</div>");
+                var nThreshold = 105;
+                var bgDelta = (color.r * 0.299) + (color.g * 0.587) + (color.b * 0.114);
+                var foreColor = (255 - bgDelta < nThreshold) ? 'Black' : 'White';
+                element.css('color', foreColor);
+                element.css('background', "#" + color.hex);
+                element.addClass('jqx-rc-all');
+                return element;
+            }
+            $(document).ready(function () {
+                LoadScheduleStyle();
+                $('input[name="textStyle"]').change(function () {
+                    var grid_Id = "jqxgrid";
+                    if ($(this).val() == 'bold') {
+                        if ($(this).is(':checked')) {
+                            $("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-weight', 'bold');
+                            var Item = "font-weight";
+                            var Value = "bold";
+                            UpdateScheduleFormat(Item, Value);
+                        }
+                        else {
+                            $($("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-weight', 'normal'));
+                            var Item = "font-weight";
+                            var Value = "normal";
+                            UpdateScheduleFormat(Item, Value);
+                        }
+                    }
+                    else if ($(this).val() == 'italic') {
+                        if ($(this).is(':checked')) {
+                            $("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-style', 'italic');
+                            var Item = "font-style";
+                            var Value = "italic";
+                            UpdateScheduleFormat(Item, Value);
+                        }
+                        else {
+                            $($("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-style', 'normal'));
+                            var Item = "font-style";
+                            var Value = "normal";
+                            UpdateScheduleFormat(Item, Value);
+                        }
+                    }
+                    else if ($(this).val() == 'underline') {
+                        if ($(this).is(':checked')) {
+                            $("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('text-decoration', 'underline');
+                            var Item = "text-decoration";
+                            var Value = "underline";
+                            UpdateScheduleFormat(Item, Value);
+                        }
+                        else {
+                            $("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('text-decoration', 'none');
+                            var Item = "text-decoration";
+                            var Value = "none";
+                            UpdateScheduleFormat(Item, Value);
+                        }
+                    }
+                });
+                $("#colorPicker").on('colorchange', function (event) {
+                    $("#dropDownButton").jqxDropDownButton('setContent', getTextElementByColor(event.args.color));
+                    //////console.log($("#jqxgrid1").find("div.jqx-clear").find("#wrapperjqxgrid1").find("#contentjqxgrid1").find("div.jqx-grid-content").find("div[role='row']"));
+                    //var grid_Id = "jqxgrid";
+                    //$("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").each(function () {
+                    //    //////console.log(this);
+                    //    $(this).css('color', "#" + event.args.color.hex);
+                    var Item = "color";
+                    var Value = "rgb(" + event.args.color.r + "," + event.args.color.g + "," + event.args.color.b + ")"
+                    UpdateScheduleFormat(Item, Value);
+                });
+
+            });
+
+            function UpdateScheduleFormat(item, value) {
+                var grid_Id = "jqxgrid";
+                $("#jqxgrid").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").each(function () {
+                    var Row = $(this).attr("Id").replace("row", "").replace(grid_Id, "").trim();
+                    var Colm = 0;
+                    var RowItem = $(this);
+                    $(RowItem).find("div.jqx-item").each(function () {
+                        var Item = $(this);
+                        if ($(Item).hasClass("jqx-grid-cell-selected")) {
+                            // Is Selected Please update on DB
+                            var inSide = $(this).find("div.jqx-grid-cell-left-align")[0];
+                            $(inSide).css(item, value);
+                            var cssStyle = $(inSide).attr("style");
+                            var Aplha = getAplhaByColumn1(Colm);
+                            var data1 = new Object();
+                            data1.row = Row;
+                            data1.col = Aplha;
+                            data1.colors = cssStyle;
+
+                            $.ajax({
+                                type: "post",
+                                url: "/Home/SaveScheduleFormat",
+                                data: { obj: data1 },
+                                async: true,
+                                cache: false,
+                                success: function (result) {
+                                }
+                            });
+                        }
+                        Colm++;
+                    });
+                });
+            }
+            // display selected row index.
+
+            $("#colorPicker").jqxColorPicker({ color: "ffaabb", colorMode: 'hue', width: 220, height: 220 });
+            $("#jqxgrid").jqxDropDownButton({ width: 150, height: 22 });
+            $("#jqxgrid").jqxDropDownButton('setContent', getTextElementByColor(new $.jqx.color({ hex: "ffaabb" })));
+            $('#jqxgrid').jqxScrollView({ slideShow: true, width: 500, height: 350, showButtons: false });
+
+            var sourceColumns = $(".default").data("gridvalues");
+            ////console.log(sourceColumns.data);
+            // renderer for grid cells.
+            var numberrenderer = function (row, column, value) {
+                return '<div style="text-align: center; margin-top: 5px;">' + (1 + value) + '</div>';
+            }
+            // create Grid datafields and columns arrays.
+            var datafields = [];
+            var columns = [];
+            for (var i = 0; i < 16; i++) {
+                var text = String.fromCharCode(65 + i);
+                if (i == 0) {
+                    var cssclass = 'jqx-widget-header';
+                    //if (theme != '') cssclass += ' jqx-widget-header-' + theme;
+                    //columns[columns.length] = { pinned: true, exportable: false, text: "", columntype: 'number', cellclassname: cssclass, cellsrenderer: numberrenderer };
+                }
+                datafields[datafields.length] = { name: text };
+                columns[columns.length] = { text: text, datafield: text, width: 60, align: 'center' };
+            }
+
+            var source =
+           {
+               localdata: sourceColumns.data,
+               datafields: [
+                   { name: 'A', type: 'string' },
+                   { name: 'B', type: 'string' },
+                   { name: 'C', type: 'string' },
+                   { name: 'D', type: 'string' },
+                   { name: 'E', type: 'string' },
+                   { name: 'F', type: 'string' },
+                   { name: 'G', type: 'string' },
+                   { name: 'H', type: 'string' },
+                   { name: 'I', type: 'string' },
+                   { name: 'J', type: 'string' },
+                   { name: 'K', type: 'string' },
+                   { name: 'L', type: 'string' },
+                   { name: 'M', type: 'string' },
+                   { name: 'N', type: 'string' },
+                   { name: 'O', type: 'string' },
+                   { name: 'P', type: 'string' }
+               ],
+               totalrecords: 100,
+               updaterow: function (rowid, rowdata) {
+                   // synchronize with the server - send update command
+               }
+           };
+
+            $("#jqxgrid").on("bindingcomplete", function (event) {
+                setTimeout(function () { RowColumnStyle1() }, 1000);
+            });
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+            // initialize jqxGrid
+            $("#jqxgrid").jqxGrid(
+           {
+               //autosavestate: true,
+               //autoloadstate: true,
+               columns: [
+                   { text: 'A', datafield: 'A', width: 100 },
+                   { text: 'B', datafield: 'B', width: 100 },
+                   { text: 'C', datafield: 'C', width: 100 },
+                   { text: 'D', datafield: 'D', width: 100 },
+                   { text: 'E', datafield: 'E', width: 81 },
+                   { text: 'F', datafield: 'F', width: 81 },
+                   { text: 'G', datafield: 'G', width: 81 },
+                   { text: 'H', datafield: 'H', width: 81 },
+                   { text: 'I', datafield: 'I', width: 81 },
+                   { text: 'J', datafield: 'J', width: 81 },
+                   { text: 'K', datafield: 'K', width: 81 },
+                   { text: 'L', datafield: 'L', width: 81 },
+                   { text: 'M', datafield: 'M', width: 81 },
+                   { text: 'N', datafield: 'N', width: 81 },
+                   { text: 'O', datafield: 'O', width: 81 },
+                   { text: 'P', datafield: 'P', width: 81 }
+               ],
+               width: 1400,
+               height: 800,
+               source: dataAdapter,
+               editable: true,
+               columnsresize: true,
+               selectionmode: 'multiplecellsadvanced',
+
+               ready: function () {
+                       //var TopScroll = $("#jqxgrid").find("#contenttablejqxgrid")[0];
+                       //console.log(TopScroll);
+                       $("#jqxWidget").mousemove(function () {
+                           var scrolling = $("#jqxgrid").jqxGrid("scrolling");
+                           console.log(scrolling);
+                           if (scrolling.vertical != true) {
+                               RowColumnStyle1();
+                               //LoadStyle();
+                           };
+                           if (scrolling.horizontal != true) {
+                               RowColumnStyle1();
+                               //LoadStyle();
+                           };
+                      
+                   });
+               }
+           });
+
+           
+
+            @(int.Parse(userType)==admin?Html.Raw("$('#jqxgrid').jqxGrid({ editable: true });"): Html.Raw("$('#jqxgrid').jqxGrid({ editable: false });"))
+            $("#jqxgrid").on('cellbeginedit', function (event) {
+                UnCheck_Style();
+            });
+
+            $("#jqxgrid").on('cellendedit', function (event) {
+                var data1 = new Object();
+                // event arguments.
+                var args = event.args;
+                // column data field.
+                data1.dataField = event.args.datafield;
+                // row's bound index.
+                data1.rowBoundIndex = event.args.rowindex;
+                // cell value
+                data1.value = args.value;
+                // cell old value.
+                data1.oldvalue = args.oldvalue;
+                // row's data.
+                var rowData = args.row;
+                $.ajax({
+                    type: "post",
+                    url: "/Home/getdata",
+                    async: true,
+                    cache: false,
+                    data: { obj: data1 },
+                    success: function (result) {
+                        LoadScheduleStyle();
+                        RowColumnStyle1();
+                    }
+                })
+            });
+
+            $("#jqxgrid").on("columnresized", function (event) {
+                // event arguments.
+                var args = event.args;
+                // column text.
+                var columnText = args.columntext;
+                // column data field.
+                var dataField = args.datafield;
+                // old column width.
+                var oldWidth = args.oldwidth;
+                // new column width.
+                var newWidth = args.newwidth;
+            });
+
+            function getColumnByAplha(alp) {
+                var Index = 0;
+                switch (alp) {
+                    case "A":
+                        Index = 0;
+                        break;
+                    case "B":
+                        Index = 1;
+                        break;
+                    case "C":
+                        Index = 2;
+                        break;
+                    case "D":
+                        Index = 3;
+                        break;
+                    case "E":
+                        Index = 4;
+                        break;
+                    case "F":
+                        Index = 5;
+                        break;
+                    case "G":
+                        Index = 6;
+                        break;
+                    case "H":
+                        Index = 7;
+                        break;
+                    case "I":
+                        Index = 8;
+                        break;
+                    case "J":
+                        Index = 9;
+                        break;
+                    case "K":
+                        Index = 10;
+                        break;
+                    case "L":
+                        Index = 11;
+                        break;
+                    case "M":
+                        Index = 12;
+                        break;
+                    case "N":
+                        Index = 13;
+                        break;
+                    case "O":
+                        Index = 14;
+                        break;
+                    case "P":
+                        Index = 15;
+                        break;
+                }
+                return Index;
+            }
+
+            function getAplhaByColumn1(alp) {
+                var Index = "A";
+                switch (alp) {
+                    case 0:
+                        Index = "A";
+                        break;
+                    case 1:
+                        Index = "B";
+                        break;
+                    case 2:
+                        Index = "C";
+                        break;
+                    case 3:
+                        Index = "D";
+                        break;
+                    case 4:
+                        Index = "E";
+                        break;
+                    case 5:
+                        Index = "F";
+                        break;
+                    case 6:
+                        Index = "G";
+                        break;
+                    case 7:
+                        Index = "H";
+                        break;
+                    case 8:
+                        Index = "I";
+                        break;
+                    case 9:
+                        Index = "J";
+                        break;
+                    case 10:
+                        Index = "K";
+                        break;
+                    case 11:
+                        Index = "L";
+                        break;
+                    case 12:
+                        Index = "M";
+                        break;
+                    case 13:
+                        Index = "N";
+                        break;
+                    case 14:
+                        Index = "O";
+                        break;
+                    case 15:
+                        Index = "P";
+                        break;
+                }
+                return Index;
+            }
+
+            function RowColumnStyle1() {
+                if (arrSchedule != undefined && arrSchedule.length > 0) {
+                    for (var i = 0; i < arrSchedule.length; i++) {
+                        var IndexColn = getColumnByAplha(arrSchedule[i].col.trim());
+                        // //console.log(IndexColn);
+                        ////console.log(arr[i]);
+                        var renItem = $("#contenttablejqxgrid").find("#row" + arrSchedule[i].row.trim() + "jqxgrid").find("div.jqx-item")[IndexColn];
+                        var inSide = $(renItem).find("div.jqx-grid-cell-left-align")[0];
+                        $(inSide).attr("style", arrSchedule[i].colors.trim());
+                    }
+                }
+            }
+
+            function UnCheck_Style() {
+                $(".sidesticky div.fontstyle div.fonts div.radiocon").each(function () {
+                    $(this).find('input[type = checkbox]').each(function () {
+                        $(this).prop("checked", false);
+                    });
+                });
+            }
+
+            $("#AddRow").on('click', function () {
+                var commit = $("#jqxgrid").jqxGrid('addrow', null, "AA");
+            });
+
+            $(document).ready(function () {
+                //var TopScroll = $("#jqxgrid").find("#contenttablejqxgrid")[0];
+                //console.log(TopScroll);
+                //$(TopScroll).mousemove(function () {
+                //    console.log($("#jqxgrid").find("#contenttablejqxgrid"));
+                //    //var scrolling = $("#jqxgrid").jqxGrid("scrolling");
+                //    //console.log(scrolling);
+                //    //if (scrolling.vertical != true) {
+                //    //    RowColumnStyle1();
+                //    //};
+                //});
+
+                //$('body').on("onscroll", function () {
+                //    console.log('mv');
+                //    var scrolling = $("#jqxgrid").jqxGrid("scrolling");
+                //    console.log(scrolling);
+                //});
+
+            });
+            var TopScroll = $("#jqxgrid").find("#contenttablejqxgrid")[0];
+            var ActScroll = $(TopScroll).prev("div");
+            console.log(ActScroll);
+            $(ActScroll).scroll(function () {
+                console.log('mv');
+                var scrolling = $("#jqxgrid").jqxGrid("scrolling");
+                console.log(scrolling);
+            });
+        </script>
+
+        <script type="text/javascript">
+            var arr = [];
+            function LoadStyle() {
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("LoadStyle","Home")',
+                    async: false,
+                    success: function (response) {
+                        $.each(response, function (i, value) {
+                            arr.push({
+                                rcfield: value.rcfield.trim(),
+                                colors: value.colors,
+                                row: value.row,
+                                col: value.col
+                            });
+                        });
+                    }
+
+                });
+            }
+            function getTextElementByColor(color) {
+                if (color == 'transparent' || color.hex == "") {
+                    return $("<div style='text-shadow: none; position: relative; padding-bottom: 2px; margin-top: 2px;'>transparent</div>");
+                }
+                var element = $("<div style='text-shadow: none; position: relative; padding-bottom: 2px; margin-top: 2px;'>#" + color.hex + "</div>");
+                var nThreshold = 105;
+                var bgDelta = (color.r * 0.299) + (color.g * 0.587) + (color.b * 0.114);
+                var foreColor = (255 - bgDelta < nThreshold) ? 'Black' : 'White';
+                element.css('color', foreColor);
+                element.css('background', "#" + color.hex);
+                element.addClass('jqx-rc-all');
+                return element;
+            }
+
+            $(document).ready(function () {
+                LoadStyle();
+                var hexi;
+                $('input[name="textStyle"]').change(function () {
+                    var grid_Id = "jqxgrid1";
+                    if ($(this).val() == 'bold') {
+                        if ($(this).is(':checked')) {
+                            $("#jqxgrid1").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-weight', 'bold');
+                            var Item = "font-weight";
+                            var Value = "bold";
+                            UpdateFormat(Item, Value);
+                        }
+                        else {
+                            $($("#jqxgrid1").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-weight', 'normal'));
+                            var Item = "font-weight";
+                            var Value = "normal";
+                            UpdateFormat(Item, Value);
+                        }
+                    }
+                    else if ($(this).val() == 'italic') {
+                        if ($(this).is(':checked')) {
+                            $("#jqxgrid1").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-style', 'italic');
+                            var Item = "font-style";
+                            var Value = "italic";
+                            UpdateFormat(Item, Value);
+                        }
+                        else {
+                            $($("#jqxgrid1").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('font-style', 'normal'));
+                            var Item = "font-style";
+                            var Value = "normal";
+                            UpdateFormat(Item, Value);
+                        }
+                    }
+                    else if ($(this).val() == 'underline') {
+                        if ($(this).is(':checked')) {
+                            $("#jqxgrid1").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('text-decoration', 'underline');
+                            var Item = "text-decoration";
+                            var Value = "underline";
+                            UpdateFormat(Item, Value);
+                        }
+                        else {
+                            $("#jqxgrid1").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").find("div.jqx-grid-cell-selected").find("span").css('text-decoration', 'none');
+                            var Item = "text-decoration";
+                            var Value = "none";
+                            UpdateFormat(Item, Value);
+                        }
+                    }
+                });
+                $("#colorPicker").on('colorchange', function (event) {
+                    $("#dropDownButton").jqxDropDownButton('setContent', getTextElementByColor(event.args.color));
+                    //////console.log($("#jqxgrid1").find("div.jqx-clear").find("#wrapperjqxgrid1").find("#contentjqxgrid1").find("div.jqx-grid-content").find("div[role='row']"));
+                    var Item = "color";
+                    var Value = "rgb(" + event.args.color.r + "," + event.args.color.g + "," + event.args.color.b + ")"
+                    UpdateFormat(Item, Value);
+                });
+            });
+
+            function UpdateFormat(item, value) {
+                var grid_Id = "jqxgrid1";
+                $("#jqxgrid1").find("div.jqx-clear").find("#wrapper" + grid_Id).find("#content" + grid_Id).find("div.jqx-grid-content").find("div[role='row']").each(function () {
+                    var Row = $(this).attr("Id").replace("row", "").replace(grid_Id, "").trim();
+                    var Colm = 0;
+                    var RowItem = $(this);
+                    $(RowItem).find("div.jqx-item").each(function () {
+                        var Item = $(this);
+                        if ($(Item).hasClass("jqx-grid-cell-selected")) {
+                            // Is Selected Please update on DB
+                            var inSide = $(this).find("div.jqx-grid-cell-left-align")[0];
+                            $(inSide).css(item, value);
+                            var cssStyle = $(inSide).attr("style");
+                            var Aplha = getAplhaByColumn(Colm);
+                            var data1 = new Object();
+                            data1.row = Row;
+                            data1.cols = Aplha;
+                            data1.colors = cssStyle;
+                            $.ajax({
+                                type: "post",
+                                url: "/home/SaveFormat",
+                                data: { obj: data1 },
+                                async: true,
+                                cache: false,
+                                success: function (result) {
+                                }
+                            });
+                        }
+                        Colm++;
+                    });
+                });
+            }
+
+            // display selected row index.
+
+            $("#colorPicker").jqxColorPicker({ color: "ffaabb", colorMode: 'hue', width: 220, height: 220 });
+            $("#jqxgrid1").jqxDropDownButton({ width: 150, height: 22 });
+            $("#jqxgrid1").jqxDropDownButton('setContent', getTextElementByColor(new $.jqx.color({ hex: "ffaabb" })));
+            $('#jqxgrid1').jqxScrollView({ slideShow: true, width: 500, height: 350, showButtons: false });
+
+            var sourceColumns = $(".default").data("element");//element
+            ////console.log(sourceColumns.data);
+            // renderer for grid cells.
+            var numberrenderer = function (row, column, value) {
+                return '<div style="text-align: center; margin-top: 5px;">' + (1 + value) + '</div>';
+            }
+            // create Grid datafields and columns arrays.
+            var datafields = [];
+            var columns = [];
+            for (var i = 0; i < 16; i++) {
+                var text = String.fromCharCode(65 + i);
+                if (i == 0) {
+                    var cssclass = 'jqx-widget-header';
+                    //if (theme != '') cssclass += ' jqx-widget-header-' + theme;
+                    //columns[columns.length] = { pinned: true, exportable: false, text: "", columntype: 'number', cellclassname: cssclass, cellsrenderer: numberrenderer };
+                }
+                datafields[datafields.length] = { name: text };
+                columns[columns.length] = { text: text, datafield: text, width: 60, align: 'center' };
+            }
+
+            var source =
+           {
+               localdata: sourceColumns.data,
+               datafields: [
+                   { name: 'A', type: 'string' },
+                   { name: 'B', type: 'string' },
+                   { name: 'C', type: 'string' },
+                   { name: 'D', type: 'string' },
+                   { name: 'E', type: 'string' },
+                   { name: 'F', type: 'string' },
+                   { name: 'G', type: 'string' },
+                   { name: 'H', type: 'string' },
+                   { name: 'I', type: 'string' },
+                   { name: 'J', type: 'string' },
+                   { name: 'K', type: 'string' },
+                   { name: 'L', type: 'string' },
+                   { name: 'M', type: 'string' },
+                   { name: 'N', type: 'string' },
+                   { name: 'O', type: 'string' },
+                   { name: 'P', type: 'string' }
+               ],
+               totalrecords: 100,
+               updaterow: function (rowid, rowdata) {
+                   // synchronize with the server - send update command
+               }
+           };
+            /*function setcolorfont(row, column) {
+                var obj = {
+                    row: row,
+                    column: column
+                };
+
+                cc = column + row;
+                if (arr != undefined) {
+
+                    if (arr != null) {
+                        var i = 0;
+                        var len = arr.length;
+                        var rcfield = arr[i].rcfield;
+                        var colors = arr[i].colors;
+                        for (var i = 0; i < len; i++) {
+                            //if (arr[i].rcfield == cc) {
+                            if (arr[i].rcfield.replace(/\s/g, '') == cc) {
+                                return arr[i].colors;
+                            }
+                        }
+                    }
+                }*/
+            //  var result = "";
+            /*commented on 19-02-2016
+             var result;
+             $.ajax({
+                 type: "POST",
+                 url: "/Home/setcolorfont",
+                 dataType: 'json',
+                 contentType: 'application/json; charset=utf-8',
+                 async: false,
+                 data: JSON.stringify(obj),
+                 success: function (data) {
+                     result = data;
+                 }
+             }); */
+            //  return result;
+            //}
+
+            $("#jqxgrid1").on("bindingcomplete", function (event) {
+                setTimeout(function () { RowColumnStyle() }, 1000);
+            });
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+            // initialize jqxGrid
+            $("#jqxgrid1").jqxGrid(
+           {
+               //autosavestate: true,
+               //autoloadstate: true,
+               columns: [
+                   { text: 'A', datafield: 'A', width: 100 },
+                   { text: 'B', datafield: 'B', width: 100 },
+                   { text: 'C', datafield: 'C', width: 100 },
+                   { text: 'D', datafield: 'D', width: 100 },
+                   { text: 'E', datafield: 'E', width: 81 },
+                   { text: 'F', datafield: 'F', width: 81 },
+                   { text: 'G', datafield: 'G', width: 81 },
+                   { text: 'H', datafield: 'H', width: 81 },
+                   { text: 'I', datafield: 'I', width: 81 },
+                   { text: 'J', datafield: 'J', width: 81 },
+                   { text: 'K', datafield: 'K', width: 81 },
+                   { text: 'L', datafield: 'L', width: 81 },
+                   { text: 'M', datafield: 'M', width: 81 },
+                   { text: 'N', datafield: 'N', width: 81 },
+                   { text: 'O', datafield: 'O', width: 81 },
+                   { text: 'P', datafield: 'P', width: 81 }
+               ],
+               width: 1400,
+               height: 800,
+               source: dataAdapter,
+               editable: true,
+               columnsresize: true,
+               selectionmode: 'multiplecellsadvanced',
+           });
+
+            @(int.Parse(userType)==admin?Html.Raw("$('#jqxgrid1').jqxGrid({ editable: true });"): Html.Raw("$('#jqxgrid1').jqxGrid({ editable: false });"))
+            @(int.Parse(userType)==admin?Html.Raw("$('.clsAdmin').show();") : Html.Raw("$('.clsAdmin').hide();"))
+
+            $("#jqxgrid1").on('cellbeginedit', function (event) {
+                UnCheck_Style();
+            });
+
+            $("#jqxgrid1").on('cellendedit', function (event) {
+
+                var data1 = new Object();
+                // event arguments.
+                var args = event.args;
+                // column data field.
+                data1.dataField = event.args.datafield;
+                // row's bound index.
+                data1.rowBoundIndex = event.args.rowindex;
+                // cell value
+                data1.value = args.value;
+                // cell old value.
+                data1.oldvalue = args.oldvalue;
+
+                var grid_Id = "jqxgrid1";
+                var IndexColn = getColumnByAplha(args.datafield);
+                var EditRow = $("#contenttablejqxgrid1").find("#row" + args.rowindex + "jqxgrid1").find("div.jqx-item")[IndexColn];
+                var n = $(EditRow).css("color");
+
+                //hexi = rgb2hex(n);
+
+                var cssStyle = $(EditRow).attr("style");
+                ////console.log(cssStyle);
+
+
+                // row's data.
+                var rowData = args.row;
+                $.ajax({
+                    type: "post",
+                    url: "/home/postdata",
+                    data: { obj: data1 },
+                    async: true,
+                    cache: false,
+                    success: function (result) {
+                        LoadStyle();
+                        RowColumnStyle();
+                    }
+                })
+            });
+
+            $("#jqxgrid1").on("columnresized", function (event) {
+                // event arguments.
+                var args = event.args;
+                // column text.
+                var columnText = args.columntext;
+                // column data field.
+                var dataField = args.datafield;
+                // old column width.
+                var oldWidth = args.oldwidth;
+                // new column width.
+                var newWidth = args.newwidth;
+            });
+
+            function getColumnByAplha(alp) {
+                var Index = 0;
+                switch (alp) {
+                    case "A":
+                        Index = 0;
+                        break;
+                    case "B":
+                        Index = 1;
+                        break;
+                    case "C":
+                        Index = 2;
+                        break;
+                    case "D":
+                        Index = 3;
+                        break;
+                    case "E":
+                        Index = 4;
+                        break;
+                    case "F":
+                        Index = 5;
+                        break;
+                    case "G":
+                        Index = 6;
+                        break;
+                    case "H":
+                        Index = 7;
+                        break;
+                    case "I":
+                        Index = 8;
+                        break;
+                    case "J":
+                        Index = 9;
+                        break;
+                    case "K":
+                        Index = 10;
+                        break;
+                    case "L":
+                        Index = 11;
+                        break;
+                    case "M":
+                        Index = 12;
+                        break;
+                    case "N":
+                        Index = 13;
+                        break;
+                    case "O":
+                        Index = 14;
+                        break;
+                    case "P":
+                        Index = 15;
+                        break;
+                }
+                return Index;
+            }
+
+            function getAplhaByColumn(alp) {
+                var Index = "A";
+                switch (alp) {
+                    case 0:
+                        Index = "A";
+                        break;
+                    case 1:
+                        Index = "B";
+                        break;
+                    case 2:
+                        Index = "C";
+                        break;
+                    case 3:
+                        Index = "D";
+                        break;
+                    case 4:
+                        Index = "E";
+                        break;
+                    case 5:
+                        Index = "F";
+                        break;
+                    case 6:
+                        Index = "G";
+                        break;
+                    case 7:
+                        Index = "H";
+                        break;
+                    case 8:
+                        Index = "I";
+                        break;
+                    case 9:
+                        Index = "J";
+                        break;
+                    case 10:
+                        Index = "K";
+                        break;
+                    case 11:
+                        Index = "L";
+                        break;
+                    case 12:
+                        Index = "M";
+                        break;
+                    case 13:
+                        Index = "N";
+                        break;
+                    case 14:
+                        Index = "O";
+                        break;
+                    case 15:
+                        Index = "P";
+                        break;
+                }
+                return Index;
+            }
+
+            function rgb2hex(rgb) {
+                rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+                function hex(x) {
+                    return ("0" + parseInt(x).toString(16)).slice(-2);
+                }
+                return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+            }
+
+            function RowColumnStyle() {
+                if (arr != undefined && arr.length > 0) {
+                    for (var i = 0; i < arr.length; i++) {
+                        var IndexColn = getColumnByAplha(arr[i].col.trim());
+                        ////console.log(IndexColn);
+                        ////console.log(arr[i]);
+                        var renItem = $("#contenttablejqxgrid1").find("#row" + arr[i].row.trim() + "jqxgrid1").find("div.jqx-item")[IndexColn];
+                        var inSide = $(renItem).find("div.jqx-grid-cell-left-align")[0];
+                        $(inSide).attr("style", arr[i].colors.trim());
+                    }
+                }
+            }
+
+            function UnCheck_Style() {
+                $(".sidesticky div.fontstyle div.fonts div.radiocon").each(function () {
+                    $(this).find('input[type = checkbox]').each(function () {
+                        $(this).prop("checked", false);
+                    });
+                });
+            }
+        </script>
+    }
+
+</head>
+<body class='default' data-gridvalues='@Html.Raw(ViewBag.GridValues)' data-element='@Html.Raw(ViewBag.AdminGridValues)' id="defaultid">
+    <form>
+        <div class="sidesticky">
+            <div class="fontstyle">
+                <div class="pen_icon">
+                    <img src="~/Content/images/fonticon.png" />
+                </div>
+                <div class="fonts">
+                    <div class="radiocon"><label for="checkbox"><input name="textStyle" type="checkbox" value="bold" />Bold</label></div>
+                    <div class="radiocon"><label for="checkbox"><input name="textStyle" type="checkbox" value="italic" />Italic</label></div>
+                    <div class="radiocon"><label for="checkbox"><input name="textStyle" type="checkbox" value="underline" />Underline</label></div>
+                </div>
+            </div>
+            <div class="colorpic" id="dropDownButton">
+                <div class="coloricon">
+                    <img src="~/Content/images/colorpicker.png" />
+                </div>
+                <div class="pickerblk">
+                    <div id="colorPicker">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div id='jqxWidget' style="font-size: 13px; font-family: Verdana; float: left;">
+                <div id="jqxgrid"></div>
+            </div>
+        </div>
+        <div class="clear clear-fix"></div>
+        <input style="display:none" type="button" id="AddRow" value="AddRow" />
+        <div class="row">
+            <h2 class="clsAdmin">Admin Notes</h2>
+            <div id='jqxWidget1' class="clsAdmin">
+                <div id="jqxgrid1">
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,501 @@
+﻿@using System.Configuration
+@model Tourism_Project.Models.BookingModel
+
+@{
+    ViewBag.Title = "Bookings";
+}
+
+<link rel="stylesheet" href="@Url.Content("~/Content/print.css")" type="text/css" media="print" />
+<style>
+    .booking td:nth-child(even) {
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+    .booking td:nth-child(odd) {
+        font-size: 11px;
+        color: grey;
+        text-align: right;
+    }
+
+    .booking td {
+        padding: 0px 5px;
+    }
+
+    .datetime {
+        display: none !important;
+    }
+
+    .printLogo {
+        display: none;
+    }
+}
+</style>
+<fieldset style="background-color: white">
+    <div id="abooking">
+        <div class="printLogo">
+            <div style="float: left;">
+                <img src='@Url.Content("~/Images/LOGO.png")' width="120" alt="Trek North">
+            </div>
+            <div style="float: left; margin-top: 18px; margin-left: 5px; text-align: left;">
+                <span style="font-size: 20px; font-weight: bold;">@ConfigurationManager.AppSettings["CompanyName"].ToString()</span><br />
+                <span style="font-size: 15px;">@ConfigurationManager.AppSettings["AddressLine1"].ToString()</span><br />
+                <span>Phone: <span style="font-size: 18px;">@ConfigurationManager.AppSettings["PhoneNumber"].ToString()</span></span><br />
+                <span style="font-size: 15px;">@ConfigurationManager.AppSettings["ABN"].ToString()</span><br />
+            </div>
+        </div>
+        <div class="datetime" style="text-align: right;">
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            @DateTime.Now.AddHours(2).ToString("dd MMMM, yyyy (dddd)")
+        </div>
+        <div class="printLogo">
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+        </div>
+        <span>Agent: <span style="font-size: 15px; font-weight: bold;">@Model.Agent</span></span>
+        <h3 style="margin: 5px 20px;">Booking #: @Model.BookingID</h3>
+        <div style="border: 2px solid rgb(240, 229, 229);"></div>
+        <table class="booking" id="tblAgents">
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.Agent)
+                </td>
+                <td colspan="2">
+                    @Html.DisplayFor(m => m.Agent) (@Html.DisplayFor(m => m.AgentId))
+                </td>
+                <td>
+                    @Html.LabelFor(m => m.Voucher)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m.Voucher)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.PaymentType)
+                </td>
+                <td>
+                    @{if (Model.PaymentType == 2)
+                    {
+                        <span>Agent (invoice)</span>
+                    }
+                    else
+                    {
+                        <span>Deposit Taken</span>
+                    }
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.Reference)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m.Reference)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.Tour)
+                </td>
+                <td colspan="3">
+                    @Html.DisplayFor(model => model.tourname)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.TourCode)
+                </td>
+                <td colspan="3">
+                    @Html.DisplayFor(model => model.tourcodevalues)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.pickuplocation)
+                </td>
+                <td colspan="2">
+                    @Html.DisplayFor(model => model.location)
+                </td>
+                <td>
+                    @Html.LabelFor(m => m.time)
+                </td>
+                <td colspan="2">
+                    @Html.DisplayFor(m => m.time)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m.Date)
+                    @*@Convert.ToDateTime(Model.Date).ToString("dddd d MMMM yyyy")*@
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.PassengerName)
+                </td>
+                <td colspan="6">
+                    @Html.DisplayFor(m => m.PassengerName)
+                    <span style="font-weight: normal;">&emsp;Adults: </span><span>@Html.DisplayFor(m => m.Adults) </span>&emsp;<span style="font-weight: normal;">Children: </span><span>@Html.DisplayFor(m => m.Children)</span> &emsp;<span style="font-weight: normal;">Family Children: </span><span>@Html.DisplayFor(m => m.FamilyChildren) </span>&emsp;<span style="font-weight: normal;">Infant: </span><span>@Html.DisplayFor(m => m.Infant)</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.ContactDetails)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m.ContactDetails)
+                </td>
+            </tr>
+            <tr>
+
+                <td>
+                    @Html.LabelFor(m => m.Comments)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m.Comments)
+                </td>
+            </tr>
+            <tr>
+
+                <td>
+                    @Html.LabelFor(m => m.ConfirmationNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m.ConfirmationNumber)
+                </td>
+            </tr>
+            <tr>
+
+                @*<td colspan="8"></td>
+                    <td></td>*@
+                <td>
+                    @Html.LabelFor(m => m.Price)
+                </td>
+                <td>
+                    $@Html.DisplayFor(m => m.Price)
+                </td>
+            </tr>
+            <tr>
+                @*<td colspan="8"></td>
+                    <td></td>*@
+                <td>
+                    DC
+                </td>
+                <td>
+                    @*@Html.DisplayFor(m => m.Discount) %*@
+                    @(Convert.ToDouble((Model.Discount)).ToString("0.00"))%
+                </td>
+            </tr>
+            <tr>
+                @*<td colspan="8"></td>
+                    <td></td>*@
+                <td>
+                    @Html.LabelFor(m => m.Commission, "Deposit Paid")
+                </td>
+                <td>
+                    @*$@Html.DisplayFor(m => m.Commission)*@
+                    @*@Html.DisplayFor(m => m.TotalPrice)*@
+                    @*$@Math.Round(Convert.ToDouble((Model.Price) - (Model.TotalPrice)),2)*@
+                    $@(Convert.ToDouble((Model.Price) - (Model.TotalPrice)).ToString("0.00"))
+                </td>
+            </tr>
+            <tr>
+                @*<td colspan="8"></td>
+                    <td></td>*@
+                <td>
+                    @Html.LabelFor(m => m.TotalPrice, "Balance Payable")
+                </td>
+                <td>
+                    @*$@Html.DisplayFor(m => m.TotalPrice)*@
+                    $@(Convert.ToDouble((Model.TotalPrice)).ToString("0.00"))
+                </td>
+            </tr>
+            <tr>
+            
+                <td>
+                    @Html.LabelFor(m => m.CardPaid)
+                </td>
+                <td>
+                    @*$@Html.DisplayFor(m => m.CardPaid)*@
+                    $@(Convert.ToDouble((Model.CardPaid)).ToString("0.00"))
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.CashPaid)
+                </td>
+                <td>
+                    $@(Convert.ToDouble((Model.CashPaid)).ToString("0.00"))
+                </td>
+            </tr>
+
+            @*added on 30/08/2016*@
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.InvoiceAgent)
+                </td>
+                <td>
+                    @*$@Html.DisplayFor(m => m.InvoiceAgent)*@
+                    $@(Convert.ToDouble((Model.InvoiceAgent)).ToString("0.00"))
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.POB)
+                </td>
+                <td>
+                    $@(Convert.ToDouble((Model.POB)).ToString("0.00"))
+                </td>
+            </tr>
+
+
+
+            @if (Model.tourname == "Cape Tribulation")
+            {
+                <tr>
+                    <td>
+                        <label>
+                            Lunch
+                        </label>
+                    </td>
+                    <td colspan="6">
+                        <span style="font-weight: normal;">&emsp;Fish: </span><span>@Html.DisplayFor(m => m.Fish) </span>&emsp;<span style="font-weight: normal;">Steak: </span><span>@Html.DisplayFor(m => m.Steak)</span> &emsp;<span style="font-weight: normal;">Vegetarian: </span><span>@Html.DisplayFor(m => m.Vegetarian) </span>
+                    </td>
+
+                </tr>
+            }
+        </table>
+        <br />
+        <div class="showinprint">
+            <span style="font-weight: bolder;font-size: 8px;">Cancellation Policy for all tours</span><br />
+            <span style="font-size: 8px; font-weight: bold;">Deposits are not refundable.</span>
+        </div>
+    </div>
+    <div style="padding: 10px;">
+        <input type="button" class="btn btn-primary" onclick="javascript: $('#abooking').jqprint();" value="Print" style="padding: 10px 30px;" />
+        <button class="btn btn-primary" style="padding: 10px 30px;" onclick="OpenEmailBox" id="openemailBtn">Email</button>
+    </div>
+</fieldset>
+
+<div id="modal-1" class="modal" style="display: none;">
+    <hgroup class="title">
+        <h2>Send Email</h2>
+    </hgroup>
+    <button aria-hidden="true" data-dismiss="modal" class="close" type="button" onclick="cancelClick();">×</button>
+    <fieldset style="background-color: antiquewhite">
+        <legend>Booking Form</legend>
+        <ol>
+            <li style="margin-top: 10px">
+                <label for="Email">Email</label> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <input type="text" id="Email">
+            </li>
+        </ol>
+    </fieldset>
+    <input type="button" class="btn btn-primary" value="Send" style="margin-top: 10px;" onclick="SendEmail()">
+
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script>
+    $(document).ready(function ()
+    {
+        (function ($)
+        {
+            var opt;
+
+            $.fn.jqprint = function (options)
+            {
+                opt = $.extend({}, $.fn.jqprint.defaults, options);
+
+                var $element = (this instanceof jQuery) ? this : $(this);
+
+                if (opt.operaSupport && $.browser.opera)
+                {
+                    var tab = window.open("", "jqPrint-preview");
+                    tab.document.open();
+
+                    var doc = tab.document;
+                }
+                else
+                {
+                    var $iframe = $("<iframe  />");
+
+                    if (!opt.debug) { $iframe.css({ position: "absolute", width: "0px", height: "0px", left: "-600px", top: "-600px" }); }
+
+                    $iframe.appendTo("body");
+                    var doc = $iframe[0].contentWindow.document;
+                }
+
+                if (opt.importCSS)
+                {
+                    if ($("link[media=print]").length > 0)
+                    {
+                        $("link[media=print]").each(function ()
+                        {
+                            doc.write("<link type='text/css' rel='stylesheet' href='" + $(this).attr("href") + "' media='print' />");
+                        });
+                    }
+                    else
+                    {
+                        $("link").each(function ()
+                        {
+                            doc.write("<link type='text/css' rel='stylesheet' href='" + $(this).attr("href") + "' />");
+                        });
+                    }
+                }
+
+                if (opt.printContainer) { doc.write($element.outer()); }
+                else { $element.each(function () { doc.write($(this).html()); }); }
+
+                doc.close();
+
+                (opt.operaSupport && $.browser.opera ? tab : $iframe[0].contentWindow).focus();
+                setTimeout(function () { (opt.operaSupport && $.browser.opera ? tab : $iframe[0].contentWindow).print(); if (tab) { tab.close(); } }, 1000);
+            }
+
+            $.fn.jqprint.defaults = {
+                debug: false,
+                importCSS: true,
+                printContainer: true,
+                operaSupport: true
+            };
+
+            // Thanks to 9__, found at http://users.livejournal.com/9__/380664.html
+            jQuery.fn.outer = function ()
+            {
+                return $($('<div></div>').html(this.clone())).html();
+            }
+        })(jQuery);
+
+        if (window.location.toString().search('print') != -1)
+        {
+            $('#abooking').jqprint();
+        }
+
+        $('#openemailBtn').bind('click', OpenEmailBox);
+
+
+    });
+
+    function OpenEmailBox(event) {
+        event.preventDefault();
+        $('#modal-1').modal({ keyboard: false, backdrop: 'static' });
+        $('#modal-1').on('show.bs.modal', function () {
+            $(this).find('.modal-dialog').css({
+                'margin-top': function () {
+                    return -($(this).outerHeight() / 2);
+                },
+                'margin-left': function () {
+                    return -($(this).outerWidth() / 2);
+                }
+            });
+        }).modal('show').after(function () {
+        });
+        return false;
+    }
+
+    function SendEmail() {
+        if ($("#Email").val() == "") {
+            alert("Enter any Email!");
+            return false;
+        }
+        else if (!isValidEmailAddress($("#Email").val())) {
+            alert("Enter any Valid Email!");
+            return false;
+        }
+
+
+        var data = {
+            HtmlData: $('#abooking').html().replace('src="/Images/LOGO.png"', 'src="http://tntq.net/Images/LOGO.png"') + ('<link rel="stylesheet" href="http://tntq.net/Content/print.css" type="text/css" media="print" />'),
+            Email: $('#Email').val()
+        };
+        $.ajax({
+            url: '@Url.Action("SendBookingEmail", "Booking")',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            error: function (xhr) {
+                if (xhr.status == 200) {
+                    alert(xhr);
+                }
+                else
+                    alert('Error Found: ' + xhr.statusText);
+            },
+            success: function (result) {
+                alert("Email is sent successfully!");
+                $("#modal-1 .close").click();
+            },
+            async: true,
+            processData: false
+        });
+        return false;
+
+    }
+    function isValidEmailAddress(emailAddress) {
+        var regex = /^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(emailAddress);
+    }
+    function cancelClick() {
+        $(".modal-backdrop.in").remove();
+    }
+</script>
+
+<style>
+    .modal {
+        display: none;
+    }
+
+    button.close {
+        padding: 0;
+        cursor: pointer;
+        background: 0 0;
+        border: 0;
+        -webkit-appearance: none;
+    }
+
+    .close {
+        float: right;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
+        opacity: .2;
+        margin-top: -40px;
+        margin-right: 20px;
+        filter: alpha(opacity=20);
+    }
+
+    .tblcon {
+        width: 100%;
+        float: left;
+        overflow: auto;
+    }
+
+    .modal {
+        max-width: 100%;
+    }
+
+    @@media(max-width:600px) {
+        .modal {
+            left: 0px;
+            margin-left: 0px;
+        }
+    }
+</style>

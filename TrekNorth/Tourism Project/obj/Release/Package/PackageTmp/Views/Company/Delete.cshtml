@@ -1,0 +1,78 @@
+﻿@model Tourism_Project.Models.Company
+
+@{
+    ViewBag.Title = "Delete Company";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+}
+
+<h2>@Html.DisplayFor(model => model.Name)</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<fieldset>
+    <legend>Company</legend>
+
+    <table>
+            <colgroup>
+                <col style="width: 50px; text-align: right;" />
+                <col />
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td align="right">
+                        ID
+
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.CompanyID)
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Name)
+
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Email)
+
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Email)
+
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Phone)
+
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Phone)
+
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        @Html.LabelFor(model => model.Commission)
+
+                    </td>
+
+                    <td class="editor-field commission">
+                        @Html.DisplayFor(model => model.Commission)
+                        <span>%</span>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</fieldset>
+@using (Html.BeginForm()) {
+    <p>
+        <input type="submit" value="Delete"  class="btn btn-large btn-block btn-primary"/> |
+        @Html.ActionLink("Back to List", "Index")
+    </p>
+}

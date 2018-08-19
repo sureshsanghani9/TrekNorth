@@ -1,0 +1,186 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    @{string company_name = "TrekNorth";}
+    <meta name="viewport" content="width=device-width" />
+    <link href='@Url.Content("~/Content/themes/base/jquery-ui.css")' rel="stylesheet" />
+    <link href='@Url.Content("~/Content/flat-ui.css")' rel="stylesheet" />
+    <link href='@Url.Content("~/Assets/css/css_table.css")' rel="stylesheet" />
+    <link href='@Url.Content("~/Content/flat-ui.css")' rel="stylesheet" media="print" />
+    <link href='@Url.Content("~/Scripts/Chosen/chosen.css")' rel="stylesheet" />
+    <link href="@Url.Content("~/Content/jquery.jscrollpane.css")" rel="stylesheet" />
+
+    <script src="@Url.Content("~/Scripts/jquery-1.7.1.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap-select.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.8.20.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.ui.touch-punch.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap-select.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap-switch.js")"></script>
+    <script src="@Url.Content("~/Scripts/flatui-checkbox.js")"></script>
+    <script src="@Url.Content("~/Scripts/flatui-radio.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.tagsinput.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.placeholder.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.stacktable.js")"></script>
+
+    <script src="@Url.Content("~/Scripts/jquery.mousewheel.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.jscrollpane.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/moment.js")"></script>
+
+
+
+
+    @*<script src="@Url.Content("~/Scripts/globalize/globalize.js")"></script>
+        <script src="@Url.Content("~/Scripts/globalize/cultures/globalize.culture.en-AU.js")"></script>*@
+
+
+
+    <title>@ViewBag.Title</title>
+    <style>
+        body {
+            background-color: #FAFAFA;
+        }
+
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            display: none;
+            z-index: 10000;
+        }
+
+        .loader-overlay {
+            background: lightGrey;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .loader-img {
+            left: 47%;
+            position: absolute;
+            top: 47%;
+        }
+
+        .chzn-container-single .chzn-single {
+            -webkit-border-radius: 0px !important;
+            -moz-border-radius: 0px !important;
+            border-radius: 0px !important;
+        }
+        .ui-datepicker table td {
+    display:table-cell;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 class="demo-logo" style="display:inline-block;float:left;margin:10px;">
+                <a href="/" style="color: #7ac0da; text-decoration: none;  float:left; padding-right:20PX;">
+                    <img src='@Url.Content("~/Images/LOGO.png")' width="100" alt="Trek North">
+                </a>
+                @*//remove for hosting
+                        <span style="font-size: 45px;">
+                        TNT Vouchers
+                        <small style="font-size:20px;  padding-top: 25px !important;">
+                            Manage vouchers
+                        </small>
+                    </span>*@
+
+            </h1>
+            <!-- /demo-headline -->
+        </div>
+        <br /><br /><br />
+        <br />
+        <br />
+
+    </header>
+    <div id="body">
+
+
+        @{
+            if (ViewContext.RouteData.Values["action"].ToString().ToLower().Contains("report"))
+            {
+                {
+                    <div class="top-menu-voucher">
+                        <a href="@Url.Action("VoucherReport", "Voucher")" id="" class="btn btn-large btn-block disabled">Report</a>
+                        <a href="@Url.Action("Index", "Company")" id="" class="btn btn-large btn-block btn-inverse">Company</a>
+                        <a href="@Url.Action("Index", "Voucher")" id="" class="btn btn-large btn-block btn-info">Voucher</a>
+                    </div>
+                }
+            }
+            else if (ViewContext.RouteData.Values["controller"].ToString() == "Company")
+            {
+                {
+                    <div class="top-menu-voucher">
+                        <a href="@Url.Action("Index", "Company")" id="" class="btn btn-large btn-block disabled" >Company</a>
+                        <a href="@Url.Action("Index", "Voucher")" id="" class="btn btn-large btn-block btn-inverse" >Voucher</a>
+                    </div>
+                }
+            }
+            else if (ViewContext.RouteData.Values["controller"].ToString() == "Voucher")
+            {
+                {
+                    <div class="top-menu-voucher">
+                        <a href="@Url.Action("VoucherReport", "Voucher")" id="" class="btn btn-large btn-block" >Report</a>
+                        <a href="@Url.Action("Index", "Company")" id="" class="btn btn-large btn-block btn-inverse" >Company</a>
+                        <a href="@Url.Action("Index", "Voucher")" id="" class="btn btn-large btn-block disabled" >Voucher</a>
+                    </div>
+                }
+            }
+            @*using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+            {
+                @Html.AntiForgeryToken();
+                <a class="btn btn-block btn-large" href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+            }*@
+        }
+
+        @*  *@
+        @RenderSection("featured", required: false)
+        <img style="position: fixed; right: 0px; bottom: 0px; width: 100%; height: 1px; display: none;" src="~/Images/horizontal-loader.gif" id="sideLoader" />
+        @{
+            if (Session["ShowVouchers"] != null && Convert.ToBoolean(Session["ShowVouchers"]))
+            {
+                <section class="content-wrapper main-content clear-fix">
+                    @RenderBody()
+                </section>
+            }
+            else
+            {
+                <section class="content-wrapper main-content clear-fix" hidden="hidden">
+                    @RenderBody()
+                </section>
+                <section class="content-wrapper main-content clear-fix" style="text-align: center;">
+                    <label style=" text-align: center; font-size: 20px; color: red; font-weight: 500;width:100%;float:left;">
+                        You are not authorized to view Vouchers
+                    </label>
+                    <br>
+                    <br>
+                    Back to <a href="@Url.Action("Index", "Home")" id="">Home</a>
+                </section>
+            }
+        }
+
+    </div>
+    <footer>
+        <div class="content-wrapper">
+            <div class="float-left">
+                <br />
+                <p>&copy; @DateTime.Now.Year - @company_name</p>
+            </div>
+        </div>
+    </footer>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

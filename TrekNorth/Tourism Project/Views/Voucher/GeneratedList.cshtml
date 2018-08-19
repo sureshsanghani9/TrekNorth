@@ -1,0 +1,169 @@
+﻿@model IEnumerable<Tourism_Project.Models.Voucher>
+
+@{
+    Layout = null;
+    double total_BalanceToPay = 0;
+    double total_Price = 0;
+    double total_Levy = 0;
+    double total_AgentCollects = 0;
+    int? total_membercount = 0;
+}
+
+<style>
+    table.gridtable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 14px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #666666;
+        border-collapse: collapse;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        table.gridtable th {
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #666666;
+            background-color: #dedede;
+        }
+
+        table.gridtable td {
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #666666;
+            background-color: #ffffff;
+        }
+
+        table.gridtable tr:hover td {
+            background-color: whitesmoke;
+        }
+</style>
+<table class="gridtable">
+    <tr>
+        <th>
+            ID
+        </th>
+        <th style="width: 230px;">
+            Travel Date
+        </th>
+        <th>
+            Pax Name
+        </th>
+        <th>
+            Tour Company
+        </th>
+        <th>
+            Operator
+        </th>
+        <th>
+            Sell
+        </th>
+        <th>
+            Levy
+        </th>
+        <th>
+            Collected
+        </th>
+        <th>
+            POB
+        </th>
+        <th style="width: 87px !important;">
+            Create Date
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr title="Generated: @item.Create_Date">
+
+            <td>
+                @Html.DisplayFor(modelItem => item.VoucherID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TravelDateString)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CompanyName)
+            </td>
+            <td>
+                @{if (@item.Create_By.IndexOf(',') != -1)
+                {
+                    {
+                        @item.Create_By.Split(',')[1].ToString()
+                    }
+                }
+                else
+                {
+                    {
+                        @item.Create_By
+                    }
+                }
+                }
+            </td>
+            <td align="right">
+                @Html.DisplayFor(modelItem => item.Price)
+                @{
+                total_Price += Convert.ToDouble(item.Price);
+                total_membercount += (Convert.ToInt32(item.AdultCount) + Convert.ToInt32(item.ChildrenCount) + Convert.ToInt32(item.InfantCount));
+                }
+            </td>
+            <td align="right">
+                @Html.DisplayFor(modelItem => item.Levy)
+                @{
+        total_Levy += Convert.ToDouble(item.Levy);
+                }
+            </td>
+            <td align="right">
+                @Html.DisplayFor(modelItem => item.AgentCollects)
+                @{
+        total_AgentCollects += Convert.ToDouble(item.AgentCollects);
+                }
+            </td>
+            <td align="right">
+                @Html.DisplayFor(modelItem => item.BalanceToPay)
+                @{
+        total_BalanceToPay += Convert.ToDouble(item.BalanceToPay);
+                }
+
+            </td>
+            @*<td>
+                    @Html.DisplayFor(modelItem => item.Create_Date)
+                </td>*@
+            <td>
+                @item.Create_Date.ToString("dd/MM/yyyy HH:mm:ss")
+            </td>
+        </tr>
+    }
+    <tr>
+        <td></td>
+        <td colspan="2">
+            Total Passenger:@Html.Raw(total_membercount != 0 ? total_membercount.ToString() : "")
+        </td>
+
+        <td colspan="2" align="right">Total:</td>
+        <td align="right">
+
+            @Html.Raw(total_Price != 0 ? "$" + Math.Round(total_Price, 2).ToString() : "")
+
+        </td>
+        <td align="right">
+            @Html.Raw(total_Levy != 0 ? "$" + Math.Round(total_Levy, 2).ToString() : "")
+
+        </td>
+        <td align="right">
+            @Html.Raw(total_AgentCollects != 0 ? "$" + Math.Round(total_AgentCollects, 2).ToString() : "")
+
+        </td>
+        <td align="right">
+            @Html.Raw(total_BalanceToPay != 0 ? "$" + Math.Round(total_BalanceToPay, 2).ToString() : "")
+
+        </td>
+        <td></td>
+    </tr>
+</table>

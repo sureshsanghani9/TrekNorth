@@ -1,0 +1,147 @@
+﻿@model IEnumerable<Tourism_Project.Models.Voucher>
+
+@{
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+    double total_BalanceToPay = 0;
+    double total_Price = 0;
+    double total_Levy = 0;
+    double total_AgentCollects = 0;
+    int? total_membercount = 0;
+}
+}
+<image style="margin-bottom:20px;" plainwidth="64" plainheight="64" url="@Context.Server.MapPath("~/Images/LOGO.png")" />
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Type: </chunk>
+    <chunk style="font-family:Times;">Vouchers</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Date: </chunk>
+    <chunk style="font-family:Times;">@DateTime.Now.ToLongDateString()</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Time: </chunk>
+    <chunk style="font-family:Times;">@DateTime.Now.ToString("hh:mm tt")</chunk>
+</paragraph>
+<table width="100%" cellpadding="1.0" cellspacing="2.0" widths="7;8;10;15;6;8;8;8;8" class="gridtable">
+    <row>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            ID
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            Travel Date
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            Pax Name
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            Tour Company
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            Operator
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            Sell
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            Levy
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            Collected
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+            POB
+        </cell>
+    </row>
+
+    @foreach (var item in Model)
+    {
+        {
+            total_Price += Convert.ToDouble(item.Price);
+            total_Levy += Convert.ToDouble(item.Levy);
+            total_AgentCollects += Convert.ToDouble(item.AgentCollects);
+            total_BalanceToPay += Convert.ToDouble(item.BalanceToPay);
+            total_membercount += (Convert.ToInt32(item.AdultCount) + Convert.ToInt32(item.ChildrenCount) + Convert.ToInt32(item.InfantCount));
+
+        }
+
+        <row>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                @item.VoucherID
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                @item.TravelDate.Value.ToShortDateString()
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                @item.FullName
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                @item.CompanyName
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                @{if (@item.Create_By.IndexOf(',') != -1)
+                {
+                    {
+                @item.Create_By.Split(',')[1].ToString()
+                    }
+                }
+                else
+                {
+                    {
+                @item.Create_By
+                    }
+                }
+                }
+
+            </cell>
+            @if (item.Price != null)
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ @String.Format("{0:0.00}", item.Price) </cell>
+            }
+            else
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ 0 </cell>
+            }
+
+            @if (item.Levy != null)
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ @String.Format("{0:0.00}", item.Levy) </cell>
+            }
+            else
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ 0 </cell>
+            }
+
+            @if (item.AgentCollects != null)
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ @String.Format("{0:0.00}", item.AgentCollects) </cell>
+            }
+            else
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ 0 </cell>
+            }
+            @if (item.BalanceToPay != null)
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ @String.Format("{0:0.00}", item.BalanceToPay) </cell>
+            }
+            else
+            {
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false" horizontalalign="right">$ 0 </cell>
+            }
+        </row>
+    }
+    <row>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" />
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">Total Passanger:</cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"><span style="font-size:6px;">
+    @Html.Raw(total_membercount != 0 ? total_membercount.ToString() : "")
+</span></cell>
+      
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" />
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" />
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"><span style="font-size:6px;">@Html.Raw(total_Price != 0 ? "$" + Math.Round(total_Price, 2).ToString() : "")</span></cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"><span style="font-size:6px;">@Html.Raw(total_Levy != 0 ? "$" + Math.Round(total_Levy, 2).ToString() : "")</span></cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"><span style="font-size:6px;">@Html.Raw(total_AgentCollects != 0 ? "$" + Math.Round(total_AgentCollects, 2).ToString() : "")</span></cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"><span style="font-size:6px;">@Html.Raw(total_BalanceToPay != 0 ? "$" + Math.Round(total_BalanceToPay, 2).ToString() : "")</span></cell>
+       
+    </row>
+</table>

@@ -1,0 +1,168 @@
+﻿@model Tourism_Project.Models.Seat
+@{
+    ViewBag.Title = "Update Seats";
+}
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> Seat(s) has been added/updated.
+        </div>
+    }
+    else if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while entering seat(s).Try Again!
+        </div>
+    }
+}
+
+@using (Html.BeginForm("AddSeats", "Booking", FormMethod.Post, new { @class = "well form-inline" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Booking Form</legend>
+        <ol>
+            <li>
+                <br />
+                @Html.LabelFor(m => m.Tour)&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+                @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                        new { value = 1000 , text = "Cape Tribulation Manifest"  }
+                  },
+                  "value",
+                  "text",
+                   1000))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Date)&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+                @Html.TextBoxFor(m => m.Date, new { @class = "addseats", @placeholder = "Enter Date..." })
+
+                &nbsp;Booked seats: <label id="lblSeatLimit"></label>
+
+
+            </li>
+            <li>
+                @Html.LabelFor(m => m.available)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                @Html.TextBoxFor(m => m.available, new { @placeholder = "Enter seats..." })
+                &nbsp; Available Seats:<label id="lblAvalNew"></label>
+            </li>
+        </ol>
+    </fieldset>
+    <button type="submit" onclick="return seatValidation(); false;" class="btn btn-primary" style="margin-top: 10px;">Update Seat</button>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $(function () {
+
+            $(".addseats").datepicker({ dateFormat: 'dd/mm/yy' });
+
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp) {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value) {
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+                    })
+                }
+            });
+
+        });
+
+    </script>
+
+    <script type="text/javascript">
+
+        //datepicker change
+
+        $(".addseats").datepicker({
+            dateFormat: 'dd/mm/yy',
+            onSelect: function (date, instance) {
+                $.ajax
+                ({
+                    type: "get",
+                    url: "/Booking/getLimitedSeats",
+                    data: { "dttime": date, "tour": $("#Tour option:selected").val() },
+                    async:true,
+                    success: function (result) {
+                        getAvalSeats(date, $("#Tour option:selected").val());
+                        $('#lblSeatLimit').text('0');
+                        if (result > 0) {
+                            $('#lblSeatLimit').text(result);
+                        }
+                      
+                        //do something
+                    }
+                });
+            }
+        });
+
+        $(function () {
+            $("#Tour").change(function () {
+                $('#lblSeatLimit').text('0');
+                if ($("#Tour").val() != '') {
+                    $.ajax
+                    ({
+                        type: "get",
+                        url: "/Booking/getLimitedSeats",
+                        async: true,
+                        data: { "dttime": $(".addseats").val(), "tour": $("#Tour option:selected").val() },
+                        success: function (result) {
+                            if (result > 0) {
+                                $('#lblSeatLimit').text(result);
+                            }
+                            getAvalSeats($(".addseats").val(), $("#Tour option:selected").val());
+                        }
+                    });
+                }
+            });
+        });
+
+        function getAvalSeats(date,Tour) {
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getSeatsLimitforUpdateSeat", "Booking")',
+                data: { "date": date, "tourid": Tour },
+                success: function (resp) {
+                    $('#lblAvalNew').show();
+                    $('#lblAvalNew').html(resp);
+                }
+            })
+        }
+
+        function seatValidation() {
+
+            debugger;
+            var seat = $('#available').val();
+            var bookSeat = $('#lblSeatLimit').text();
+            //if (!seat.match(/^\d+$/)) {
+            if (!seat.match(/^\d+$/)) {
+                alert('please enter Available seats');
+                return false;
+            }
+            //if (parseInt(seat) < parseInt(bookSeat)) {
+            //    alert('please choose more then already booked seats');
+            //    return false;
+            //}
+            return true;
+        }
+
+
+    </script>
+
+}

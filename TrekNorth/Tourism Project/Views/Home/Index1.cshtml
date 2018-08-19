@@ -1,0 +1,527 @@
+﻿@model Tourism_Project.Models.AvailabilityModel
+@{
+    ViewBag.Title = "Index1";
+}
+@{ int ADMIN = 1, STAFF = 2, AGENT = 3; }
+
+@section featured {
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h2>@ViewBag.Message</h2>
+            </hgroup>
+            <p>
+                <b>Safaris and Day Tours</b>
+            </p>
+        </div>
+    </section>
+}
+
+<style>
+    #addBooking, #checkAvailability, #viewReports {
+        font-size: 20px;
+    }
+
+    a .btn {
+        color: white !important;
+    }
+
+    .calendar {
+        margin: 0 20px;
+        width: 640px;
+    }
+
+        .calendar input[type="text"] {
+            width: 25px;
+            font-size: 18px;
+        }
+
+        .calendar td {
+            text-align: center;
+            padding: 0px;
+        }
+
+    .data {
+        height: 50px;
+    }
+
+    .chzn-container {
+        width: 220px !important;
+    }
+
+    .seats {
+        text-align: center;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+        .seats:hover {
+            text-align: center;
+            border: 1px solid #CCCCCC !important;
+            background: white !important;
+        }
+
+        .seats:focus {
+            text-align: center;
+            border: 1px solid #CCCCCC !important;
+            background: white !important;
+        }
+
+    .headerText, .day {
+        font-weight: bold;
+        color: rgb(157, 122, 158);
+    }
+
+    .day {
+        font-size: 12px;
+        background: rgb(190, 240, 255);
+        padding: 5px;
+        border: 1px solid rgb(253, 253, 253);
+    }
+
+    .monthText {
+        text-align: center;
+        font-weight: bold;
+        color: GrayText;
+        font-size: 22px;
+    }
+
+    .yearText {
+        font-weight: bold;
+        font-size: 26px;
+        padding-bottom: 10px !important;
+        color: rgb(115, 133, 202);
+    }
+
+    .loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        display: none;
+        z-index: 10000;
+    }
+
+    .loader-overlay {
+        background: lightGrey;
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        opacity: 0.4;
+    }
+
+    .loader-img {
+        left: 48%;
+        position: absolute;
+        top: 48%;
+    }
+
+    .bookingInfoDivs {
+        position: absolute;
+        background: white;
+        display: none;
+        padding: 5px;
+        border: 3px solid #BEBEBE;
+        border-radius: 15px;
+        opacity: 0.3;
+    }
+
+        .bookingInfoDivs table {
+            color: #333;
+            font-family: Helvetica, Arial, sans-serif;
+            width: 640px;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .bookingInfoDivs td, th {
+            border: 1px solid transparent; /* No more visible border */
+            height: 30px;
+            transition: all 0.3s; /* Simple transition for hover effect */
+        }
+
+        .bookingInfoDivs th {
+            background: #DFDFDF; /* Darken header a bit */
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .bookingInfoDivs td {
+            background: #FAFAFA;
+        }
+
+        /* Cells in even rows (2,4,6...) are one color */
+        .bookingInfoDivs tr:nth-child(even) td {
+            background: #F1F1F1;
+        }
+
+        /* Cells in odd rows (1,3,5...) are another (excludes header cells)  */
+        .bookingInfoDivs tr:nth-child(odd) td {
+            background: #FEFEFE;
+        }
+
+        .bookingInfoDivs tr td:hover {
+            /*background: #666;
+            color: #FFF;*/
+        }
+
+    .occupied {
+        font-size: 16px;
+        vertical-align: text-bottom;
+        border-radius: 15px;
+        padding: 5px;
+    }
+    /* Hover cell effect! */
+    @@media(max-width:768px) {
+        .content-wrapper {
+            max-width: 100% !important;
+        }
+
+        .calendar {
+            width: 100%;
+            float: left;
+            overflow: auto;
+        }
+
+        .bookingInfoDivs {
+            left: 50% !important;
+            margin-left: -150px !important;
+            width: 300px;
+        }
+
+        .bookings {
+            width: 100%;
+            float: left;
+            overflow: auto;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+
+@if (Request.IsAuthenticated)
+{
+    string[] user = User.Identity.Name.Split(',');
+    string userType = user[2]; //userid,username,usertype
+    if (Int32.Parse(userType) == AGENT)
+    {
+        <div class="row">
+            <div class="col-lg-2">
+                <ol class="round">
+                    <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                </ol>
+            </div>
+        </div>
+    }
+    else if (Int32.Parse(userType) == STAFF)
+    {
+        <div class="row">
+            <div class="col-lg-2">
+                <ol class="round">
+                    <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                    @*<li>@Html.ActionLink("Check Availability", "CheckAvailability", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>*@
+                    <li>@Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>
+                    <li>@Html.ActionLink("View Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "viewReports" })</li>
+                </ol>
+            </div>
+            <div class="col-lg-9">
+                @if (ViewBag.Tours != null)
+                {
+                    <div style="margin-left:165px;">
+                        @Html.DropDownListFor(model => model.TourID, (IEnumerable<SelectListItem>)ViewBag.Tours, new { @class = "chosen" })
+                    </div>
+                }
+
+                <div id="loader" class="loader">
+                    <div class="loader-overlay"></div>
+                    <img src="~/Images/loader.gif" class="loader-img" />
+                </div>
+                <div>
+                    <div class="calendar"></div>
+
+                </div>
+
+                <div class="bookingInfoDivs">
+                    <div class="bookings"></div>
+                    <div class="buttons" style="text-align: center;">
+                        @*<a href="javascript: void(0);"  class="btn btn-danger" onclick="onMainfests()">Print Mainfests</a>*@
+                        @Html.ActionLink("Print Mainfests", "ReportsMainfests", "Booking", new { Date = "xDate", Tour = "xTour" }, new { @class = "btn btn-danger", id = "print" })
+
+                        <a href="javascript: void(0);" class="btn btn-success" onclick="javascript: $('.bookingInfoDivs').hide();">Ok</a>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="javascript: saveSeats();">Save</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-2">
+                <ol class="round">
+                    <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                    @*<li>@Html.ActionLink("Check Availability", "CheckAvailability", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>*@
+                    <li>@Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>
+                    <li>@Html.ActionLink("View Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "viewReports" })</li>
+                </ol>
+            </div>
+            <div class="col-lg-9">
+                @if (ViewBag.Tours != null)
+                {
+                    <div style="margin-left:165px;">
+                        @Html.DropDownListFor(model => model.TourID, (IEnumerable<SelectListItem>)ViewBag.Tours, new { @class = "chosen" })
+                    </div>
+                }
+
+                <div id="loader" class="loader">
+                    <div class="loader-overlay"></div>
+                    <img src="~/Images/loader.gif" class="loader-img" />
+                </div>
+                <div>
+                    <div class="calendar"></div>
+
+                </div>
+
+                <div class="tblcon">
+                    <table id="tblHome" class="table table-striped tablesorter" data-table="home" style="background-color: antiquewhite">
+                        <colgroup>
+                            <col style="width: 190px;">
+                            <col style="width: 190px;">
+                            <col style="width: 190px;">
+                            <col style="width: 190px;">
+                            <col style="width: 190px;">
+                            <col style="width: 190px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>
+                                    @if (ViewBag.Tours != null)
+                                    {
+                                        @Html.DisplayFor(model=>model.TourID)
+                                            @*@Html.DropDownListFor(model => model.TourID, (IEnumerable<SelectListItem>)ViewBag.Tours, new { @class = "chosen" })*@
+                                    }
+                            </th>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Commission Level</th>
+                            </tr>
+
+                        <tbody>
+                            @{
+                                
+                            }
+                            @*@foreach (var agent in Model)
+                            {
+                                <tr>
+                                    <td data-agentid="@agent.ID">@id</td>
+                                    <td>@agent.Name</td>
+                                    <td>@agent.Address</td>
+                                    <td>@agent.Phone</td>
+                                    <td>@agent.Email</td>
+                                    <td>@agent.Commission</td>
+                                    <td>@agent.Credit</td>
+                                    <td>@agent.UserName</td>
+                                    <td>@agent.Password</td>
+                                    <td>@Html.ActionLink("Edit Agent", "EditRegister", "Account", new { id = agent.ID }, htmlAttributes: new { id = "editAgent" })</td>
+                                    <td>@Html.ActionLink("View Bookings", "ViewAgentsBooking", "Booking", new { id = agent.ID }, htmlAttributes: new { id = "viewAgentsBooking" })</td>
+                                    <td><a id="@agent.ID" onclick="DeleteAgent(@agent.ID);">Delete Agent</a></td>
+                                    <td>
+                                        @{
+                                            if (@agent.Showvouchers)
+                                            {
+                                                <input type="checkbox" value="@agent.ID" onchange="setVoucherPermission(this)" checked="checked">
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" value="@agent.ID" onchange="setVoucherPermission(this)">
+                                            }
+                                        }
+                                    </td>
+
+
+
+                                </tr>
+                                                id = id + 1;
+                                                check = true;
+                                            }*@
+                        </tbody>
+                    </table>
+                </div>
+                <div id="modal-1" class="modal"></div>
+
+              
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-2">
+            <ol class="round">
+                <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                <li>@Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>
+                <li>@Html.ActionLink("View Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "viewReports" })</li>
+            </ol>
+        </div>
+        <div class="col-lg-9">
+        </div>
+    </div>
+}
+@Scripts.Render("~/bundles/jquery")
+
+@section Scripts {
+    <script>
+
+        $(document).ready(function ()
+        {
+            //$("[data-table='agents']").tablesorter();
+            loadAgents();
+        });
+
+        function DeleteAgent(id)
+        {
+            $.post("/Account/DeleteAgent/" + id, function (data)
+            {
+                alert(data);
+                $('[data-agentid="' + id + '"]').parent().remove();
+            });
+
+        }
+
+        function loadAgents()
+        {
+
+            $('#tblHome').dataTable({
+                "oLanguage": { "sSearch": "" },
+                "iDisplayLength": 25,
+                "aaSorting": [[5, "desc"]],
+                "sDom": 'fltip',
+                "sPaginationType": "full_numbers",
+                "sPaginationType": "bootstrap",
+                "aoColumns": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+                ],
+                // sDom Description
+                // =====================
+                //'l' - Length changing
+                //'f' - Filtering input
+                //'t' - The table!
+                //'i' - Information
+                //'p' - Pagination
+                //'r' - pRocessing
+                "fnInitComplete": function (oSettings, json)
+                {
+                    $.loader({
+                        className: "blue-with-image",
+                        content: ''
+                    });
+                }
+            });
+            //$('#tblAgents').removeClass("dataTable");
+            $('.dataTables_filter input').attr("placeholder", "Search Agent");
+            $('.dataTables_info').css("clear", "both");
+            setTimeout(function () { $.loader('close'); }, 1000);
+        }
+
+        function setVoucherPermission(obj)
+        {
+            if ($(obj).is(":checked"))
+            {
+                //alert($(obj).val());
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("setVoucherPermission", "Booking")',
+                    data: { id: $(obj).val(), check: true },
+                    dataType: 'html',
+                    success: function (respData)
+                    {
+                    }
+                });
+            }
+            else
+            {
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("setVoucherPermission", "Booking")',
+                    data: { id: $(obj).val(), check: false },
+                    dataType: 'html',
+                    success: function (respData)
+                    {
+                    }
+                });
+                //alert($(obj).val());
+            }
+        }
+
+        $('#btnAddAgents').click(function ()
+        {
+            linkObj = $(this);
+            var viewUrl = linkObj.attr('actionurl');
+            $.get(viewUrl, function (data)
+            {
+                clickOperationAccountUser('#modal-1', "#registerForm", data);
+            });
+            return false;
+        });
+
+        function reloadAgents()
+        {
+            location.reload();
+        }
+
+        function initializeCalendar() {
+            showLoader();
+            var date = new Date();
+            var html = "";
+            html += '<table>';
+            html += "<tr><td colspan='7' class='yearText'>" + (new Date()).getFullYear() + "</td></tr>";
+
+            var newDate = new Date((new Date().getFullYear()), date.getMonth() + 1, 0);
+            var lastDay = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0, 23, 59, 59).getDate();
+
+            var monthString = "<tr><td colspan='7' class='monthText' id='" + getMonth(date.getMonth()) + "'>" + getMonth(date.getMonth()) + "<br /><br /></td></tr>";
+            monthString += "<tr>";
+            var dayCount = 0;
+            for (var j = 0; j < lastDay; j++) {
+                dayCount++;
+                monthString += '<td>' + (dayCount / 7 <= 1 ? ('<span class="headerText">' + getDayInitial(j + 1, date.getMonth()) + '</span><br />') : '') + '<div style="text-align: center;" class="data"><a class="day" href="javascript: void(0);" data="' + (j + 1) + '/' + (date.getMonth() + 1) + '/' + (new Date()).getFullYear() + '">' + (j + 1) + postScript(j + 1) + '</a><span class="month" style="display: none;">' + (date.getMonth()) + '</span><br /><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" class="seats" calendar-data="' + (j + 1).padLeft(2) + '/' + (date.getMonth() + 1).padLeft(2) + '/' + (new Date()).getFullYear() + '" /></div></td>';
+                if (dayCount % 7 == 0) {
+                    monthString += "</tr>";
+                }
+            }
+            html += monthString;
+            html += '</table>';
+            $('.calendar').append(html);
+            hideLoader();
+        }
+
+        //Changes Made on 03-02-2016
+        function MonthData() {
+            for (var i = 0; i <= 11; i++) {
+                var optionhtml = '<option value="' +
+                   i + '">' + getMonth(i) + '</option>';
+                $("#op1").append(optionhtml);
+                $("#op2").append(optionhtml);
+            }
+            $("#Month_From").val(0);
+            $("#Month_To").val(0);
+        }
+    </script>
+}
+
+
+

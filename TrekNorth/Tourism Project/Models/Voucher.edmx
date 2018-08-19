@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="VoucherModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Companies">
+          <Key>
+            <PropertyRef Name="CompanyID" />
+          </Key>
+          <Property Name="CompanyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="100" />
+          <Property Name="Phone" Type="varchar" MaxLength="100" />
+          <Property Name="Commission" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="Create_By" Type="varchar" MaxLength="25" Nullable="false" />
+          <Property Name="Create_Date" Type="datetime" Nullable="false" />
+          <Property Name="Modify_By" Type="varchar" MaxLength="25" />
+          <Property Name="Modify_Date" Type="datetime" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="demo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="row" Type="nchar" MaxLength="10" />
+          <Property Name="col" Type="nchar" MaxLength="10" />
+          <Property Name="data" Type="varchar(max)" />
+          <Property Name="colors" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Vouchers">
+          <Key>
+            <PropertyRef Name="VoucherBookingID" />
+          </Key>
+          <Property Name="VoucherBookingID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="VoucherID" Type="varchar" MaxLength="50" />
+          <Property Name="CompanyID" Type="int" Nullable="false" />
+          <Property Name="TravelDate" Type="datetime" />
+          <Property Name="Tour" Type="varchar" MaxLength="500" />
+          <Property Name="FareBasis" Type="varchar" MaxLength="100" />
+          <Property Name="FirstName" Type="varchar" MaxLength="50" />
+          <Property Name="LastName" Type="varchar" MaxLength="50" />
+          <Property Name="RoomNumber" Type="varchar" MaxLength="50" />
+          <Property Name="AdultCount" Type="int" />
+          <Property Name="ChildrenCount" Type="int" />
+          <Property Name="InfantCount" Type="int" />
+          <Property Name="PickupLocation" Type="varchar" MaxLength="500" />
+          <Property Name="UserID" Type="int" />
+          <Property Name="Comments" Type="varchar" MaxLength="500" />
+          <Property Name="Price" Type="decimal" Precision="18" Scale="5" />
+          <Property Name="Levy" Type="decimal" Precision="18" Scale="5" />
+          <Property Name="Discount" Type="decimal" Precision="18" Scale="5" />
+          <Property Name="Commission" Type="decimal" Precision="18" Scale="5" />
+          <Property Name="Create_By" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Create_Date" Type="datetime" Nullable="false" />
+          <Property Name="Modify_By" Type="varchar" MaxLength="50" />
+          <Property Name="Modify_Date" Type="datetime" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="ConfirmationNumber" Type="varchar" MaxLength="500" />
+          <Property Name="paymenttype" Type="nvarchar" MaxLength="50" />
+          <Property Name="salesfrom" Type="nvarchar" MaxLength="50" />
+          <Property Name="cashPaid" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="cardPaid" Type="decimal" Precision="18" Scale="2" />
+        </EntityType>
+        <Association Name="FK_Vouchers_Companies">
+          <End Role="Companies" Type="Self.Companies" Multiplicity="1" />
+          <End Role="Vouchers" Type="Self.Vouchers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Companies">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Vouchers">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="VoucherModelStoreContainer">
+          <EntitySet Name="Companies" EntityType="Self.Companies" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="demo" EntityType="Self.demo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Vouchers" EntityType="Self.Vouchers" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Vouchers_Companies" Association="Self.FK_Vouchers_Companies">
+            <End Role="Companies" EntitySet="Companies" />
+            <End Role="Vouchers" EntitySet="Vouchers" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="VoucherModel" Alias="Self" p1:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:p1="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="VoucherEntities" p1:LazyLoadingEnabled="true">
+          <EntitySet Name="Companies" EntityType="VoucherModel.Company" />
+          <EntitySet Name="Vouchers" EntityType="VoucherModel.Voucher" />
+          <AssociationSet Name="FK_Vouchers_Companies" Association="VoucherModel.FK_Vouchers_Companies">
+            <End EntitySet="Companies" Role="Company" />
+            <End EntitySet="Vouchers" Role="Voucher" />
+          </AssociationSet>
+          <EntitySet Name="demoes" EntityType="VoucherModel.demo" />
+          </EntityContainer>
+        <EntityType Name="Company">
+          <Key>
+            <PropertyRef Name="CompanyID" />
+          </Key>
+          <Property Name="CompanyID" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" />
+          <Property Name="Name" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Email" MaxLength="100" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Phone" MaxLength="100" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Commission" Precision="18" Scale="0" Type="Decimal" />
+          <Property Name="Create_By" Nullable="false" MaxLength="25" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Create_Date" Nullable="false" Precision="3" Type="DateTime" />
+          <Property Name="Modify_By" MaxLength="25" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Modify_Date" Precision="3" Type="DateTime" />
+          <Property Name="IsActive" Nullable="false" Type="Boolean" />
+          <NavigationProperty Name="Vouchers" Relationship="VoucherModel.FK_Vouchers_Companies" FromRole="Company" ToRole="Voucher" />
+        </EntityType>
+        <EntityType Name="Voucher">
+          <Key>
+            <PropertyRef Name="VoucherBookingID" />
+          </Key>
+          <Property Name="VoucherBookingID" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" />
+          <Property Name="VoucherID" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="CompanyID" Nullable="false" Type="Int32" />
+          <Property Name="TravelDate" Precision="3" Type="DateTime" />
+          <Property Name="Tour" MaxLength="500" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="FareBasis" MaxLength="100" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="FirstName" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="LastName" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="RoomNumber" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="AdultCount" Type="Int32" />
+          <Property Name="ChildrenCount" Type="Int32" />
+          <Property Name="InfantCount" Type="Int32" />
+          <Property Name="PickupLocation" MaxLength="500" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="UserID" Type="Int32" />
+          <Property Name="Comments" MaxLength="500" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Price" Precision="18" Scale="5" Type="Decimal" />
+          <Property Name="Levy" Precision="18" Scale="5" Type="Decimal" />
+          <Property Name="Discount" Precision="18" Scale="5" Type="Decimal" />
+          <Property Name="Commission" Precision="18" Scale="5" Type="Decimal" />
+          <Property Name="Create_By" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Create_Date" Nullable="false" Precision="3" Type="DateTime" />
+          <Property Name="Modify_By" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="Modify_Date" Precision="3" Type="DateTime" />
+          <Property Name="IsActive" Nullable="false" Type="Boolean" />
+          <Property Name="ConfirmationNumber" MaxLength="500" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="paymenttype" MaxLength="50" FixedLength="false" Unicode="true" Type="String" />
+          <Property Name="salesfrom" MaxLength="50" FixedLength="false" Unicode="true" Type="String" />
+          <NavigationProperty Name="Company" Relationship="VoucherModel.FK_Vouchers_Companies" FromRole="Voucher" ToRole="Company" />
+          <Property Name="cashPaid" Precision="18" Scale="2" Type="Decimal" />
+          <Property Name="cardPaid" Precision="18" Scale="2" Type="Decimal" />
+        </EntityType>
+        <Association Name="FK_Vouchers_Companies">
+          <End Type="VoucherModel.Company" Multiplicity="1" Role="Company" />
+          <End Type="VoucherModel.Voucher" Multiplicity="*" Role="Voucher" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Voucher">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="demo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="row" Type="String" MaxLength="10" FixedLength="true" Unicode="true" />
+          <Property Name="col" Type="String" MaxLength="10" FixedLength="true" Unicode="true" />
+          <Property Name="data" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="colors" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="VoucherModelStoreContainer" CdmEntityContainer="VoucherEntities">
+          <EntitySetMapping Name="Companies">
+            <EntityTypeMapping TypeName="VoucherModel.Company">
+              <MappingFragment StoreEntitySet="Companies">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Modify_Date" ColumnName="Modify_Date" />
+                <ScalarProperty Name="Modify_By" ColumnName="Modify_By" />
+                <ScalarProperty Name="Create_Date" ColumnName="Create_Date" />
+                <ScalarProperty Name="Create_By" ColumnName="Create_By" />
+                <ScalarProperty Name="Commission" ColumnName="Commission" />
+                <ScalarProperty Name="Phone" ColumnName="Phone" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Vouchers">
+            <EntityTypeMapping TypeName="VoucherModel.Voucher">
+              <MappingFragment StoreEntitySet="Vouchers">
+                <ScalarProperty Name="cardPaid" ColumnName="cardPaid" />
+                <ScalarProperty Name="cashPaid" ColumnName="cashPaid" />
+                <ScalarProperty Name="salesfrom" ColumnName="salesfrom" />
+                <ScalarProperty Name="paymenttype" ColumnName="paymenttype" />
+                <ScalarProperty Name="ConfirmationNumber" ColumnName="ConfirmationNumber" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Modify_Date" ColumnName="Modify_Date" />
+                <ScalarProperty Name="Modify_By" ColumnName="Modify_By" />
+                <ScalarProperty Name="Create_Date" ColumnName="Create_Date" />
+                <ScalarProperty Name="Create_By" ColumnName="Create_By" />
+                <ScalarProperty Name="Commission" ColumnName="Commission" />
+                <ScalarProperty Name="Discount" ColumnName="Discount" />
+                <ScalarProperty Name="Levy" ColumnName="Levy" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Comments" ColumnName="Comments" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="PickupLocation" ColumnName="PickupLocation" />
+                <ScalarProperty Name="InfantCount" ColumnName="InfantCount" />
+                <ScalarProperty Name="ChildrenCount" ColumnName="ChildrenCount" />
+                <ScalarProperty Name="AdultCount" ColumnName="AdultCount" />
+                <ScalarProperty Name="RoomNumber" ColumnName="RoomNumber" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="FareBasis" ColumnName="FareBasis" />
+                <ScalarProperty Name="Tour" ColumnName="Tour" />
+                <ScalarProperty Name="TravelDate" ColumnName="TravelDate" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="VoucherID" ColumnName="VoucherID" />
+                <ScalarProperty Name="VoucherBookingID" ColumnName="VoucherBookingID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="demoes">
+            <EntityTypeMapping TypeName="VoucherModel.demo">
+              <MappingFragment StoreEntitySet="demo">
+                <ScalarProperty Name="colors" ColumnName="colors" />
+                <ScalarProperty Name="data" ColumnName="data" />
+                <ScalarProperty Name="col" ColumnName="col" />
+                <ScalarProperty Name="row" ColumnName="row" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+        <DesignerProperty Name="UseLegacyProvider" Value="True" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,117 @@
+﻿@using System.Configuration
+@model Tourism_Project.Controllers.TempClass
+@{
+}
+
+<style>
+    .cells {
+        border: 1px solid rgb(241, 211, 165);
+        padding: 5px;
+    }
+</style>
+
+@*<table>
+        <tr>
+            <td class="cells"><b>Date</b></td>
+            @if (Model.single == false)
+            {
+                <td class="cells"><b>Agent</b></td>
+            }
+            <td class="cells"><b>Description</b></td>
+            <td class="cells" style="width: 100px;text-align:right;"><b>Nett Price($)</b></td>
+            <td class="cells" style="text-align:right;"><b>Edit</b></td>
+        </tr>
+        @{
+            float total = 0;
+        }
+        @foreach (var report in Model.models)
+        {
+            <tr>
+                <td class="cells">@report.Date</td>
+                @if (Model.single == false)
+                {
+                    <td class="cells">@report.Agent</td>
+                }
+                <td class="cells">@report.PassengerName @report.Adults Ad/@report.Children Ch/@report.FamilyChildren FCh/@report.Infant In on tour code @report.tourname, Voucher: @report.Voucher</td>
+                <td class="cells" style="width: 70px;" align="right">$@String.Format("{0:0.00}", report.Price)</td>
+
+
+                <td class="cells" style="width: 70px;" align="right">
+                    @Html.ActionLink("Edit", "EditBooking", "Booking", new { bookingid = @report.BookingID }, htmlAttributes: new { id = "EditBooking" })
+                </td>
+            </tr>
+                total += @report.Price;
+        }
+        <tr>
+
+
+                if (Model.single == false)
+                {
+                    <td class="cells" colspan="3" align="right" style="padding-right: 5px !important;">Amount Due</td>
+                }
+                else
+                {
+                    <td class="cells" colspan="2" align="right" style="padding-right: 5px !important;">Amount Due</td>
+                }
+            }
+            <td align="right" width="70px" class="cells" style="padding-right: 5px !important;">$ @String.Format("{0:0.00}", total)</td>
+
+        </tr>
+        <tr>
+            <td colspan="3" align="right">All GST Inclusive</td>
+        </tr>
+    </table>*@
+<table>
+    <tr>
+        <td class="cells"><b>Booking ID</b></td>
+        <td class="cells"><b>Date</b></td>
+        @*@if (Model.single == false)
+        {*@
+            <td class="cells"><b>Agent</b></td>
+        @*}*@
+        <td class="cells"><b>Tour</b></td>
+        <td class="cells" style="width: 100px;text-align:right;"><b>Gross(Total Price)($)</b></td>
+        <td class="cells" style="width: 100px;text-align:right;"><b>Net(Agent Invoice)($)</b></td>
+        <td class="cells" style="text-align:right;"><b>Edit</b></td>
+    </tr>
+    @{
+        float total = 0;
+        float totalinvoiceAgent = 0;
+    }
+    @foreach (var report in Model.models)
+    {
+        <tr>
+            <td class="cells">@report.BookingID</td>
+            <td class="cells">@report.Date</td>
+            @*@if (Model.single == false)
+            {*@
+                <td class="cells">@report.Agent</td>
+            @*}*@
+
+            <td class="cells">@report.tourname</td>
+            <td class="cells">@report.Price</td>
+            <td class="cells">@report.TotalPrice</td>
+
+            <td class="cells" style="width: 70px;" align="right">
+                @Html.ActionLink("Edit", "EditBooking", "Booking", new { bookingid = @report.BookingID }, htmlAttributes: new { id = "EditBooking" })
+            </td>
+        </tr>
+        //total += @report.Price;
+        //totalinvoiceAgent += (float)@report.InvoiceAgent;
+
+        total += @report.Price;
+        totalinvoiceAgent += (float)@report.TotalPrice;
+    }
+    <tr>
+        <td class="cells" align="right" style="padding-right: 5px !important;"></td>
+        <td class="cells" colspan="3" align="right" style="padding-right: 5px !important;">Amount Due</td>
+        <td align="right" width="70px" class="cells" style="padding-right: 5px !important;">$ @String.Format("{0:0.00}", total)</td>
+        <td align="right" width="70px" class="cells" style="padding-right: 5px !important;">$ @String.Format("{0:0.00}", totalinvoiceAgent)</td>
+        <td align="right" width="70px" class="cells" style="padding-right: 5px !important;"></td>
+        @*<td align="right" width="70px" class="cells" style="padding-right: 5px !important;">$ @String.Format("{0:0.00}", total)</td>
+        <td align="right" width="70px" class="cells" style="padding-right: 5px !important;">$ @String.Format("{0:0.00}", totalinvoiceAgent)</td>*@
+    </tr>
+    <tr>
+        <td colspan="3" align="right">All GST Inclusive</td>
+    </tr>
+</table>

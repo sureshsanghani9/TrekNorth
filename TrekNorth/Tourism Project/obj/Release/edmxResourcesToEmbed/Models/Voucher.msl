@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="VoucherModelStoreContainer" CdmEntityContainer="VoucherEntities">
+    <EntitySetMapping Name="Companies">
+      <EntityTypeMapping TypeName="VoucherModel.Company">
+        <MappingFragment StoreEntitySet="Companies">
+          <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+          <ScalarProperty Name="Modify_Date" ColumnName="Modify_Date" />
+          <ScalarProperty Name="Modify_By" ColumnName="Modify_By" />
+          <ScalarProperty Name="Create_Date" ColumnName="Create_Date" />
+          <ScalarProperty Name="Create_By" ColumnName="Create_By" />
+          <ScalarProperty Name="Commission" ColumnName="Commission" />
+          <ScalarProperty Name="Phone" ColumnName="Phone" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Vouchers">
+      <EntityTypeMapping TypeName="VoucherModel.Voucher">
+        <MappingFragment StoreEntitySet="Vouchers">
+          <ScalarProperty Name="cardPaid" ColumnName="cardPaid" />
+          <ScalarProperty Name="cashPaid" ColumnName="cashPaid" />
+          <ScalarProperty Name="salesfrom" ColumnName="salesfrom" />
+          <ScalarProperty Name="paymenttype" ColumnName="paymenttype" />
+          <ScalarProperty Name="ConfirmationNumber" ColumnName="ConfirmationNumber" />
+          <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+          <ScalarProperty Name="Modify_Date" ColumnName="Modify_Date" />
+          <ScalarProperty Name="Modify_By" ColumnName="Modify_By" />
+          <ScalarProperty Name="Create_Date" ColumnName="Create_Date" />
+          <ScalarProperty Name="Create_By" ColumnName="Create_By" />
+          <ScalarProperty Name="Commission" ColumnName="Commission" />
+          <ScalarProperty Name="Discount" ColumnName="Discount" />
+          <ScalarProperty Name="Levy" ColumnName="Levy" />
+          <ScalarProperty Name="Price" ColumnName="Price" />
+          <ScalarProperty Name="Comments" ColumnName="Comments" />
+          <ScalarProperty Name="UserID" ColumnName="UserID" />
+          <ScalarProperty Name="PickupLocation" ColumnName="PickupLocation" />
+          <ScalarProperty Name="InfantCount" ColumnName="InfantCount" />
+          <ScalarProperty Name="ChildrenCount" ColumnName="ChildrenCount" />
+          <ScalarProperty Name="AdultCount" ColumnName="AdultCount" />
+          <ScalarProperty Name="RoomNumber" ColumnName="RoomNumber" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+          <ScalarProperty Name="FareBasis" ColumnName="FareBasis" />
+          <ScalarProperty Name="Tour" ColumnName="Tour" />
+          <ScalarProperty Name="TravelDate" ColumnName="TravelDate" />
+          <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+          <ScalarProperty Name="VoucherID" ColumnName="VoucherID" />
+          <ScalarProperty Name="VoucherBookingID" ColumnName="VoucherBookingID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="demoes">
+      <EntityTypeMapping TypeName="VoucherModel.demo">
+        <MappingFragment StoreEntitySet="demo">
+          <ScalarProperty Name="colors" ColumnName="colors" />
+          <ScalarProperty Name="data" ColumnName="data" />
+          <ScalarProperty Name="col" ColumnName="col" />
+          <ScalarProperty Name="row" ColumnName="row" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

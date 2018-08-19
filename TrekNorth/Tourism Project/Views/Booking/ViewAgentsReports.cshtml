@@ -1,0 +1,271 @@
+﻿@model Tourism_Project.Models.RegisterModel
+@{
+    ViewBag.Title = "Agents Reports";
+}
+
+
+
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while processing.Try Again!
+        </div>
+    }
+}
+<h2>@ViewBag.Title</h2>
+@using (Html.BeginForm("DownloadAgentsReports", "Booking", FormMethod.Post, new { @class = "well form-inline" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Agents Report</legend>
+        <ol>
+            <li>
+                <br />
+                <label for="ID">Select Agent</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                @Html.DropDownListFor(model => model.ID, new SelectList(
+                  new List<Object>{
+                       new { value = 1000 , text = ""  }
+                  },
+                  "value",
+                  "text",
+                   1000))
+            </li>
+            <li style="margin-top: 10px">
+                <label for="Tour">Tour From Date</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                @Html.TextBoxFor(m => m.FromDate, new { @data_pickdate = "reportsFrom", @class = "seatschecking", @placeholder = "Enter Date...", @required = "required" })
+            </li>
+            <li style="margin-top: 10px">
+                <label for="Tour">Tour To Date</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                @Html.TextBoxFor(m => m.ToDate, new { @data_pickdate = "reportsTo", @class = "seatschecking", @placeholder = "Enter Date...", @required = "required" })
+            </li>
+        </ol>
+    </fieldset>
+
+
+    <div id="result" style="max-height: 400px; overflow-y: auto;">
+
+    </div>
+
+    <button class="btn btn-primary" style="margin-top: 10px;" onclick="getReportView" id="generateBtn">Generate</button>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;" formtarget="_blank">Download</button>
+    <button class="btn btn-primary" style="margin-top: 10px;" onclick="OpenEmailBox" id="openemailBtn">Email</button>
+}
+
+<div id="modal-1" class="modal" style="display: none;">
+    <hgroup class="title">
+        <h2>Send Email</h2>
+    </hgroup>
+    <button aria-hidden="true" data-dismiss="modal" class="close" type="button" onclick="cancelClick();">×</button>
+    <fieldset style="background-color: antiquewhite">
+        <legend>Booking Form</legend>
+        <ol>
+            <li style="margin-top: 10px">
+                <label for="Email">Email</label> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Email, new { })
+            </li>
+        </ol>
+    </fieldset>
+    <input type="button" class="btn btn-primary" value="Send" style="margin-top: 10px;" onclick="SendEmail()">
+
+</div>
+
+<img style="position: fixed; right: 0px; top: 0px; width: 100%; height: 44px;" src="~/Images/horizontal-loader.gif" id="sideLoader" />
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+    $(function () {
+
+        $(document).ajaxStart(function () {
+            $('#sideLoader').show();
+        }).ajaxStop(function () {
+            $('#sideLoader').hide();
+        }).ajaxError(function () {
+            $('#sideLoader').hide();
+        });
+
+        $(".seatschecking").datepicker({ dateFormat: 'dd/mm/yy' });
+
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("getAgents", "Booking")',
+            success: function (resp) {
+                $('#ID').empty();
+                $.each(resp, function (i, value) {
+                    $('#ID').append('<option value=' + value['ID'] + '>' + value['Name'] + '</option>');
+                });
+                $('#ID').prepend('<option value="300321">All Agents</option>');
+            }
+        });
+    });
+    $('#generateBtn').bind('click', getReportView);
+    $('#openemailBtn').bind('click', OpenEmailBox);
+    function getReportView(event) {
+        event.preventDefault();
+
+        $('#result').html('');
+        if ($('#FromDate').val() == "" || $('#ToDate').val() == "") {
+            alert("Please enter all the values to see the result");
+            return;
+        }
+
+        var data = {
+            FromDate: $('#FromDate').val(),
+            ToDate: $('#ToDate').val(),
+            ID: $('#ID').val()
+        };
+        $.ajax({
+            url: '@Url.Action("ViewAgentsReportDetails", "Booking")',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                error: function (xhr) {
+                    if (xhr.status == 200) {
+                        $('#result').html(xhr.responseText);
+                        $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+                    }
+                    else
+                        alert('Error Found: ' + xhr.statusText);
+                },
+                success: function (result) {
+                },
+                async: true,
+                processData: false
+            });
+            return false;
+        }
+
+        function OpenEmailBox(event) {
+            event.preventDefault();
+            $('#modal-1').modal({ keyboard: false, backdrop: 'static' });
+            $('#modal-1').on('show.bs.modal', function () {
+                $(this).find('.modal-dialog').css({
+                    'margin-top': function () {
+                        return -($(this).outerHeight() / 2);
+                    },
+                    'margin-left': function () {
+                        return -($(this).outerWidth() / 2);
+                    }
+                });
+            }).modal('show').after(function () {
+            });
+            return false;
+        }
+
+        function SendEmail() {
+            if ($("#Email").val() == "")
+            {
+                alert("Enter any Email!");
+                return false;
+            }
+            else if(!isValidEmailAddress($("#Email").val()))
+            {
+                alert("Enter any Valid Email!");
+                return false;
+            }
+
+            $('#result').html('');
+            if ($('#FromDate').val() == "" || $('#ToDate').val() == "") {
+                alert("Please enter all the values to see the result");
+                return;
+            }
+
+            var data = {
+                FromDate: $('#FromDate').val(),
+                ToDate: $('#ToDate').val(),
+                ID: $('#ID').val(),
+                Email: $('#Email').val()
+            };
+            $.ajax({
+                url: '@Url.Action("SendViewAgentsReport", "Booking")',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                error: function (xhr) {
+                    if (xhr.status == 200) {
+                        alert(xhr);
+                    }
+                    else
+                        alert('Error Found: ' + xhr.statusText);
+                },
+                success: function (result) {
+                    alert("Email is sent successfully!");
+                    $("#modal-1 .close").click();
+                },
+                async: true,
+                processData: false
+            });
+            return false;
+
+        }
+        function isValidEmailAddress(emailAddress) 
+        {
+            var regex = /^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            return regex.test(emailAddress);
+        }
+    </script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            
+        });
+
+        function cancelClick() {
+            $(".modal-backdrop.in").remove();
+        }
+    </script>
+
+
+    <style>
+        .modal {
+            display: none;
+        }
+
+        button.close {
+            padding: 0;
+            cursor: pointer;
+            background: 0 0;
+            border: 0;
+            -webkit-appearance: none;
+        }
+
+        .close {
+            float: right;
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1;
+            color: #000;
+            text-shadow: 0 1px 0 #fff;
+            opacity: .2;
+            margin-top: -40px;
+            margin-right: 20px;
+            filter: alpha(opacity=20);
+        }
+
+        .tblcon {
+            width: 100%;
+            float: left;
+            overflow: auto;
+        }
+
+        .modal {
+            max-width: 100%;
+        }
+
+        @@media(max-width:600px) {
+            .modal {
+                left: 0px;
+                margin-left: 0px;
+            }
+        }
+    </style>
+}
+

@@ -1,0 +1,163 @@
+﻿@model Tourism_Project.Models.BookingModel
+@{
+    ViewBag.Title = "Edit Tour";
+}
+
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> Tour has been updated.
+        </div>
+    }
+}
+
+@*<script src="~/Scripts/timepick/timepicki.js"></script>
+    <link href="~/Scripts/timepick/timepicki.css" rel="stylesheet" type="text/css" />*@
+
+<script src="~/Scripts/timepick/jquery.inputmask.js"></script>
+<script src="~/Scripts/timepick/jquery.inputmask.date.extensions.js"></script>
+
+<script type="text/javascript">
+
+    $('body').on('focus',".clstime", function(){
+    });
+
+    $(document).ready(function () {
+        var selectedIndex = @ViewBag.Tour
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("getTourName", "Booking")',
+            success: function (resp) {
+                $('#Tour').empty();
+                $.each(resp, function (i, value) {
+                    if(selectedIndex==value['Tour'])
+                        $('#Tour').append('<option value=' + value['Tour'] + ' selected>' + value['tourname'] + '</option>');
+                    else
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+                });
+
+            }
+        });
+
+        $('#modal-1').modal({ keyboard: false, backdrop: 'static' });
+        $('#modal-1').on('show.bs.modal', function () {
+            $(this).find('.modal-dialog').css({
+                'margin-top': function () {
+                    return -($(this).outerHeight() / 2);
+                },
+                'margin-left': function () {
+                    return -($(this).outerWidth() / 2);
+                }
+            });
+        }).modal('show');
+    });
+
+    function cancelClick() {
+        $(".modal-backdrop.in").remove();
+    }
+</script>
+
+<button aria-hidden="true" data-dismiss="modal" class="close" type="button" onclick="cancelClick();">×</button>
+ 
+@Html.HiddenFor(model => model.TourCode)
+
+@*@using (Ajax.BeginForm("EditLocation", "Booking", new AjaxOptions
+    {
+        InsertionMode = InsertionMode.Replace,
+        HttpMethod = "POST",
+        OnSuccess = "reloadLocations"
+    }, new { @class = "well form-inline", @id = "editLocationForm" }))*@
+@{
+    @*}
+
+        @using (Html.BeginForm("EditLocation", "Booking", FormMethod.Post, new { @class = "well form-inline", @id = "editLocationForm" }))
+        {*@
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend></legend>
+        <ol>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.Tour)&nbsp;
+                @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                       new { value = 0 , text = ""  }
+                    },
+                  "value",
+                  "text",
+                   @ViewBag.Tour))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.tourcodevalues)&nbsp;
+                @Html.TextBoxFor(model => model.tourcodevalues)
+            </li>
+        </ol>
+    </fieldset>
+
+    <!--On 09-04-2015 -->
+    <fieldset style="background-color: antiquewhite">
+        <div class="datescon">
+            <div class="col-md-8" style="width:62%; margin-left: 30px;">
+
+                <div class="clear-fix"></div>
+
+                @*<input id="btnAdd" style="display:none;" type="button" class="btn btn-primary " value="Add" />*@
+                <div id="TextBoxContainer" class="TextBoxContainer">
+                    <!--Textboxes will be added here -->
+                </div>
+                <br />
+                <!--On 09-04-2015 -->
+                <button onclick="EditTour();" class="btn btn-primary" style="margin-top: 10px;">Update Tour</button>
+            </div>
+        </div>
+    </fieldset>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+<script type="text/javascript">
+
+    //ajax function to edit location and time
+    function EditTour()
+    {
+        var ID=  @ViewBag.tid;
+        var url = "/Booking/EditTour";
+        var Tour =$('#Tour').val();
+        var tourcodevalues = $('#tourcodevalues').val();
+        //var TourCode = $('#TourCode').val();
+        var TourCode= ID;
+      
+        $(".TextBoxContainer .clstime").each(function() {
+        });
+
+        $.post(url, { Tour: Tour, tourcodevalues: tourcodevalues, TourCode: TourCode }, function (data) {
+            if(data=="success")
+            {
+                alert("successfully data saved..!");
+            }
+            else if(data=="errortime")
+            {
+                alert("Error on Update times...!");
+            }
+            else
+            {
+                alert("Error on Update records...!");
+            }
+        });
+    }
+
+</script>
+@*on 2015-04-09*@

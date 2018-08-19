@@ -1,0 +1,269 @@
+﻿@{
+    ViewBag.Title = "Agents";
+}
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while retrieving agent(s).Try Again!
+        </div>
+    }
+}
+
+<style>
+    .modal {
+        display: none;
+    }
+
+    button.close {
+        padding: 0;
+        cursor: pointer;
+        background: 0 0;
+        border: 0;
+        -webkit-appearance: none;
+    }
+
+    .close {
+        float: right;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
+        opacity: .2;
+        margin-top: -45px;
+        margin-right: 20px;
+        filter: alpha(opacity=20);
+    }
+
+    .tblcon {
+        width: 100%;
+        float: left;
+        overflow:auto;
+    }
+</style>
+
+<h2 style="margin: 10px;">Full Payment Agents</h2>
+
+<div class="tblcon">
+    <table id="tblAgents" class="table table-striped tablesorter" data-table="agents" style="background-color: antiquewhite">
+        <colgroup>
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Commission Level</th>
+                <th>Credit Status</th>
+                <th>User Name</th>
+                <th>Password</th>
+                <th>Edit</th>
+                <th>Bookings</th>
+                <th>Delete</th>
+                <th>If Show Voucher</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int id = 1;
+                bool check = false;
+            }
+            @foreach (var agent in Model)
+            {
+                <tr>
+                    <td data-agentid="@agent.ID">@id</td>
+                    <td>@agent.Name</td>
+                    <td>@agent.Address</td>
+                    <td>@agent.Phone</td>
+                    <td>@agent.Email</td>
+                    <td>@agent.Commission</td>
+                    <td>@agent.Credit</td>
+                    <td>@agent.UserName</td>
+                    <td>@agent.Password</td>
+                    <td>@Html.ActionLink("Edit Agent", "EditRegister", "Account", new { id = agent.ID }, htmlAttributes: new { id = "editAgent" })</td>
+                    <td>@Html.ActionLink("View Bookings", "ViewAgentsBooking", "Booking", new { id = agent.ID }, htmlAttributes: new { id = "viewAgentsBooking" })</td>
+                    <td><a id="@agent.ID" onclick="DeleteAgent(@agent.ID);">Delete Agent</a></td>
+                    <td>
+                        @{
+                if (@agent.Showvouchers)
+                {
+                    <input type="checkbox" value="@agent.ID" onchange="setVoucherPermission(this)" checked="checked">
+                }
+                else
+                {
+                    <input type="checkbox" value="@agent.ID" onchange="setVoucherPermission(this)">
+                }
+                        }
+                    </td>
+
+
+
+                </tr>
+                id = id + 1;
+                check = true;
+            }
+            @{
+                if (!check)
+                {
+                    <div class="alert alert-info">
+                        <a class="close" data-dismiss="alert">×</a>
+                        <strong>Information!</strong> no agents are available!
+                    </div>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div id="modal-1" class="modal"></div>
+
+@section Scripts {
+    <script>
+
+        $(document).ready(function ()
+        {
+            //$("[data-table='agents']").tablesorter();
+            loadAgents();
+        });
+
+        function DeleteAgent(id)
+        {
+            $.post("/Account/DeleteAgent/" + id, function (data)
+            {
+                alert(data);
+                $('[data-agentid="' + id + '"]').parent().remove();
+            });
+
+        }
+
+        function loadAgents()
+        {
+
+            $('#tblAgents').dataTable({
+                "oLanguage": { "sSearch": "" },
+                "iDisplayLength": 25,
+                "aaSorting": [[5, "desc"]],
+                "sDom": 'fltip',
+                "sPaginationType": "full_numbers",
+                "sPaginationType": "bootstrap",
+                "aoColumns": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+                ],
+                // sDom Description
+                // =====================
+                //'l' - Length changing
+                //'f' - Filtering input
+                //'t' - The table!
+                //'i' - Information
+                //'p' - Pagination
+                //'r' - pRocessing
+                "fnInitComplete": function (oSettings, json)
+                {
+                    $.loader({
+                        className: "blue-with-image",
+                        content: ''
+                    });
+                }
+            });
+            //$('#tblAgents').removeClass("dataTable");
+            $('.dataTables_filter input').attr("placeholder", "Search Agent");
+            $('.dataTables_info').css("clear", "both");
+            setTimeout(function () { $.loader('close'); }, 1000);
+        }
+
+        function setVoucherPermission(obj)
+        {
+            if ($(obj).is(":checked"))
+            {
+                //alert($(obj).val());
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("setVoucherPermission", "Booking")',
+                    data: { id: $(obj).val(), check: true },
+                    dataType: 'html',
+                    success: function (respData)
+                    {
+                    }
+                });
+            }
+            else
+            {
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("setVoucherPermission", "Booking")',
+                    data: { id: $(obj).val(), check: false },
+                    dataType: 'html',
+                    success: function (respData)
+                    {
+                    }
+                });
+                //alert($(obj).val());
+            }
+        }
+
+
+        $('#btnAddAgents').click(function ()
+        {
+            linkObj = $(this);
+            var viewUrl = linkObj.attr('actionurl');
+            $.get(viewUrl, function (data)
+            {
+                clickOperationAccountUser('#modal-1', "#registerForm", data);
+            });
+            return false;
+        });
+
+        function clickOperationAccountUser(divDialouge, formID, data)
+        {
+            var dialogDiv = $(divDialouge);
+            dialogDiv.html(data);
+            //validation
+            var $form = $(formID);
+            // Unbind existing validation
+            $form.unbind();
+            $form.data("validator", null);
+            // Check document for changes
+            $.validator.unobtrusive.parse(document);
+            // Re add validation with changes
+            $form.validate($form.data("unobtrusiveValidation").options);
+            //open dialog
+            dialogDiv.modal('show');
+        }
+
+        function reloadAgents()
+        {
+            location.reload();
+        }
+
+    </script>
+}

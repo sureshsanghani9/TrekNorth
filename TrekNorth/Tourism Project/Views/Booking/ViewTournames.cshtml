@@ -1,0 +1,226 @@
+﻿@{
+    ViewBag.Title = "Tour";
+}
+@{
+    //string status = ViewBag.Status;
+    @*if (status.Equals("error"))
+    {
+        <div class="alert alert-error">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> an error occured while retrieving location(s).Try Again!
+        </div>
+    }*@
+}
+
+<style>
+    .modal {
+        display: none;
+    }
+
+    button.close {
+        padding: 0;
+        cursor: pointer;
+        background: 0 0;
+        border: 0;
+        -webkit-appearance: none;
+    }
+
+    .close {
+        float: right;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
+        opacity: .2;
+        margin-top: -40px;
+        margin-right: 20px;
+        filter: alpha(opacity=20);
+    }
+
+    .tblcon {
+        width: 100%;
+        float: left;
+        overflow: auto;
+    }
+
+    .modal {
+        max-width: 100%;
+    }
+
+    @@media(max-width:600px) {
+        .modal {
+            left: 0px;
+            margin-left: 0px;
+        }
+    }
+</style>
+<h2>@ViewBag.Title</h2>
+
+<button id="btnAddTour" type="button" class="btn btn-primary" style="margin-top: -42px; float: right;" actionurl="@Url.Action("AddTour", "Booking")">Add Tour</button>
+<div class="tblcon">
+    <table id="tblTour" class="table table-striped tablesorter" data-table="tour" style="background-color: antiquewhite">
+        <colgroup>
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+            <col style="width: 190px;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tour ID</th>
+                <th>Tour Code Values</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int id = 1;
+                bool check = false;
+            }
+           
+            @foreach (var tour in Model)
+            {
+                <tr data-tour="@tour.TourCode">
+                    <td>
+                        @tour.TourCode
+                    </td>
+                    <td>
+                        @tour.tourname
+                    </td>
+                    <td>
+                        @tour.tourcodevalues
+                    </td>
+                    <td>
+                        @Html.ActionLink("Edit Tour Code Values", "EditTour", new { id = tour.TourCode }, new { Class = "operationLink", style = "", data_toggle = "modal" })
+                    </td>
+                   @*<td>@Html.ActionLink("Delete Tour Code Values", "DeleteTourCode", "Booking", new { id = tour.TourCode }, htmlAttributes: new { id = "DeleteTourCode" })</td>*@
+                    <td data-tourid="@tour.TourCode"><button class="btn btn-danger" data-tour="delete">Delete</button></td>
+                </tr>
+                id = id + 1;
+                check = true;
+            }
+            @{
+                if (!check)
+                {
+                    <div class="alert alert-info">
+                        <a class="close" data-dismiss="alert">×</a>
+                        <strong>Information!</strong> no location(s) are available!
+                    </div>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div id="modal-1" class="modal"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            //$("[data-table='locations']").tablesorter();
+            loadTour();
+            $("[data-tour='delete']").click(function () {
+                if (confirm("Are you sure want to delete Tour?")) {
+                    var TourCode = $(this).parent().data('tourid');
+                    $.ajax({
+                        type: 'POST',
+                        traditional: true,
+                        url: '@Url.Action("DeleteTourCode", "Booking")',
+                        data: { id: TourCode },
+                        success: function (resp) {
+                            if (resp) {
+                                $("[data-tour='" + TourCode + "']").remove();
+                            }
+                            else { alert('error while deleting location. try again. Realod page.') }
+                        }
+                    });
+
+                }
+            });
+        });
+
+        function loadTour() {
+            $('#tblTour').dataTable({
+                "oLanguage": { "sSearch": "" },
+                "iDisplayLength": 25,
+                "aaSorting": [[5, "desc"]],
+                "sDom": 'fltip',
+                "sPaginationType": "full_numbers",
+                "sPaginationType": "bootstrap",
+                "aoColumns": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                ],
+                // sDom Description
+                // =====================
+                //'l' - Length changing
+                //'f' - Filtering input
+                //'t' - The table!
+                //'i' - Information
+                //'p' - Pagination
+                //'r' - pRocessing
+
+                "fnInitComplete": function (oSettings, json) {
+                    $.loader({
+                        className: "blue-with-image",
+                        content: ''
+                    });
+                }
+            });
+            //$('#tblLocations').removeClass("dataTable");
+            $('.dataTables_filter input').attr("placeholder", "Search Tour");
+            $('.dataTables_info').css("clear", "both");
+            setTimeout(function () { $.loader('close'); }, 1500);
+        }
+
+        //Edit Tour
+        $('#tblTour').on('click', 'a.operationLink', function () {
+            linkObj = $(this);
+            var viewUrl = linkObj.attr('href');
+            $.get(viewUrl, function (data) {
+                clickOperationAccountUser('#modal-1', "#editLocationForm", data);
+            });
+            return false;
+        });
+
+        //Adding Tour Data
+        $('#btnAddTour').click(function () {
+            linkObj = $(this);
+            var viewUrl = linkObj.attr('actionurl');
+            $.get(viewUrl, function (data) {
+                clickOperationAccountUser('#modal-1', "#addTourForm", data);
+            });
+            return false;
+        });
+
+
+        function clickOperationAccountUser(divDialouge, formID, data) {
+            var dialogDiv = $(divDialouge);
+            dialogDiv.html(data);
+            //validation
+            var $form = $(formID);
+            // Unbind existing validation
+            $form.unbind();
+            $form.data("validator", null);
+            // Check document for changes
+            $.validator.unobtrusive.parse(document);
+            // Re add validation with changes
+            $form.validate($form.data("unobtrusiveValidation").options);
+            //open dialog
+            dialogDiv.modal('show');
+        }
+
+        function reloadLocations()
+        {
+            location.reload();
+        }
+
+    </script>
+
+}

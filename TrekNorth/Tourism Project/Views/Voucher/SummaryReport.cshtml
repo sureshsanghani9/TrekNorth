@@ -1,0 +1,108 @@
+﻿@model IEnumerable<Tourism_Project.Models.VoucherTemporary>
+
+@{
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+}
+<image style="margin-bottom:20px;" plainwidth="64" plainheight="64" url="@Context.Server.MapPath("~/Images/LOGO.png")" />
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Type: </chunk>
+    <chunk style="font-family:Times;">Vouchers Summary</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Date: </chunk>
+    <chunk style="font-family:Times;">@DateTime.Now.ToLongDateString()</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Time: </chunk>
+    <chunk style="font-family:Times;">@DateTime.Now.ToString("hh:mm tt")</chunk>
+</paragraph>
+<table width="100%" cellpadding="1.0" cellspacing="2.0" widths="25;4;5;4;8;6;7;8" class="gridtable">
+    <row>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Tour Company</chunk>
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Adults</chunk>
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Children</chunk>
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Infants</chunk>
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Price</chunk>
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Levy</chunk>
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Discount</chunk>
+        </cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" style="font-weight:bold;">
+            <chunk style="font-family:Times;font-weight:bold;">Deposit</chunk>
+        </cell>
+    </row>
+
+    @foreach (var item in Model)
+    {
+        <row>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true">
+                @item.Name
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">
+                @item.AdultCount
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">
+                @item.ChildrenCount
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">
+                @item.InfantCount
+            </cell>
+            @if (item.Price != null)
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ @String.Format("{0:0.00}", item.Price) </cell>
+            }
+            else
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ 0 </cell>
+            }
+
+            @if (item.Levy != null)
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ @String.Format("{0:0.00}", item.Levy) </cell>
+            }
+            else
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ 0 </cell>
+            }
+
+            @if (item.Discount != null)
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ @String.Format("{0:0.00}", item.Discount) </cell>
+            }
+            else
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ 0 </cell>
+            }
+            @if (item.Commission != null)
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ @String.Format("{0:0.00}", item.Commission) </cell>
+            }
+            else
+            {
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">$ 0 </cell>
+            }
+        </row>
+    }
+    <row>
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+        <cell borderwidth="0.5" left="false" right="false" top="true" bottom="false" />
+    </row>
+</table>

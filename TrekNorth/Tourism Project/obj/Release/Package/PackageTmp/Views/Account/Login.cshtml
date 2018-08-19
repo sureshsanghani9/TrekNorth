@@ -1,0 +1,54 @@
+﻿@model Tourism_Project.Models.LoginModel
+
+@{
+    ViewBag.Title = "Log in";
+}
+
+<style>
+    .mainlogo {
+    float:left;
+}
+</style>
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+
+<section class="loginsec">
+
+    @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "well form-inline", ReturnUrl = ViewBag.ReturnUrl }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+        <fieldset style="background-color:antiquewhite">
+            <legend>Log in Form</legend>
+            <ol>
+                <li style="margin-top:10px">
+                    @Html.LabelFor(m => m.UserName)
+                    @Html.TextBoxFor(m => m.UserName)
+                    @Html.ValidationMessageFor(m => m.UserName)
+                </li>
+                <li>
+                    @Html.LabelFor(m => m.Password)&nbsp&nbsp
+                    @Html.PasswordFor(m => m.Password)
+                    @Html.ValidationMessageFor(m => m.Password)
+                </li>
+                <li>
+                    @Html.CheckBoxFor(m => m.RememberMe)
+                    @Html.LabelFor(m => m.RememberMe, new { @class = "checkbox" })
+                </li>
+            </ol>
+        </fieldset>
+      
+
+        <button type="submit" class="btn btn-primary" style="margin-top:10px;">Log In</button>
+        <p style="margin-top:5px">
+            @* @Html.ActionLink("Register", "Register") if you don't have an account.*@
+        </p>
+    }
+</section>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

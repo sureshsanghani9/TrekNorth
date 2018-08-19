@@ -1,0 +1,329 @@
+﻿@model Tourism_Project.Models.Voucher
+
+@{
+    ViewBag.Title = "Details";
+
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+}
+<style>
+    .formTable td {
+        padding: 5px 10px;
+    }
+</style>
+<h2>Details</h2>
+
+<fieldset>
+    <legend>Voucher</legend>
+    <table align="center" class="formTable">
+        <colgroup>
+            <col align="right">
+        </colgroup>
+        <tbody>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.VoucherID)
+                    </div>
+                </td>
+                <td>
+                    <div style="font-weight: bold;">
+                        @Html.DisplayFor(model => model.VoucherID, new { @style = "font-weight:bold" })
+                    </div>
+                </td>
+            </tr>
+            <tr>
+
+                <td align="right">
+                    <div class="editor-label">
+                        Company
+                    </div>
+                </td>
+                <td>
+                <td align="right">
+                    <div class="editor-label">
+                        @ViewBag.CompanyName
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Operator</td>
+                <td>
+                    @{if (@Model.Create_By.IndexOf(',') != -1)
+                    {
+                        {
+                            @Model.Create_By.Split(',')[1].ToString()
+                        }
+                    }
+                    else
+                    {
+                        {
+                            @Model.Create_By
+                        }
+                    }
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Travel Date
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.TravelDateString)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.Tour)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.Tour)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Fare Basis
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.FareBasis)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        First Name
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.FirstName)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Last Name
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.LastName)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Contact
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.RoomNumber)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Adult(s)
+                    </div>
+                </td>
+                <td>
+                    <span class="editor-field counts">
+                        @Html.DisplayFor(model => model.AdultCount, new { @class = "counts" })
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Children
+                    </div>
+                </td>
+                <td>
+                    <span class="editor-field counts">
+                        @Html.DisplayFor(model => model.ChildrenCount, new { @class = "counts" })
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Infant(s)
+                    </div>
+                </td>
+                <td>
+                    <span class="editor-field counts">
+                        @Html.DisplayFor(model => model.InfantCount, new { @class = "counts" })
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Pickup Location
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.PickupLocation)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.ConfirmationNumber)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.ConfirmationNumber)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.Comments)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.DisplayFor(model => model.Comments)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Price
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        <span class="price">@Html.DisplayFor(model => model.Price)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Agent Deposit
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+
+                        <span class="commision">@Html.DisplayFor(model => model.Commission)</span>
+                    </div>
+                </td>
+            </tr>
+            @{
+                if (@Model.Discount > 0)
+                {
+                    decimal? discountPer = (@Model.Discount == null || @Model.Price == null || @Model.Price == 0) ? 0 : (@Model.Discount / @Model.Price) * 100;
+                    <tr>
+                        <td align="right">
+                            <div class="editor-label" style="font-weight: 900;">
+                                Agent Discount
+                            </div>
+                        </td>
+                        <td>
+                            <div class="editor-field prices">
+
+                                <span class="discount" style="font-weight: 900;">@Html.DisplayFor(model => model.Discount) (@String.Format("{0:0.00}", discountPer)%)</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            @{
+                decimal? APBC = 0;
+                //APBC = item.Commission - item.Discount;
+                APBC = Convert.ToDecimal(Model.cardPaid) + Convert.ToDecimal(Model.cashPaid);
+            }
+            <tr>
+                <td align="right">
+                    <div class="editor-label" style="font-weight: 900;">
+                        Amount Paid by Customer
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+
+                        @*<span class="discount" style="font-weight: 900;">@Html.DisplayFor(model => model.AgentCollects)</span>*@
+
+                        <span class="discount" style="font-weight: 900;">@String.Format("{0:0.00}", APBC)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Levy
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        <span class="levy">@Html.DisplayFor(model => model.Levy)</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div class="editor-label">
+                        Balance to Pay Tour Operator
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        @Html.DisplayFor(model => model.BalanceToPay)
+                    </div>
+                </td>
+            </tr>
+
+            <tr style="display: none;">
+                <td align="right">
+                    <div class="editor-label">
+                        Agent Collects($)
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field prices">
+                        @Html.DisplayFor(model => model.AgentCollects)
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.VoucherBookingID }) |
+    @Html.ActionLink("Back to List", "Index") |
+    <a href="?Voucher_ID=@Model.VoucherID&print">Print</a>
+</p>
+<script>
+    $(document).ready(function ()
+    {
+        //calculateFinancials();
+        $('.counts').each(function ()
+        {
+            if ($(this).html().trim() == "")
+                $(this).html('0');
+        });
+    });
+</script>

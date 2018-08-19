@@ -1,0 +1,1598 @@
+﻿@model Tourism_Project.Models.AvailabilityModel
+@{
+    ViewBag.Title = "Home";
+}
+@{ int ADMIN = 1, STAFF = 2, AGENT = 3; }
+@section featured {
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h2>@ViewBag.Message</h2>
+            </hgroup>
+
+            <div class="col-sm-12">
+                <div class="col-sm-3">
+                    <p>
+                        <b>Safaris and Day Tours</b>
+                    </p>
+                </div>
+                <div class="col-sm-8">
+                    @if (Request.IsAuthenticated)
+                    {
+                        string[] user = User.Identity.Name.Split(',');
+                        string userType = user[2]; //userid,username,usertype
+                        if (Int32.Parse(userType) != AGENT)
+                        {
+                            if (Int32.Parse(userType) != STAFF)
+                            {
+                                @*<div class="pull-right" style="margin-top:-30px;">
+
+                                    </div>*@
+                                <div class="col-sm-3 text-center" style="margin-top:-16px;">
+                                    @Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })
+                                </div>
+                                <div class="col-sm-3 text-center" style="margin-top:-16px;">
+                                    @Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })
+                                </div>
+                                <div class="col-sm-3 text-center" style="margin-top:-16px;">
+                                    @Html.ActionLink("View Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "viewReports" })
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+<style>
+    .calendar .rstbl {
+        width: 100%;
+        float: left;
+        border-collapse: collapse;
+        border: 1px #bbb solid;
+        background: #fff;
+    }
+
+        .calendar .rstbl th, .rstbl td {
+            padding: 7px 10px;
+            border: 1px #999 solid;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .calendar .rstbl tr:nth-child(2n) {
+            background: #efefef;
+        }
+
+        .calendar .rstbl td input[type='text'] {
+            border: 1px #ccc solid;
+            max-width: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0;
+            line-height: 24px;
+            padding: 0 3px;
+        }
+
+        .calendar .rstbl .seat {
+            margin-top: 10px;
+            padding-top: 10px;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            /*border-top: 1px #ccc solid;*/
+        }
+</style>
+
+@*Changes Made on 2016-03-09*@
+<style>
+    #addBooking, #checkAvailability, #viewReports {
+        font-size: 20px;
+    }
+
+    a .btn {
+        color: white !important;
+    }
+
+    .calendar {
+        margin: 0 20px;
+        width: 100%;
+    }
+
+        .calendar input[type="text"] {
+            width: 25px;
+            font-size: 18px;
+        }
+
+        .calendar td {
+            text-align: center;
+            padding: 0px;
+        }
+
+    .data {
+        height: 50px;
+    }
+
+    .chzn-container {
+        width: 220px !important;
+    }
+
+    .seats {
+        text-align: center;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+        .seats:hover {
+            text-align: center;
+            border: 1px solid #CCCCCC !important;
+            background: white !important;
+        }
+
+        .seats:focus {
+            text-align: center;
+            border: 1px solid #CCCCCC !important;
+            background: white !important;
+        }
+
+    .headerText, .day {
+        font-weight: bold;
+        color: rgb(157, 122, 158);
+    }
+
+    .day {
+        font-size: 12px;
+        background: rgb(190, 240, 255);
+        padding: 5px;
+        border: 1px solid rgb(253, 253, 253);
+    }
+
+    .monthText {
+        text-align: center;
+        font-weight: bold;
+        color: GrayText;
+        font-size: 22px;
+    }
+
+    .yearText {
+        font-weight: bold;
+        font-size: 26px;
+        padding-bottom: 10px !important;
+        color: rgb(115, 133, 202);
+    }
+
+    .loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        display: none;
+        z-index: 10000;
+    }
+
+    .loader-overlay {
+        background: lightGrey;
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        opacity: 0.4;
+    }
+
+    .loader-img {
+        left: 48%;
+        position: absolute;
+        top: 48%;
+    }
+
+    .bookingInfoDivs {
+        position: absolute;
+        background: white;
+        display: none;
+        padding: 5px;
+        border: 3px solid #BEBEBE;
+        border-radius: 15px;
+        opacity: 0.3;
+    }
+
+        .bookingInfoDivs table {
+            color: #333;
+            font-family: Helvetica, Arial, sans-serif;
+            width: 640px;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .bookingInfoDivs td, th {
+            border: 1px solid transparent; /* No more visible border */
+            height: 30px;
+            transition: all 0.3s; /* Simple transition for hover effect */
+        }
+
+        .bookingInfoDivs th {
+            background: #DFDFDF; /* Darken header a bit */
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .bookingInfoDivs td {
+            background: #FAFAFA;
+        }
+
+        /* Cells in even rows (2,4,6...) are one color */
+        .bookingInfoDivs tr:nth-child(even) td {
+            background: #F1F1F1;
+        }
+
+        /* Cells in odd rows (1,3,5...) are another (excludes header cells)  */
+        .bookingInfoDivs tr:nth-child(odd) td {
+            background: #FEFEFE;
+        }
+
+        .bookingInfoDivs tr td:hover {
+            /*background: #666;
+            color: #FFF;*/
+        }
+
+    .occupied {
+        font-size: 16px;
+        vertical-align: text-bottom;
+        border-radius: 15px;
+        padding: 5px;
+    }
+    /* Hover cell effect! */
+    @@media(max-width:768px) {
+        .content-wrapper {
+            max-width: 100% !important;
+        }
+
+        .calendar {
+            width: 100%;
+            float: left;
+            overflow: auto;
+        }
+
+        .bookingInfoDivs {
+            left: 50% !important;
+            margin-left: -150px !important;
+            width: 300px;
+        }
+
+        .bookings {
+            width: 100%;
+            float: left;
+            overflow: auto;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+@*End Changes*@
+
+@if (Request.IsAuthenticated)
+{
+    string[] user = User.Identity.Name.Split(',');
+    string userType = user[2]; //userid,username,usertype
+
+    if (Int32.Parse(userType) == AGENT)
+    {
+        <div class="row">
+            <div class="col-lg-2">
+                <ol class="round">
+                    <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                </ol>
+            </div>
+        </div>
+    }
+    else if (Int32.Parse(userType) == STAFF)
+    {
+        <div class="row">
+            <div class="col-lg-2">
+                <ol class="round">
+                    <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                    <li>@Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>
+                    <li>@Html.ActionLink("View Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "viewReports" })</li>
+                </ol>
+            </div>
+            <div class="col-lg-12">
+                @if (ViewBag.Tours != null)
+                {
+
+                    @Html.DropDownListFor(model => model.TourID, (IEnumerable<SelectListItem>)ViewBag.Tours, new { @class = "chosen" })
+
+                }
+                Start Date:<input type="text" name="date" id="date" style="margin-left:10px;margin-top:7px;" />&nbsp;&nbsp;&nbsp;
+                No Days:<input type="text" name="noofday" id="noofday" style="margin-left:10px;margin-top:7px;" />&nbsp;&nbsp;&nbsp;
+                <button class="btn btn-primary" onclick="javascript: SeatDataInfo(false);">Submit</button>
+
+                <div id="loader" class="loader">
+                    <div class="loader-overlay"></div>
+                    <img src="~/Images/loader.gif" class="loader-img" />
+                </div>
+                <div>
+                    <div class="calendar"></div>
+                </div>
+
+                <div class="bookingInfoDivs">
+                    <div class="bookings"></div>
+                    <div class="buttons" style="text-align: center;">
+                        @*<a href="javascript: void(0);"  class="btn btn-danger" onclick="onMainfests()">Print Mainfests</a>*@
+                        @*@Html.ActionLink("Print Mainfests", "ReportsMainfests", "Booking", new { Date = "xDate", Tour = "xTour" }, new { @class = "btn btn-danger", id = "print" })*@
+                        @Html.ActionLink("Print Mainfests", "ReportsMain", "Booking", new { Date = "xDate" }, new { @class = "btn btn-danger", id = "print" })
+
+                        <a href="javascript: void(0);" class="btn btn-success" onclick="javascript: $('.bookingInfoDivs').hide();">Ok</a>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="javascript: saveSeats();">Save</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row"> 
+            @*<div class="col-lg-2">
+                    <ol class="round">
+                        <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                        <li>@Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>
+                        <li>@Html.ActionLink("View Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "viewReports" })</li>
+                    </ol>
+                </div>*@
+            <div class="col-lg-12" >
+                <div>
+                    @if (ViewBag.Tours != null)
+                    {
+                        @*@Html.DropDownListFor(model => model.TourID, (IEnumerable<SelectListItem>)ViewBag.Tours, new { @class = "chosen" })*@
+                    }
+                    Start Date:<input type="text" name="date" id="date" style="margin-left:10px;margin-top:7px;" />&nbsp;&nbsp;&nbsp;
+                    No Days:<input type="text" name="noofday" id="noofday" style="margin-left:10px;margin-top:7px;" />&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-primary" onclick="javascript: SeatDataInfo(false);">Submit</button>
+                </div>
+                <div id="loader" class="loader">
+                    <div class="loader-overlay"></div>
+                    <img src="~/Images/loader.gif" class="loader-img" />
+                </div>
+                <div>
+                    <div class="calendar"></div>
+
+                </div>
+
+                <div class="bookingInfoDivs">
+                    <div class="bookings"></div>
+                    <div class="buttons" style="text-align: center;">
+
+                        @*<a href="javascript: void(0);"  class="btn btn-danger" onclick="onMainfests()">Print Mainfests</a>*@
+                        @Html.ActionLink("Print Mainfests", "ReportsMain", "Booking", new { Date = "xDate" }, new { @class = "btn btn-danger", id = "print" })
+                        @*@Html.ActionLink("Print Mainfests", "ReportsMainfests", "Booking", new { Date = "xDate", Tour = "xTour" }, new { @class = "btn btn-danger", id = "print" })*@
+
+                        <a href="javascript: void(0);" class="btn btn-success" onclick="javascript: $('.bookingInfoDivs').hide();">Ok</a>
+                    </div>
+                </div>
+                @*<button class="btn btn-primary" style="margin-top: 10px;" onclick="javascript: saveSeats();">Save</button>*@
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-2">
+            <ol class="round">
+                <li>@Html.ActionLink("Make Bookings", "AddBookingB", "Booking", routeValues: null, htmlAttributes: new { id = "addBooking" })</li>
+                <li>@Html.ActionLink("Check Availability", "Seats", "Booking", routeValues: null, htmlAttributes: new { id = "checkAvailability" })</li>
+                <li>@Html.ActionLink("View Reports", "Reports", "Booking", routeValues: null, htmlAttributes: new { id = "viewReports" })</li>
+            </ol>
+        </div>
+        <div class="col-lg-9">
+        </div>
+    </div>
+}
+@Scripts.Render("~/bundles/jquery")
+<style type="text/css">
+    .calendar table tr td {
+        border: 1px solid black;
+    }
+
+    .rowDatatd {
+        min-width: 15px;
+    }
+</style>
+
+<script type="text/javascript">
+    var currentMousePos = { x: -1, y: -1 };
+    jQuery(function ($) {
+        $(document).mousemove(function (event) {
+            currentMousePos.x = event.pageX;
+            currentMousePos.y = event.pageY;
+            //console.log(event.pageX + ',' + event.pageY);
+        });
+
+    });
+    var dateSelcted;
+    $(document).ready(function () {
+        $(document).ajaxStart(function () {
+
+           showLoader();
+        }).ajaxStop(function () {
+            hideLoader();
+        });
+
+        $(".chosen").chosen();
+
+        /*start on 31-08-2016*/
+        //When home page is loaded 
+
+        //initializeCalendar();  //Temp commented for test
+        var isHomePageLoad = true;
+        SeatDataInfo(isHomePageLoad);   //temp added for test.
+        //End on 31-08-2016
+        getSeats();
+        MonthData();
+        $('#TourID').change(getSeats);
+
+        $('.bookingInfoDivs').hover(function () {
+            if ($(this).is(':visible')) {
+                $(this).stop().fadeTo("slow", 1);
+            }
+        }, function () {
+            if ($(this).is(':visible')) {
+                $(this).stop().fadeTo("slow", 0.3);
+            }
+        });
+
+        $('.day').live('click', function () {
+            var aItem = $(this)[0];
+            var dateParts = $(this).attr('data').split('/');
+            dateSelcted = dateParts;
+            var date = new Date(dateParts[2], dateParts[1], dateParts[0]);
+            var tourCode = $('#TourID').val();
+            $('.bookingInfoDivs').hide();
+            showLoader();
+
+            var html = "<h4 style='text-align: center;'>Booking(s) for " + dateParts[0] + postScript(dateParts[0]) + " " + getMonth(parseInt(dateParts[1]) - 1) + ", " + dateParts[2] + "</h4>";
+
+            $.get('/Booking/GetBookingsByDateData?year=' + dateParts[2] + '&month=' + dateParts[1] + '&date=' + dateParts[0] , null, function (data, textStatus, jqXHR) {
+                $('.bookings').html(html);
+
+                if (data.length > 0) {
+                    html = "<center><table style='width: 800px;' ><tr><th style='width: 70px;'>Booking ID</th><th>Agent</th><th>Passenger Name</th><th style='width: 71px;'>Tour Code</th><th style='width: 58px;'>Payable</th><th style='width:100px;'>Total Passenger</th><th></th><th></th></tr>";
+                    for (var a = 0; a < data.length ; a++) {
+                        //  var tourdate = new Date(data[a].Date.toString());
+                        var tourdate = data[a].Date.split("-");
+                        html += "<tr>";
+                        // html += "<td align='right'><a href=\"javascript:window.open('/Booking/Bookings/" + data[a].BookingID + "')\" class='btn btn-success' target='_parent'>" + data[a].BookingID + "</a></td><td>" + data[a].Agent + "</td><td>" + data[a].PassengerName + "</td><td align='right'>" + data[a].TourCode + "</td><td align='right'>$ " + data[a].TotalPrice + "</td><td align='right'>" + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + "</td><td align='right'><a href=\"javascript:window.open('/Booking/EditBooking?bookingid=" + data[a].BookingID + "')\" class='btn btn-success' target='_parent'>Edit</a></td><td align='right'><a href='javascript:deleteBooking(" + data[a].BookingID + "," + data[a].Tour + "," + tourdate[0] + "," + tourdate[1] + "," + tourdate[2] + "," + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + ");' class='btn btn-success'>Delete</a></td>";
+                        html += "<td align='right'><a href=\"/Booking/Bookings/" + data[a].BookingID + "\" class='btn btn-success' target='_blank'>" + data[a].BookingID + "</a></td><td>" + data[a].Agent + "</td><td>" + data[a].PassengerName + "</td><td align='right'>" + data[a].tourcodevalues + "</td><td align='right'>$ " + data[a].TotalPrice + "</td><td align='right'>" + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + "</td><td align='right'><a href=\"/Booking/EditBooking?bookingid=" + data[a].BookingID + "\" class='btn btn-success' target='_blank'>Edit</a></td>"
+                        //<td align='right'><a href='javascript:deleteBooking(" + data[a].BookingID + "," + data[a].Tour + "," + tourdate[0] + "," + tourdate[1] + "," + tourdate[2] + "," + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + ");' class='btn btn-success'>Delete</a></td>";
+                        html += "</tr>";
+                    }
+                    html += "</table></center>";
+                    $('.bookings').append(html);
+                }
+                else {
+                    html = "<span>No Data</span>";
+                    $('.bookings').append(html);
+                }
+                hideLoader();
+                var p = $(aItem);
+                var position = p.position();
+                $('.bookingInfoDivs').css('left', position.left).css('top', (position.top + parseInt("27"))).show();
+                //$('.bookingInfoDivs').css('left',  currentMousePos.x).css('top', currentMousePos.y).show();
+            });
+
+        });
+
+    });
+    function getMonthData(control) {
+        showLoader();
+        var date = new Date();
+        if (control == "genrate") {
+            fromMonth = $('#Month_From').val();
+            toMonth = $('#Month_To').val();
+
+            var html = "";
+            html += '<table>';
+            html += "<tr><td colspan='7' class='yearText'>" + (new Date()).getFullYear() + "</td></tr>";
+
+            var fromMonth = parseInt(fromMonth);
+            var toMonth = parseInt(toMonth);
+
+            for (i = fromMonth; i <= toMonth; i++) {
+                var newDate = new Date((new Date().getFullYear()), i, 1);
+                var lastDay = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0, 23, 59, 59).getDate();
+                var monthString = "<tr><td colspan='7' class='monthText' id='" + getMonth(i) + "'>" + getMonth(i) + "<br /><br /></td></tr>";
+                monthString += "<tr>";
+                var dayCount = 0;
+                for (var j = 0; j < lastDay; j++) {
+                    dayCount++;
+                    monthString += '<td>' + (dayCount / 7 <= 1 ? ('<span class="headerText">' + getDayInitial(j + 1, i) + '</span><br />') : '')
+                            + '<div style="text-align: center;" class="data"><a class="day" href="javascript: void(0);" data="'
+                            + (j + 1) + '/' + (i + 1) + '/' + (new Date()).getFullYear() + '">' + (j + 1) + postScript(j + 1) +
+                            '</a><span class="month" style="display: none;">' + (i) + '</span><br /><span class="occupied">0</span>'
+                            + '<span style="font-size: 25px;"> /</span>'
+                            + '<input type="text" class="seats" calendar-data="' + padLeft((j + 1), 2) + '/' + padLeft((i + 1), 2) + '/' + (new Date()).getFullYear() + '" /></div></td>';
+                    if (dayCount % 7 == 0) {
+                        monthString += "</tr>";
+                    }
+                }
+
+                html += monthString;
+            }
+            html += '</table>';
+            $('.calendar').html("");
+            $('.calendar').html(html);
+            hideLoader();
+            getSeats();
+        }
+    }
+
+    //Changes made on 2016-05-03
+    function SeatDataInfo(ispageLoad) {
+
+
+        //debugger;
+        var date ;
+        var dd;
+        var mm;
+        var yyyy;
+        var date1;
+        var noofdays;
+        
+        
+        if (ispageLoad) {
+             date = new Date();
+             dd = date.getDate();
+             mm = date.getMonth() + 1;
+             yyyy = date.getFullYear();
+             date1 = dd + "/" + mm + "/" + yyyy;
+             noofdays = 15;
+        }
+        else
+        {
+            date = new Date();
+            date1 = document.getElementById('date').value;
+            noofdays = document.getElementById('noofday').value;
+        }
+        /*
+        var date = new Date();
+        var date1 = document.getElementById('date').value;
+        var noofdays = document.getElementById('noofday').value;
+       */
+        
+        var datestr = [];
+        datestr = date1.split("/");
+        var month = parseInt(datestr[1]);
+        var Total = parseInt(datestr[0]) + parseInt(noofdays);
+        var d = new Date(parseInt(datestr[2]), parseInt(datestr[1]), 0);
+        var TotalDays = d.getDate();
+        var date = new Date();
+        var html = "";
+        var innerValues = "";
+        var newDate = new Date((datestr[2]), date.getMonth(), datestr[0], 0);
+        var lastDay = Total;
+        var AllCollection = new Array();
+        var FinalHeader = "";
+        var FinalBody = "";
+        var IsHeader = false;
+
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            dataType: "json",
+            url: '@Url.Action("TourCodeValue", "Booking")',
+            success: function (result) {
+                var AllTour_Detail = result;
+                $('.calendar').html("");
+                html = "";
+                AllCollection = new Array();
+                for (var i = 0 ; i < AllTour_Detail.length; i++) {
+                    
+                    innerValues = "";
+                    $.ajax({
+                        type: 'POST',
+                        traditional: true,
+                        dataType: "json",
+                        data: { todate: date1, noofday: noofdays, tourid: AllTour_Detail[i].TourID },
+                        url: '@Url.Action("SeatDataInfo", "Booking")',
+                        async: false,
+                        success: function (resultSeat) {
+                           
+                            if (resultSeat != "" || resultSeat.length > 0) {
+
+                                
+                                collection = new Array();
+                                for (var j = 0; j < resultSeat.length; j++) {
+                                    var obj = new Object();
+                                    obj.Date = resultSeat[j].Date1;
+                                    obj.Seats = resultSeat[j].TotalSeats;
+                                    obj.OccupiedSeats = (resultSeat[j].OccupiedSeats == null || resultSeat[j].OccupiedSeats == "") ? 0 : resultSeat[j].OccupiedSeats;
+                                    obj.TourID = resultSeat[j].TourID;
+                                    collection.push(obj);
+                                }
+                                AllCollection.push(collection);
+                                if (resultSeat[0].TourID == 1)
+                                    //$('.seats').val(18).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white');
+                                    $('.seats').val(resultSeat[0].TotalSeats).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white'); //Seat Calculation
+                                else
+                                    //$('.seats').val(21).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white');
+                                    $('.seats').val(resultSeat[0].TotalSeats).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white'); //Seat Calculation
+
+                                innerValues = "";
+                                if (!IsHeader) {
+                                    var header = "";
+                                    header += '<table class="rstbl" id="' + resultSeat[0].TourID + '"><tr><th>Tour Name </th>';
+                                    var dayCount = 0;
+                                    var DayStart = 1;
+                                    var Days = 1;
+                                    if (TotalDays == 31) {
+
+
+                                       
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 31) {
+                                                Days++;
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                //header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(datestr[1]) + 1) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                DayStart++;
+                                                if (Days == 31) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 30) {
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 30) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 30) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 29) {
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 29) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 29) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+
+                                    if (TotalDays == 28) {
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 28) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 28) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+                                }
+
+                                var body = "<tr class='tourData' data-rowid='" + resultSeat[0].TourID + "'>";
+                                body += "<td>" + AllTour_Detail[i].TourName + "</td>"
+                                var DayStart = 1;
+                                for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                    dayCount++;
+                                    if (parseInt(j) > 31) {
+                                        if (AllTour_Detail[i].TourID == 1) {
+                                            //body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" readonly="readonly" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1]) + 1).padLeft(2) + '/' + (parseInt(datestr[2])) + '" value="18" /></td>';
+                                            body += '<td><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" class="seats" readonly="readonly" style="margin-top:-10px;" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1]) + 1).padLeft(2) + '/' + (parseInt(datestr[2])) + '" value="18" /></span></td>';
+                                        }
+                                        else {
+
+                                            //debugger;
+                                            //body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" readonly="readonly" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1]) + 1).padLeft(2) + '/' + (parseInt(datestr[2])) + '" value="21" /></td>';
+                                            body += '<td><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" class="seats" readonly="readonly" style="margin-top:-10px;" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1]) + 1).padLeft(2) + '/' + (parseInt(datestr[2])) + '" value="21" /></span></td>';
+                                        }
+
+                                        DayStart++;
+                                        if (DayStart == 31) {
+                                            DayStart = 1;
+                                        }
+                                    }
+                                    else {
+                                        body += '<td><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" class="seats" readonly="readonly" style="margin-top:-10px;" calendar-data="' + (j).padLeft(2) + '/' + (parseInt(datestr[1])).padLeft(2) + '/' + (parseInt(datestr[2])) + '"  /></span></td>';
+                                    }
+                                }
+
+                                // body Completed
+                                body += "</tr>";
+
+                                //innerValues += header + body + "</table>";
+                                FinalBody += body;
+                            }
+                            if (resultSeat.length == 0) {
+                                collection = new Array();
+                                innerValues = "";
+                                if (!IsHeader) {
+                                    var header = "";
+                                    header += '<table class="rstbl" id="' + AllTour_Detail[i].TourID + '"><tr><th>Tour Name </th>';
+                                    var dayCount = 0;
+                                    var DayStart = 1;
+                                    var Days = 1;
+                                    if (TotalDays == 31) {
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 31) {
+                                                Days++;
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                DayStart++;
+                                                if (Days == 31) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 30) {
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 30) {
+                                                Days++;
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                DayStart++;
+                                                if (Days == 30) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 29) {
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 29) {
+                                                Days++;
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                DayStart++;
+                                                if (Days == 29) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+
+                                    if (TotalDays == 28) {
+                                        for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 28) {
+                                                Days++;
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, datestr[1]) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                                DayStart++;
+                                                if (Days == 28) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), parseInt(datestr[1]) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(datestr[1])).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    var body = "<tr class='tourData' data-rowid='" + AllTour_Detail[i].TourID + "'>";
+                                    body += "<td>" + AllTour_Detail[i].TourName + "</td>"
+                                    for (var j = parseInt(datestr[0]) ; j < lastDay; j++) {
+                                        var DayStart = 1;
+                                        dayCount++;
+
+                                        //debugger;
+                                        if (parseInt(j) > 31) {
+                                            if (AllTour_Detail[i].TourID == 1) {
+                                                body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" readonly="readonly" class="seats" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1])).padLeft(2) + '/' + (parseInt(datestr[2])) + '"  value="18"/></td>';
+                                            }
+                                            else {
+                                                body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" readonly="readonly" class="seats" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1])).padLeft(2) + '/' + (parseInt(datestr[2])) + '" value="21" /></td>';
+                                            }
+                                            //body += '<td><a class="#" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a><br/><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1])).padLeft(2) + '/' + (parseInt(datestr[2])) + '" /></span></td>';
+
+                                            DayStart++;
+                                            if (DayStart == 31) {
+                                                DayStart = 1;
+                                            }
+                                        }
+                                        else {
+                                            body += '<td><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" class="seats" readonly="readonly" style="margin-top:-10px;" calendar-data="' + (j).padLeft(2) + '/' + (parseInt(datestr[1])).padLeft(2) + '/' + (parseInt(datestr[2])) + '" value="21"  /></span></td>';
+                                        }
+
+                                    }
+
+                                    // body Completed
+                                    body += "</tr>";
+
+                                    //innerValues += header + body + "</table>";
+                                    FinalBody += body;
+                                }
+
+                            }
+                        }
+                    });
+                }
+
+                console.log("Header:- " + FinalHeader);
+                console.log("Body:- " + FinalBody);
+                html += FinalHeader + FinalBody + "</tbody></table>";
+                //console.log(html);
+                $('.calendar').html("");
+                $('.calendar').append(html);
+            }
+        });
+
+        window.setTimeout(function () {
+            $.each(AllCollection, function (index, item) {
+                $(".calendar").find("table.rstbl").find("tr.tourData[data-rowid='" + AllCollection[index][0].TourID + "'] span.seat").each(function (indexV, itemV) {
+                    var x = $(this).find('.seats');// you can do the same using find
+                    $(x).removeAttr('disabled').css('background', 'none').attr('title', 'Seats already entered');
+                    var dateCmp = x.attr("calendar-data");
+                    var itemValues = x.val();
+                    if (AllCollection[index][0].TourID == "1") {
+                        x.val("18");
+                    }
+                    else {
+                        x.val("21");
+                    }
+                    $.each(AllCollection[index], function (indexCol, itemCol) {
+                        console.log(itemCol.TourID);
+                        if (dateCmp == itemCol.Date) {
+                            x.val(itemCol.Seats);
+                            itemValues = itemCol.Seats;
+                            $(x).val(itemValues);
+                            if (itemCol.OccupiedSeats >= itemCol.Seats) {
+                                $(x).prevAll('.occupied').html(itemCol.OccupiedSeats).css('background', 'red').css('color', 'yellow').attr('title', 'Finished');
+                                //$(x).prevAll('.seats').val(itemCol.Seats);
+                            }
+                            else {
+                                $(x).prevAll('.occupied').html(itemCol.OccupiedSeats).css('background', 'none').css('color', 'black').attr('title', 'Booked Seats');
+                                //$(x).prevAll('.seats').val(itemCol.Seats);
+                            }
+                        }
+                    });
+                });
+            });
+        }, 1500);
+    }
+    //End Code
+
+    function initializeCalendar(reload) {
+        var date = new Date();
+        var dd = date.getDate();
+
+        //debugger;
+        var mm = date.getMonth() + 1; //January is 0!
+        var yyyy = date.getFullYear();
+        var date1 = dd + "/" + mm + "/" + yyyy; // Today's Date
+        var noofdays = 15; //Number's To be Displayed
+        var Total = parseInt(dd) + parseInt(noofdays);
+        var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        console.log(lastDay);
+        var lastDay = (lastDay.getDate()) + '/' + (lastDay.getMonth() + 1) + '/' + lastDay.getFullYear();
+        var dateSplit = lastDay.split('/');
+        var TotalDays = dateSplit[0];//Last date of current Month
+        var html = "";
+        var innerValues = "";
+        //var newDate = new Date((datestr[2]), date.getMonth(), datestr[0], 0);
+        var lastDay = Total;
+        var AllCollection = new Array();
+        var FinalHeader = "";
+        var FinalBody = "";
+        var IsHeader = false;
+
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            dataType: "json",
+            url: '@Url.Action("TourCodeValue", "Booking")',
+            success: function (result) {
+                var AllTour_Detail = result;
+                $('.calendar').html("");
+                html = "";
+                AllCollection = new Array();
+                for (var i = 0 ; i < AllTour_Detail.length; i++) {
+                    innerValues = "";
+                    $.ajax({
+                        type: 'POST',
+                        traditional: true,
+                        dataType: "json",
+                        data: { todate: date1, noofday: noofdays, tourid: AllTour_Detail[i].TourID },
+                        url: '@Url.Action("SeatDataInfo", "Booking")',
+                        async: false,
+                        success: function (resultSeat) {
+                            if (resultSeat != "" || resultSeat.length > 0) {
+                                collection = new Array();
+                                for (var j = 0; j < resultSeat.length; j++) {
+                                    var obj = new Object();
+                                    obj.Date = resultSeat[j].Date1;
+                                    obj.Seats = resultSeat[j].TotalSeats;
+                                    obj.OccupiedSeats = (resultSeat[j].OccupiedSeats == null || resultSeat[j].OccupiedSeats == "") ? 0 : resultSeat[j].OccupiedSeats;
+                                    obj.TourID = resultSeat[j].TourID;
+                                    collection.push(obj);
+                                }
+                                AllCollection.push(collection);
+                                if (resultSeat[0].TourID == 1)
+                                    //$('.seats').val(18).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white');
+                                    $('.seats').val(resultSeat[0].TotalSeats).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white'); //Seat Calculation
+                                else
+                                    //$('.seats').val(21).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white');
+                                    $('.seats').val(resultSeat[0].TotalSeats).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white'); //Seat Calculation
+
+                                innerValues = "";
+                                if (!IsHeader) {
+                                    var header = "";
+                                    header += '<table class="rstbl" id="' + resultSeat[0].TourID + '"><tr><th>Tour Name </th>';
+                                    var dayCount = 0;
+                                    var DayStart = 1;
+                                    var Days = 0;
+                                    if (TotalDays == 31) {
+                                         //debugger;
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 31) {
+                                                Days++;
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm) + 1) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                DayStart++;
+                                                if (Days == 31) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 30) {
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 30) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm) + 1).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 30) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 29) {
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 29) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm) + 1).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 29) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+
+                                    if (TotalDays == 28) {
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 28) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm) + 1).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 28) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+                                }
+
+                                var body = "<tr class='tourData' data-rowid='" + resultSeat[0].TourID + "'>";
+                                body += "<td>" + AllTour_Detail[i].TourName + "</td>"
+                                for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                    var DayStart = 1;
+                                    dayCount++;
+
+                                    //debugger;
+                                    if (parseInt(j) > 31) {
+                                        //body += '<td><a class="#" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a><br/><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1])).padLeft(2) + '/' + (parseInt(datestr[2])) + '" /></span></td>';
+                                        if (resultSeat[0].TourID == 1) {
+                                            body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" readonly="readonly"  value="18" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(mm) + 1).padLeft(2) + '/' + (parseInt(yyyy)) + '"  /></td>';
+                                        }
+                                        else {
+                                            body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" readonly="readonly"  value="21"  calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(mm) + 1).padLeft(2) + '/' + (parseInt(yyyy)) + '"/></td>';
+                                        }
+
+                                        DayStart++;
+                                        if (DayStart == 31) {
+                                            DayStart = 1;
+                                        }
+                                    }
+                                    else {
+                                        body += '<td><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" class="seats" style="margin-top:-10px;" readonly="readonly" calendar-data="' + (j).padLeft(2) + '/' + (parseInt(mm)).padLeft(2) + '/' + (parseInt(yyyy)) + '"  /></span></td>';
+                                    }
+
+                                }
+
+                                // body Completed
+                                body += "</tr>";
+
+                                //innerValues += header + body + "</table>";
+                                FinalBody += body;
+                            }
+
+                            if (resultSeat.length == 0) {
+                                collection = new Array();
+
+                                innerValues = "";
+                                if (!IsHeader) {
+                                    var header = "";
+                                    header += '<table class="rstbl" id="' + AllTour_Detail[i].TourID + '"><tr><th>Tour Name </th>';
+                                    var dayCount = 0;
+                                    var DayStart = 1;
+                                    var Days = 1;
+                                    if (TotalDays == 31) {
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 31) {
+                                                Days++;
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm) + 1).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                DayStart++;
+                                                if (Days == 31) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 30) {
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 30) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm) + 1).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 30) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+                                    if (TotalDays == 29) {
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 29) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm) + 1).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 29) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+
+
+                                    if (TotalDays == 28) {
+                                        for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                            dayCount++;
+                                            if (parseInt(j) > 28) {
+                                                header += '<th><span class="headerText">' + getDayInitial(Days, parseInt(mm)) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (DayStart) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(mm) + 1).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                                Days++;
+                                                DayStart++;
+                                                if (Days == 28) {
+                                                    Days = 1;
+                                                }
+                                            }
+                                            else {
+                                                header += '<th><span class="headerText">' + getDayInitial1(parseInt(j), (parseInt(mm)) - 1) + '</span><br/><a class="day" href="javascript: void(0);" data="' + (j) + '/' + (parseInt(mm)) + '/' + (new Date()).getFullYear() + '">' + (j).padLeft(2) + '-' + (parseInt(mm)).padLeft(2) + '-' + (parseInt(yyyy)) + '</a></th>';
+                                            }
+                                        }
+
+                                     
+
+                                        //header completed
+                                        header += "</tr><tbody>";
+                                        FinalHeader = header;
+                                        IsHeader = true;
+                                    }
+                                }
+
+                                var body = "<tr class='tourData' data-rowid='" + AllTour_Detail[i].TourID + "'>";
+                                body += "<td>" + AllTour_Detail[i].TourName + "</td>"
+                                for (var j = parseInt(dd) ; j < lastDay; j++) {
+                                    //debugger;
+                                    var DayStart = 1;
+                                    dayCount++;
+                                    if (parseInt(j) > 31) {
+                                        if (AllTour_Detail[i].TourID == 1) {
+                                            body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" readonly="readonly" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(mm)).padLeft(2) + '/' + (parseInt(yyyy)) + '"  value="18"/></td>';
+                                        }
+                                        else {
+                                            body += '<td><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" readonly="readonly"  calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(mm)).padLeft(2) + '/' + (parseInt(yyyy)) + '" value="21" /></td>';
+                                        }
+                                        //body += '<td><a class="#" href="javascript: void(0);" data="' + (DayStart) + '/' + (datestr[1]) + '/' + (new Date()).getFullYear() + '">' + (DayStart).padLeft(2) + '-' + (parseInt(datestr[1]) + 1).padLeft(2) + '-' + (parseInt(datestr[2])) + '</a><br/><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" style="margin-top:-10px;" class="seats" calendar-data="' + (DayStart).padLeft(2) + '/' + (parseInt(datestr[1])).padLeft(2) + '/' + (parseInt(datestr[2])) + '" /></span></td>';
+
+                                        DayStart++;
+                                        if (DayStart == 31) {
+                                            DayStart = 1;
+                                        }
+                                    }
+                                    else {
+                                        body += '<td><span class="seat"><span class="occupied">0</span><span style="font-size: 25px;"> /</span><input type="text" class="seats" style="margin-top:-10px;" readonly="readonly" calendar-data="' + (j).padLeft(2) + '/' + (parseInt(mm)).padLeft(2) + '/' + (parseInt(yyyy)) + '" value="21"  /></span></td>';
+                                    }
+                                }
+
+                                // body Completed
+                                body += "</tr>";
+
+                                //innerValues += header + body + "</table>";
+                                FinalBody += body;
+                            }
+
+
+                        }
+                    });
+                }
+
+                html += FinalHeader + FinalBody + "</tbody></table>";
+                //console.log(html);
+                $('.calendar').html("");
+                $('.calendar').append(html);
+            }
+        });
+
+        window.setTimeout(function () {
+
+            $.each(AllCollection, function (index, item) {
+                //debugger;
+                $(".calendar").find("table.rstbl").find("tr.tourData[data-rowid='" + AllCollection[index][0].TourID + "'] span.seat").each(function (indexV, itemV) {
+                    var x = $(this).find('.seats');// you can do the same using find
+                    $(x).removeAttr('disabled').css('background', 'none').attr('title', 'Seats already entered');
+                    var dateCmp = x.attr("calendar-data");
+                    var itemValues = x.val();
+                    if (AllCollection[index][0].TourID == "1") {
+                        x.val("18");
+                        //$('.seats').attr('value', '18');
+                        //x.attr("value", "18");
+                    }
+                    else {
+                        x.val("21");
+                        //$('.seats').attr('value', '21');
+                        //x.attr("value", "21");
+                    }
+                    $.each(AllCollection[index], function (indexCol, itemCol) {
+                        console.log(itemCol.TourID);
+                        if (dateCmp == itemCol.Date) {
+                            //debugger;
+                            x.val(itemCol.Seats);
+                            itemValues = itemCol.Seats;
+                            $(x).val(itemValues);
+                            if (itemCol.OccupiedSeats >= itemCol.Seats) {
+                                $(x).prevAll('.occupied').html(itemCol.OccupiedSeats).css('background', 'red').css('color', 'yellow').attr('title', 'Finished');
+                                //$(x).prevAll('.seats').val(itemCol.Seats);
+                            }
+                            else {
+                                $(x).prevAll('.occupied').html(itemCol.OccupiedSeats).css('background', 'none').css('color', 'black').attr('title', 'Booked Seats');
+                                //$(x).prevAll('.seats').val(itemCol.Seats);
+                            }
+                        }
+                    });
+                });
+            });
+        }, 1500);
+    }
+
+    //}
+    //Changes made on 22-06-2016
+    $('a.day').live('click', function () {
+        var dateParts = $(this).attr('data').split('/');
+        dateSelcted = dateParts;
+        var date = new Date(dateParts[2], dateParts[1], dateParts[0]);
+        //var tourCode = $('#TourID').val();
+        var tourCode = 1;
+        $('.bookingInfoDivs').hide();
+        showLoader();
+
+        var html = "<h4 style='text-align: center;'>Booking(s) for " + dateParts[0] + postScript(dateParts[0]) + " " + getMonth(parseInt(dateParts[1]) - 1) + ", " + dateParts[2] + "</h4>";
+        $.get('/Booking/getBookingsByDate?year=' + dateParts[2] + '&month=' + dateParts[1] + '&date=' + dateParts[0] + '&TourCodeID=' + tourCode, null, function (data, textStatus, jqXHR) {
+            $('.bookings').html(html);
+           
+            if (data.length > 0) {
+                html = "<center><table style='width: 800px;' ><tr><th style='width: 70px;'>Booking ID</th><th>Agent</th><th>Passenger Name</th><th style='width: 71px;'>Tour Code</th><th style='width: 58px;'>Payable</th><th style='width:100px;'>Total Passenger</th><th></th><th></th></tr>";
+                for (var a = 0; a < data.length ; a++) {
+                    //  var tourdate = new Date(data[a].Date.toString());
+                    var tourdate = data[a].Date.split("-");
+                    html += "<tr>";
+                    // html += "<td align='right'><a href=\"javascript:window.open('/Booking/Bookings/" + data[a].BookingID + "')\" class='btn btn-success' target='_parent'>" + data[a].BookingID + "</a></td><td>" + data[a].Agent + "</td><td>" + data[a].PassengerName + "</td><td align='right'>" + data[a].TourCode + "</td><td align='right'>$ " + data[a].TotalPrice + "</td><td align='right'>" + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + "</td><td align='right'><a href=\"javascript:window.open('/Booking/EditBooking?bookingid=" + data[a].BookingID + "')\" class='btn btn-success' target='_parent'>Edit</a></td><td align='right'><a href='javascript:deleteBooking(" + data[a].BookingID + "," + data[a].Tour + "," + tourdate[0] + "," + tourdate[1] + "," + tourdate[2] + "," + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + ");' class='btn btn-success'>Delete</a></td>";
+                    html += "<td align='right'><a href=\"/Booking/Bookings/" + data[a].BookingID + "\" class='btn btn-success' target='_blank'>" + data[a].BookingID + "</a></td><td>" + data[a].Agent + "</td><td>" + data[a].PassengerName + "</td><td align='right'>" + data[a].tourcodevalues + "</td><td align='right'>$ " + data[a].TotalPrice + "</td><td align='right'>" + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + "</td><td align='right'><a href=\"/Booking/EditBooking?bookingid=" + data[a].BookingID + "\" class='btn btn-success' target='_blank'>Edit</a></td>";
+                    //<td align='right'><a href='javascript:dsseleteBooking(" + data[a].BookingID + "," + data[a].Tour + "," + tourdate[0] + "," + tourdate[1] + "," + tourdate[2] + "," + (data[a].Adults + data[a].FamilyChildren + data[a].Infant + data[a].Children) + ");' class='btn btn-success'>Delete</a></td>";
+                    html += "</tr>";
+                }
+                html += "</table></center>";
+                $('.bookings').append(html);
+            }
+            else {
+                html = "<span>No Data</span>";
+                $('.bookings').append(html);
+            }
+            hideLoader();
+            $('.bookingInfoDivs').css('left', currentMousePos.x).css('top', currentMousePos.y).show();
+        });
+    });
+
+    Date.prototype.addDays = function (days) {
+        this.setDate(this.getDate() + parseInt(days));
+        return this;
+    };
+
+    //Changes Made on 03-02-2016
+    function MonthData() {
+        for (var i = 0; i <= 11; i++) {
+            var optionhtml = '<option value="' +
+               i + '">' + getMonth(i) + '</option>';
+            $("#op1").append(optionhtml);
+            $("#op2").append(optionhtml);
+        }
+        $("#Month_From").val(0);
+        $("#Month_To").val(0);
+    }
+    //End Changes
+
+    var dates = new Array();
+    var seats = new Array();
+    function prepareData() {
+        dates = new Array();
+        seats = new Array();
+        $('.data').each(function () {
+            var obj = new Object();
+            var tempDate = new Date((new Date()).getFullYear(), $(this).find('.month').html(), parseInt($(this).find('.day').html()));
+            dates.push(tempDate.getFullYear() + "-" + (+tempDate.getMonth() + 1) + "-" + tempDate.getDate());
+            seats.push($(this).find('input').val());
+        });
+    }
+    function saveSeats() {
+        showLoader();
+        prepareData();
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("Seats", "Booking")',
+            data: { attr1: dates, attr2: seats, attr3: $('#TourID').val() },
+            success: function (resp) {
+                if (resp != "") {
+                    alert(resp);
+                }
+                hideLoader();
+            },
+            error: function () {
+                hideLoader();
+            }
+        });
+        preventDefault();
+    }
+
+    function deleteBooking(BookingId, tourId, touryear, tourmonth, tourdat, totalseat) {
+        //  console.log(tourdate.getMonth() + 1 + '/' + tourdate.getDate() + '/' + tourdate.getFullYear());
+        var tourdate = touryear + "-" + tourmonth + "-" + tourdat;
+        showLoader();
+        prepareData();
+
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("DeleteBookingFromSeats", "Booking")',
+            data: { bid: BookingId, tId: tourId, tdt: tourdate, tseat: totalseat },
+            success: function (resp) {
+                if (resp != "") {
+                    $(".chosen").chosen();
+                    //initializeCalendar();
+                    getSeats();
+                }
+                hideLoader();
+            },
+            error: function () {
+                hideLoader();
+            }
+        });
+        $('.bookingInfoDivs').hide();
+    }
+    var collection = new Array();
+    function getSeats() {
+        showLoader();
+        $.get('@Url.Action("GetAllSeats","Booking")' + '/?id=' + $('#TourID').val(),
+            function (result) {
+                result = JSON.parse(result);
+                collection = new Array();
+                for (var i = 0; i < result.length; i++) {
+                    var obj = new Object();
+                    obj.Date = result[i].Date1;
+                    obj.Seats = result[i].TotalSeats;
+                    obj.OccupiedSeats = (result[i].OccupiedSeats == null || result[i].OccupiedSeats == "") ? 0 : result[i].OccupiedSeats;
+                    collection.push(obj);
+                }
+                if ($('#TourID').val() == '1')
+                    $('.seats').val(18).removeAttr('title').attr('title', 'Default number of seats').removeAttr('disable').css('background', 'white');
+                    //$('.seats').val(18).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white');
+                    ///$('.seats').val(item.Seats).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white'); // Seat Calculation
+                else
+                    $('.seats').val(21).removeAttr('title').attr('title', 'Default number of seats').removeAttr('disable').css('background', 'white');
+                    //$('.seats').val(21).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white');
+                    //$('.seats').val(item.Seats).removeAttr('title').attr('title', 'Max Seat').removeAttr('disable').css('background', 'white'); // Seat Calculation
+
+                $.each(collection, function (index, item) {
+                    $('[calendar-data = "' + item.Date + '"]').val(item.Seats).removeAttr('disabled').css('background', 'none').attr('title', 'Currently available seats');
+
+                    if (item.OccupiedSeats >= item.Seats) {
+                        //$('[calendar-data = "' + item.Date + '"]').prevAll('.occupied').html(item.OccupiedSeats).css('background', 'red').css('color', 'yellow').attr('title', 'Finished');
+                        $('[calendar-data = "' + item.Date + '"]').prevAll('.seats').val(item.Seats);
+                    }
+                    else
+                        // $('[calendar-data = "' + item.Date + '"]').prevAll('.occupied').html(item.OccupiedSeats).css('background', 'none').css('color', 'black').attr('title', 'Occupied Seats');
+                        //$('[calendar-data = "' + item.Date + '"]').prevAll('.occupied').html(item.OccupiedSeats).css('background', 'none').css('color', 'black').attr('title', 'Booked Seats');
+                        $('[calendar-data = "' + item.Date + '"]').prevAll('.seats').val(item.Seats);
+
+                });
+                hideLoader();
+                var d = new Date();
+                var element = document.getElementById(getMonth(+d.getMonth() + 1));
+                var offset = element.offsetTop;
+                window.scrollTo(0, offset);
+            });
+    }
+
+
+
+    function padLeft(nr, n, str) {
+        return Array(n - String(nr).length + 1).join(str || '0') + nr;
+    }
+
+    //or as a Number prototype method:
+    Number.prototype.padLeft = function (n, str) {
+        return Array(n - String(this).length + 1).join(str || '0') + this;
+    }
+
+    function postScript(a) {
+        if (a == 11 || a == "11")
+            return "th";
+        if (a == 12 || a == "12")
+            return "th";
+        if (a == 13 || a == "13")
+            return "th";
+        if (a % 10 == 1 || a % 10 == "1")
+            return "st";
+        if (a % 10 == 2 || a % 10 == "2")
+            return "nd";
+        if (a % 10 == 3 || a % 10 == "3")
+            return "rd";
+        else
+            return "th";
+    }
+
+    function getDayInitial(a, b) {
+        var weekday = new Array(7);
+        weekday[0] = "Sun";
+        weekday[1] = "Mon";
+        weekday[2] = "Tue";
+        weekday[3] = "Wed";
+        weekday[4] = "Thur";
+        weekday[5] = "Fri";
+        weekday[6] = "Sat";
+        return weekday[(new Date(new Date().getFullYear(), b, a)).getDay()];
+    }
+    function getDayInitial1(a1, b) {
+        var weekday = new Array(7);
+        weekday[0] = "Sun";
+        weekday[1] = "Mon";
+        weekday[2] = "Tue";
+        weekday[3] = "Wed";
+        weekday[4] = "Thur";
+        weekday[5] = "Fri";
+        weekday[6] = "Sat";
+        return weekday[(new Date(new Date().getFullYear(), b, a1)).getDay()];
+    }
+    function getMonth(a) {
+        var month = new Array();
+        month[0] = "January";
+        month[1] = "February";
+        month[2] = "March";
+        month[3] = "April";
+        month[4] = "May";
+        month[5] = "June";
+        month[6] = "July";
+        month[7] = "August";
+        month[8] = "September";
+        month[9] = "October";
+        month[10] = "November";
+        month[11] = "December";
+        return month[a];
+    }
+    function getMonth1(a) {
+        var month = new Array();
+        month[1] = "January";
+        month[2] = "February";
+        month[3] = "March";
+        month[4] = "April";
+        month[5] = "May";
+        month[6] = "June";
+        month[7] = "July";
+        month[8] = "August";
+        month[9] = "September";
+        month[10] = "October";
+        month[11] = "November";
+        month[12] = "December";
+        return month[a];
+    }
+
+    function showLoader() {
+        $('#loader').show();
+    }
+    function hideLoader() {
+        $('#loader').hide();
+    }
+    $("#print").click(function () {
+        var dateParts = dateSelcted;
+
+        if (dateParts != null && dateParts != "") {
+            var tourCode = $('#TourID').val();
+            var jData = {};
+            jData['Tour'] = tourCode;
+            jData['Date'] = dateParts[0] + "/" + dateParts[1] + "/" + dateParts[2];
+            var Dt = dateParts[0] + "/" + dateParts[1] + "/" + dateParts[2];
+            jData['available'] = 0;
+            //Get the id of the selected item in dropdown
+            //Replace the predifined QueryString param "xTour" with the "tourcode" and "xDate" with the Dt
+            this.href = this.href.replace("xTour", tourCode);
+            this.href = this.href.replace("xDate", Dt);
+        }
+        else {
+            return false;
+        }
+    });
+</script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="/resources/demos/style.css">
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#date').datepicker({
+            dateFormat: "dd/m/yy",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "-60:+0"
+        });
+
+    });
+</script>
+

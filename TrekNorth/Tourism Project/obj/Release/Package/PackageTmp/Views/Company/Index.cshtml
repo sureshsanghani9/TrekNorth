@@ -1,0 +1,326 @@
+﻿@model IEnumerable<Tourism_Project.Models.Company>
+
+<link rel="stylesheet" href="@Url.Content("~/Content/print.css")" type="text/css" media="print" />
+@{
+    ViewBag.Title = "Companies";
+
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+}
+<style>
+    .loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        display: none;
+        z-index: 10000;
+    }
+
+    .loader-overlay {
+        background: lightGrey;
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        opacity: 0.4;
+    }
+
+    .loader-img {
+        left: 45%;
+        position: absolute;
+        top: 42%;
+    }
+
+    table.gridtable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 14px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #666666;
+        border-collapse: collapse;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        table.gridtable th {
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #666666;
+            background-color: #dedede;
+        }
+
+        table.gridtable td {
+            border-width: 1px;
+            padding:5px;
+            border-style: solid;
+            border-color: #666666;
+            background-color: #ffffff;
+            font-size:12px;
+        white-space:nowrap;
+        }
+
+        table.gridtable tr:hover td {
+            background-color: whitesmoke;
+        }
+    .noprint {
+        white-space:nowrap;
+
+    }
+        .noprint a {
+            display:inline-block;
+        }
+    .allCompanies {
+        width:100%;
+        float:left;
+        overflow:auto;
+    }
+
+    footer {
+        width:100%;
+        float:left;
+    }
+    .ui-dialog , .ui-widget-overlay {
+        max-width:100% !important;
+
+
+    }
+    body {
+        margin:0px;
+        overflow-x:hidden;
+        width:100%;
+        float:left;
+        padding:10px;
+    }
+    @@media(max-width:768px){
+    h2{font-size:16px;}
+    h3{font-size:14px;}
+    }
+</style>
+<h2 style="text-align: center;">Companies</h2>
+<br />
+
+@using (Html.BeginForm())
+{
+    <div style="margin: 0 auto; text-align: center; width: 630px;max-width:100%;">
+        <input type="text" id="txtCompanyName" placeholder="Name" />
+        <input type="text" id="txtPhone" placeholder="Phone Number" />
+        <input type="text" id="txtCommission" placeholder="Commission" />
+        <br class="clear" />
+        <br class="clear" />
+        <div style="text-align: left; position: relative;">
+
+            <a href="javascript: void(0);" id="lbSearch" class="btn btn-block btn-large">Search</a>
+
+            <a href="@Url.Action("Index","Company")" class="btn btn-block btn-large">Clear</a>
+
+            <a href="javascript: $('.allCompanies').jqprint();" id="lbPrint" class="btn btn-large btn-block btn-info">Print</a>
+
+            <a class="btn btn-large btn-block btn-primary" href="Company/Create" id="Add" onclick="javascript: AddCompany(); return false;">Add</a>
+
+
+        </div>
+    </div>
+    <br />
+
+}
+
+<div class="allCompanies">
+    <table class="gridtable">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Commission)
+            </th>
+            <th class="noprint">
+                Actions
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a class="editInPopup" href="Company\Details\@Html.DisplayFor(modelItem => item.CompanyID)" onclick="javascript: ViewCompany(@Html.DisplayFor(modelItem => item.CompanyID)); return false;">
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Phone)
+                </td>
+                <td align="right">
+                    @Html.DisplayFor(modelItem => item.Commission)
+                    <span>%</span>
+                </td>
+                <td class="noprint">
+                    <a class="editInPopup btn btn-block btn-primary" href="Company\Edit\@Html.DisplayFor(modelItem => item.CompanyID)" onclick="javascript: GetCompany(@Html.DisplayFor(modelItem => item.CompanyID)); return false;">Edit</a>
+                    <a class="editInPopup btn btn-block btn-primary" href="Company\Delete\@Html.DisplayFor(modelItem => item.CompanyID)" onclick="javascript: DeleteCompany(@Html.DisplayFor(modelItem => item.CompanyID)); return false;">Delete</a>
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<div id="popup"></div>
+<div id="loader" class="loader">
+    <div class="loader-overlay"></div>
+    <img src="~/Images/loader.gif" class="loader-img" />
+</div>
+<script>
+    function GetCompany(a)
+    {
+        $('#loader').show();
+        var a = $.get('/Company/Edit/' + a, function (data)
+        {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Edit",
+                width: 400,
+                height: 430,
+                modal: true
+            });
+            window.setTimeout(function () { $('#loader').hide(); }, 100);
+        });
+    }
+
+    function ViewCompany(a)
+    {
+        $('#loader').show();
+        var a = $.get('/Company/Details/' + a, function (data)
+        {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Company Detail",
+                width: 400,
+                height: 420,
+                modal: true
+            });
+            window.setTimeout(function () { $('#loader').hide(); }, 100);
+        });
+    }
+
+    function DeleteCompany(a)
+    {
+        $('#loader').show();
+        var a = $.get('/Company/Delete/' + a, function (data)
+        {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Delete",
+                width: 'auto',
+                height: 380,
+                modal: true
+            });
+            window.setTimeout(function () { $('#loader').hide(); }, 100);
+        });
+    }
+
+    function AddCompany(a)
+    {
+        $('#loader').show();
+        var a = $.get('/Company/Create/', function (data)
+        {
+            $('#popup').html(data);
+            $('#popup').dialog({
+                title: "Add",
+                width: 400,
+                height: 430,
+                modal: true
+            });
+            window.setTimeout(function () { $('#loader').hide(); }, 100);
+        });
+    }
+
+    (function ($)
+    {
+        var opt;
+
+        $.fn.jqprint = function (options)
+        {
+            opt = $.extend({}, $.fn.jqprint.defaults, options);
+
+            var $element = (this instanceof jQuery) ? this : $(this);
+
+            if (opt.operaSupport && $.browser.opera)
+            {
+                var tab = window.open("", "jqPrint-preview");
+                tab.document.open();
+
+                var doc = tab.document;
+            }
+            else
+            {
+                var $iframe = $("<iframe  />");
+
+                if (!opt.debug) { $iframe.css({ position: "absolute", width: "0px", height: "0px", left: "-600px", top: "-600px" }); }
+
+                $iframe.appendTo("body");
+                var doc = $iframe[0].contentWindow.document;
+            }
+
+            if (opt.importCSS)
+            {
+                if ($("link[media=print]").length > 0)
+                {
+                    $("link[media=print]").each(function ()
+                    {
+                        doc.write("<link type='text/css' rel='stylesheet' href='" + $(this).attr("href") + "' media='print' />");
+                    });
+                }
+                else
+                {
+                    $("link").each(function ()
+                    {
+                        doc.write("<link type='text/css' rel='stylesheet' href='" + $(this).attr("href") + "' />");
+                    });
+                }
+            }
+
+            if (opt.printContainer) { doc.write($element.outer()); }
+            else { $element.each(function () { doc.write($(this).html()); }); }
+
+            doc.close();
+
+            (opt.operaSupport && $.browser.opera ? tab : $iframe[0].contentWindow).focus();
+            setTimeout(function () { (opt.operaSupport && $.browser.opera ? tab : $iframe[0].contentWindow).print(); if (tab) { tab.close(); } }, 1000);
+        }
+
+        $.fn.jqprint.defaults = {
+            debug: false,
+            importCSS: true,
+            printContainer: true,
+            operaSupport: true
+        };
+
+        // Thanks to 9__, found at http://users.livejournal.com/9__/380664.html
+        jQuery.fn.outer = function ()
+        {
+            return $($('<div></div>').html(this.clone())).html();
+        }
+    })(jQuery);
+
+    $(document).ready(function ()
+    {
+        $('#txtCompanyName').val('@ViewBag.Name');
+        $('#txtPhone').val('@ViewBag.Phone');
+        $('#txtCommission').val('@ViewBag.Comission');
+        $('#lbSearch').click(function ()
+        {
+            window.location = "Company?Name=" + $('#txtCompanyName').val() + "&Phone=" + $('#txtPhone').val() + "&Comission=" + $('#txtCommission').val();
+        });
+    })
+</script>

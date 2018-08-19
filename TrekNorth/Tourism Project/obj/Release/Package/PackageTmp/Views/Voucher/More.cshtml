@@ -1,0 +1,217 @@
+﻿@using System.Configuration
+@model IEnumerable<Tourism_Project.Models.Voucher>
+
+@{
+    ViewBag.Title = "More";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/VoucherMasterPage.cshtml";
+    int ADMIN = 1, STAFF = 2, AGENT = 3;
+    string[] user = User.Identity.Name.Split(',');
+    string userType = user[2];//userid,username,usertype
+}
+<table style="margin: 0 auto;" class="tblVouchers">
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                <div class="printLogo">
+                    <div style="float: left;">
+                        <img src='@Url.Content("~/Images/LOGO.png")' width="120" alt="Trek North">
+                    </div>
+                    <div style="float: left; margin-top: 18px; margin-left: 5px; text-align: left;">
+                        <span style="font-size: 20px; font-weight: bold;">@ConfigurationManager.AppSettings["CompanyName"].ToString()</span><br />
+                        <span style="font-size: 15px;">@ConfigurationManager.AppSettings["AddressLine1"].ToString()</span><br />
+                        Phone: <span style="font-size: 14px;">@ConfigurationManager.AppSettings["PhoneNumber"].ToString()</span><br />
+                        <span style="font-size: 14px;">@ConfigurationManager.AppSettings["ABN"].ToString()</span><br />
+                    </div>
+                </div>
+                <div class="datetime" style="font-size: 14px;">
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    @*Booking Date: @DateTime.Now.ToString("dd MMMM, yyyy (dddd)")*@
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="display: none;">@Html.HiddenFor(modelItem => item.VoucherBookingID)</td>
+            <td>
+                <div style="" class="mainDiv">
+                    <div class="voucherIdDiv">
+                        <span style="" class="voucherId">
+                            <a class="editInPopup " href="Voucher\Details\@Html.DisplayFor(modelItem => item.VoucherBookingID)" onclick="javascript: ViewVoucher(@Html.DisplayFor(modelItem => item.VoucherBookingID)); return false;">
+                                @Html.DisplayFor(modelItem => item.VoucherID)
+                            </a>
+                        </span>&nbsp;<span style="float: right; margin: 4px 4px;">Voucher No:</span>
+                    </div>
+                    <div class="voucherNameDiv">
+                        <div style="float: left; width: 300px; padding: 5px;">
+                            <label style="font-style: italic; font-size: 12px; width: 250px; display: block; margin-left: -16px;">
+                                Passenger Name
+                            </label>
+                            <br style="height: 0; display: none" />
+                            <label style="" class="passengerName">@Html.DisplayFor(modelItem => item.FullName)</label>
+                            <div class="clear"></div>
+                        </div>
+                        <div class="divActions">
+                            @if (Int32.Parse(userType) == ADMIN)
+                            {
+                                {
+                                    @*<a class="editInPopup btn btn-large btn-block btn-primary" href="/Voucher/Edit/@Html.DisplayFor(modelItem => item.VoucherBookingID)" onclick="javascript: GetVoucher(@Html.DisplayFor(modelItem => item.VoucherBookingID)); return false;">Edit</a>*@
+                                    @*<a class="popup" href="javascript:window.open('/Voucher/Edit/@Html.DisplayFor(modelItem => item.VoucherBookingID)')"></a>*@
+
+                                    @*<a class="editInPopup btn btn-large btn-block btn-primary" href="/Voucher/Delete/@Html.DisplayFor(modelItem => item.VoucherBookingID)" onclick="javascript: DeleteVoucher(@Html.DisplayFor(modelItem => item.VoucherBookingID)); return false;">Delete</a>*@
+                                    @*<a class="popup" href="javascript:window.open('/Voucher/Delete/@Html.DisplayFor(modelItem => item.VoucherBookingID)')"></a>*@
+
+                                    @*<a class="editInPopup btn btn-block btn-primary" href="/Voucher/Edit/@Html.DisplayFor(modelItem => item.VoucherBookingID)" onclick="javascript: GetVoucher(@Html.DisplayFor(modelItem => item.VoucherBookingID)); return false;">Edit</a>*@
+                                    <a class="btn btn-large btn-block btn-primary" href="javascript:window.open('/Voucher/Edit/@Html.DisplayFor(modelItem => item.VoucherBookingID)','_self')">Edit</a>
+                                    @*<a class="editInPopup btn btn-block btn-primary" href="/Voucher/Delete/@Html.DisplayFor(modelItem => item.VoucherBookingID)" onclick="javascript: DeleteVoucher(@Html.DisplayFor(modelItem => item.VoucherBookingID)); return false;">Delete</a>*@
+                                    <a class="btn btn-large btn-block btn-primary" href="javascript:window.open('/Voucher/Delete/@Html.DisplayFor(modelItem => item.VoucherBookingID)','_self')">Delete</a>
+                                }
+                            }
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="voucherInfoDiv">
+                        <div class="scrollcon">
+                            <label style="font-style: italic; font-size: 12px; width: 250px; display: block; margin-left: -16px;">Tour</label>
+                            <label style="" class="tourname">@Html.DisplayFor(modelItem => item.Tour)</label>
+                            <label style="float: right; padding-right: 30px;">@item.Create_Date.ToLongDateString()  @item.Create_Date.AddHours(2).ToShortTimeString()</label>
+                            <br class="clear" />
+                            <label>Company:</label>
+                            <b style="" class="companyName">
+                                @Html.DisplayFor(modelItem => item.CompanyName)
+                            </b>
+                            &nbsp;&nbsp;<label style="float: right; padding-right: 30px; margin-left: 5px; font-weight: bold; text-transform: capitalize;">@Html.DisplayFor(modelItem => item.Modify_By.ToLower().Split(',')[1])</label><label style="float: right;">Booked by:</label>
+                            <br class="clear" />
+                            <label>Fare Basis:</label>&nbsp;&nbsp;<span>@Html.DisplayFor(modelItem => item.FareBasis)</span>
+                            <br />
+                            <label>Travel Date:</label>&nbsp;&nbsp;<span>@Html.DisplayFor(modelItem => item.TravelDateString)</span>
+                            <br />
+                            <label>Passengers:</label>&nbsp;&nbsp;Adult(s):
+                            <span class="editor-field counts">@Html.DisplayFor(modelItem => item.AdultCount)</span>&nbsp;&nbsp;Child(ren):
+                            <span class="editor-field counts">@Html.DisplayFor(modelItem => item.ChildrenCount)</span>&nbsp;&nbsp;Infant(s):
+                            <span class="editor-field counts">@Html.DisplayFor(modelItem => item.InfantCount)</span>
+                            <br />
+                            <label>Pickup/Check In:</label>
+                            <span>
+                                @Html.DisplayFor(modelItem => item.PickupLocation)
+                            </span>
+                            @{
+        if (!string.IsNullOrEmpty(item.ConfirmationNumber))
+        {
+            <br />
+                                <label>Confirmation No: </label> <span>@Html.DisplayFor(modelItem => item.ConfirmationNumber)</span>
+        }
+                            }
+
+                            <div style="width:250px; position: relative;">
+                                <div class="ref_no" style="width: 295px; font-weight: bold; margin-left: -18px; margin-top: 5px; top: 15px;">
+                                    <br>
+                                    @if (item.Comments != null && item.Comments.Length > 160)
+                                    {
+                                        {
+                                            <span title="@item.Comments">@item.Comments.Substring(0, 160).........</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        {
+                                            <span>@item.Comments</span>
+                                        }
+                                    }
+                                    <br class="clear" />
+                                    <label style="">@Html.DisplayFor(modelItem => item.CompanyName):</label>
+                                    <span>
+                                        @Html.DisplayFor(modelItem => item.CompanyNumber)
+                                    </span>
+                                </div>
+                            </div>
+                            <table class="priceDiv">
+                                <tr>
+                                    <td align="right" style="white-space: nowrap;">Tour Value:</td>
+                                    <td style="white-space: nowrap;"><b><span class="price">@Html.DisplayFor(modelItem => item.Price)</span></b> AUD</td>
+                                </tr>
+
+                                <tr style="display:none;">
+                                    <td align="right" style="white-space: nowrap;">Deposit Paid:</td>
+                                    <td style="white-space: nowrap;"><b><span class="commision">@Html.DisplayFor(modelItem => item.Commission)</span></b> AUD</td>
+                                </tr>
+                                @{
+
+        if (item.Discount > 0)
+        {
+            <tr style="">
+                <td align="right" style="font-weight: 900; white-space: nowrap;">Discount Given:</td>
+                <td style="white-space: nowrap;"><b><span class="commision" style="font-weight: 900; white-space: nowrap;">@Html.DisplayFor(modelItem => item.Discount)</span></b> AUD</td>
+            </tr>
+        }
+                                }
+
+
+                                @{
+        decimal? APBC = 0;
+        //APBC = item.Commission - item.Discount;
+        APBC = Convert.ToDecimal(item.cardPaid) + Convert.ToDecimal(item.cashPaid);
+
+        <tr>
+            <td align="right" style="font-weight: 900; white-space: nowrap;">Customer Paid:</td>
+            <td style="white-space: nowrap;"><b><span class="commision" style="font-weight: 900; white-space: nowrap;">$@String.Format("{0:0.00}", APBC)</span></b> AUD</td>
+        </tr>
+                                }
+                                <tr>
+                                    <td align="right">Levy:</td>
+                                    <td style="white-space: nowrap;">
+                                        <b>
+                                            @{
+        if (item.Levy == null)
+        {
+            <span class="levy">$0</span>
+        }
+        else
+        {
+            <span class="levy">$@String.Format("{0:0.00}", item.Levy)</span>
+        }
+                                            }
+                                        </b>AUD
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="right" style="white-space: nowrap;">Balance to Pay to Operator:</td>
+                                    <td style="white-space: nowrap;"><b>@Html.DisplayFor(modelItem => item.BalanceToPay)</b> AUD</td>
+                                </tr>
+
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <div class="showinprint" style="display: none;">
+                        <span style="font-size: 8px; font-weight: bolder; display:inline-block;">Cancellation Policy for all tours</span><span style="float: right; color: red; display:inline-block;">Any questions relating to your tour, please call @item.CompanyNumber</span><br />
+                        <span style="font-size: 9px;display:inline-block;font-style:italic; width:100%;">Deposits and Booking Fees are not refunded. These Fees are for our service and not the products booked. In the event that you seek a full refund, this will have to be taken up with the Tour Operator and their respective Cancellation Policy.</span>
+                    </div>
+                    <script>
+
+                        function mywidth()
+                        {
+                            var ww = $(window).width();
+                            //alert(ww);
+                            if (ww <= 768)
+                            {
+                                $(".mainDiv").css("width", ww - 30);
+                            };
+                        }
+                        mywidth();
+                        $(window).resize(mywidth);
+
+                    </script>
+                </div>
+            </td>
+        </tr>
+    }
+</table>
+@*</section>*@
+

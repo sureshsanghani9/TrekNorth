@@ -1,0 +1,169 @@
+﻿@model Tourism_Project.Models.RegisterModel
+@{
+    ViewBag.Title = "Add User";
+}
+
+<hgroup class="title" style="margin: 10px;">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> user has been entered.
+        </div>
+    }
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#modal-1').modal({ keyboard: false, backdrop: 'static' });
+        $('#modal-1').on('show.bs.modal', function () {
+            $(this).find('.modal-dialog').css({
+                'margin-top': function () {
+                    return -($(this).outerHeight() / 2);
+                },
+                'margin-left': function () {
+                    return -($(this).outerWidth() / 2);
+                }
+            });
+        }).modal('show');
+
+        //on 09-01-2016 for new user 'Driver'
+
+        $(document).ready(function () {
+            if (document.URL.indexOf('Booking/ViewAgents') != -1) 
+            {
+                $("#UserType").append($("<option>").val('4').text('Drivers'));
+                $("#UserType").append($("<option>").val('5').text('Satalite'));
+            }
+
+
+            $("#UserType").change(function () {
+                var user = $("#UserType option:selected").val();
+                if(user=="4")
+                {
+                    $('#Commission').val(0);
+                    $('#Commission').attr('readonly', true);
+                }
+                else
+                {
+                    $('#Commission').val('');
+                    $('#Commission').attr('readonly', false);
+                }
+
+            });
+        });
+        //End
+
+
+
+    });
+
+    function cancelClick() {
+        $(".modal-backdrop.in").remove();
+    }
+</script>
+
+<button aria-hidden="true" data-dismiss="modal" class="close" type="button" onclick="cancelClick();">×</button>
+
+@using (Ajax.BeginForm("Register", "Account", new AjaxOptions
+{
+    InsertionMode = InsertionMode.Replace,
+    HttpMethod = "POST",
+    OnSuccess = "reloadAgents"
+}, new { @class = "well form-inline", @id = "registerForm", @style = "margin: 0px;" }))
+{
+
+    @*@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "well form-inline", @id = "registerForm" }))
+        {*@
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Registration Form</legend>
+
+        <ol>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Name)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Name, new { @placeholder = "Enter agent name..." })
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.UserType)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.UserType, new SelectList(
+                  new List<Object>{
+                       new { value = 1 , text = "Admin" },
+                       new { value = 2 , text = "Staff" },
+                       new { value = 3 , text = "Agent" }
+                        //new { value = 4 , text = "Drivers" }
+                    },
+                  "value",
+                  "text",
+                   1))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.PaymentType)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.PaymentType, new SelectList(
+                  new List<Object>{
+                       new { value = 2 , text = "Agent (invoice)"  },
+                       new { value = 3 , text = "Deposit Taken"  }
+                    },
+                  "value",
+                  "text",
+                   1))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Address)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Address, new { @maxlength = "200", @placeholder = "Enter address..." })
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Phone)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Phone, new { @maxlength = "30", @placeholder = "Enter phone number..." })
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Email)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Email, new { @type = "email", @placeholder = "Enter email..." })
+            </li>
+            <li class="licommission" style="margin-top: 10px">
+                @Html.LabelFor(m => m.Commission)
+                <div class="input-append">
+                    @Html.TextBoxFor(m => m.Commission, new { @class = "span2", @style = "width:180px", @placeholder = "Enter commission..." })
+                    <span class="add-on">%</span>
+            </li>
+            <li>
+                @*@Html.LabelFor(m => m.Credit)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                    @Html.DropDownListFor(model => model.Credit, new SelectList(
+                      new List<Object>{
+                           new { value = 0 , text = "Deposit"  },
+                           new { value = 1 , text = "Full Amount" }
+                        },
+                      "value",
+                      "text",
+                       0))*@
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.UserName)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.UserName, new { @placeholder = "Enter username..." })
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Password)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.PasswordFor(m => m.Password, new { @placeholder = "Enter password..." })
+            </li>
+            <li>
+                @Html.LabelFor(m => m.ConfirmPassword)&nbsp&nbsp
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @placeholder = "Enter password again..." })
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Comments)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextAreaFor(m => m.Comments, new { @placeholder = "User Notes..." })
+            </li>
+        </ol>
+    </fieldset>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Add User</button>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

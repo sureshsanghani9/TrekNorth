@@ -1,0 +1,212 @@
+﻿@model IEnumerable<Tourism_Project.Models.TourCodePrice>
+
+@{
+    ViewBag.Title = "Tour Prices";
+}
+
+<h2>Tour Prices</h2>
+<style>
+    .tourNameRows {
+        background-color: #007589;
+        background-repeat: repeat-x;
+        /*background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#1a82f7), to(#2F2727));
+        background: -webkit-linear-gradient(top, white, #027487);
+        background: -moz-linear-gradient(top, white, #027487);
+        background: -ms-linear-gradient(top, white, #027487);
+        background: -o-linear-gradient(top, white, #027487);*/
+        padding: 5px 18px;
+        /*border-radius: 20px;*/
+        color: white;
+        cursor: pointer;
+    }
+
+    .gold {
+        color: goldenrod !important;
+    }
+
+    .tblcon {
+        width: 100%;
+        float: left;
+        overflow: auto;
+    }
+</style>
+
+<img style="position: fixed; right: 0px; top: 0px; width: 100%; height: 42px;" src="~/Images/horizontal-loader.gif" id="sideLoader" />
+<div class="tblcon">
+    <table id="tbPrices" style="width: 100%;">
+
+        @foreach (var item in Model)
+        {
+            <tr class="@item.TourName.Replace(' ','-')">
+                <td>
+                    <input type="checkbox" class="chkSelect" />
+                </td>
+                <td style="display:none;" class="tourid">
+                    @Html.DisplayFor(modelItem => item.TourCodeID)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TourName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TourCodeName)
+                    <br />
+                    <br />
+                    <span style="color: goldenrod;">Gold Class</span>
+                </td>
+                <td align="right">
+                    $ @Html.TextBoxFor(modelItem => item.Price, new { disabled = "disabled", style = "margin-top:10px; text-align: right; width: 50px;", @class = "txtPrice prices", placeholder = "Adult" })
+                    <br />
+                    $ @Html.TextBoxFor(modelItem => item.GoldPrice, new { disabled = "disabled", style = "margin-top:10px; text-align: right; width: 50px;", @class = "txtGoldPrice prices gold", placeholder = "Adult(Gold Class)" })
+                </td>
+                <td align="right">
+                    $ @Html.TextBoxFor(modelItem => item.PriceChild, new { disabled = "disabled", style = "margin-top:10px; text-align: right; width: 50px;", @class = "txtPriceChild prices", placeholder = "Child" })
+                    <br />
+                    $ @Html.TextBoxFor(modelItem => item.GoldPriceChild, new { disabled = "disabled", style = "margin-top:10px; text-align: right; width: 50px;", @class = "txtGoldPriceChild prices gold", placeholder = "Child(Gold Class)" })
+                </td>
+                <td align="right">
+                    $ @Html.TextBoxFor(modelItem => item.PriceFamilyChild, new { disabled = "disabled", style = "margin-top:10px; text-align: right; width: 50px;", @class = "txtPriceFamilyChild prices", placeholder = "Family Child" })
+                    <br />
+                    $ @Html.TextBoxFor(modelItem => item.GoldPriceFamilyChild, new { disabled = "disabled", style = "margin-top:10px; text-align: right; width: 50px;", @class = "txtGoldPriceFamilyChild prices gold", placeholder = "Family Child(Gold Class)" })
+                </td>
+            </tr>
+        }
+
+        <tr>
+            <td colspan="7" align="right">
+                <button class="btn btn-success" style="margin-top: 10px;padding: 8px 22px;
+  border-radius: 0px;" id="btnSave" disabled="disabled">
+                    Save
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function ()
+        {
+            $('.chkSelect').unbind('click').click(function ()
+            {
+                if ($(this).is(':checked'))
+                {
+                    $(this).parents('tr').find('input[type="text"]').removeAttr('disabled');
+                    $('#btnSave').removeAttr('disabled');
+                }
+                else
+                {
+                    $(this).parents('tr').find('input[type="text"]').attr('disabled', 'disabled');
+                    if ($('.chkSelect:checked').length == 0)
+                        $('#btnSave').attr('disabled', 'disabled');
+                }
+            });
+            stylize();
+        });
+
+        $('#btnSave').click(function (e)
+        {
+            e.preventDefault();
+            var list = new Array();
+            for (var i = 0; i < $('.chkSelect:checked').length; i++)
+            {
+                var object = {
+                    TourCodeID: parseInt($('.chkSelect:checked').eq(i).parents('tr').find('td.tourid').html()),
+                    Price: parseFloat($('.chkSelect:checked').eq(i).parents('tr').find('input.txtPrice').val()),
+                    PriceChild: parseFloat($('.chkSelect:checked').eq(i).parents('tr').find('input.txtPriceChild').val()),
+                    PriceFamilyChild: parseFloat($('.chkSelect:checked').eq(i).parents('tr').find('input.txtPriceFamilyChild').val()),
+                    GoldPrice: parseFloat($('.chkSelect:checked').eq(i).parents('tr').find('input.txtGoldPrice').val()),
+                    GoldPriceChild: parseFloat($('.chkSelect:checked').eq(i).parents('tr').find('input.txtGoldPriceChild').val()),
+                    GoldPriceFamilyChild: parseFloat($('.chkSelect:checked').eq(i).parents('tr').find('input.txtGoldPriceFamilyChild').val())
+                };
+                list.push(object);
+            }
+            $.ajax({
+                url: '@Url.Action("SaveChanges", "TourCodePrice")',
+                type: 'POST',
+                data: JSON.stringify(list),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                error: function (xhr)
+                {
+                    alert('Error Found: ' + xhr.statusText);
+                },
+                success: function (result)
+                {
+                    $('.chkSelect').removeAttr('checked');
+                    $('.chkSelect').parents('table').find('input[type="text"]').attr('disabled', 'disabled');
+                    //hide every row except headers
+                    $('#tbPrices tr:not("[class*=headers]")').hide();
+
+                    $('#btnSave').parents('tr').show();
+                },
+                async: true,
+                processData: false
+            });
+        });
+
+        function stylize()
+        {
+            var classList = new Array();
+            $('#tbPrices tr').each(function ()
+            {
+                if ($(this).attr('class') != undefined)
+                {
+                    if (classList.indexOf($(this).attr("class")) == -1)
+                    {
+                        classList.push($(this).attr("class"));
+                    }
+                }
+            });
+            for (var a = 0 ; a < classList.length ; a++)
+            {
+                $('.' + classList[a]).hide();
+                var tourNameRow = "<tr><td style='line-height: 20px;'></td></tr><tr class='headers' id='" + classList[a] + "'><td colspan='6' class='tourNameRows'>" + classList[a].replace('-', ' ') + "</td></tr><tr class='" + classList[a] + "' style='display: none;'><td></td><td></td><td></td><td align='right'>For Adult</td><td align='right'>For Child</td><td align='right'>For Family Child</td></tr>";
+                $(tourNameRow).insertBefore('.' + classList[a] + ':first');
+            }
+
+            $('.headers').click(function ()
+            {
+                var className = $(this).prop('id');
+                $('.' + className).toggle(300);
+            });
+        }
+
+        $(document).ajaxStart(function ()
+        {
+            $('#sideLoader').show();
+        }).ajaxStop(function ()
+        {
+            $('#sideLoader').hide();
+        }).ajaxError(function ()
+        {
+            $('#sideLoader').hide();
+        });
+        
+        $('.prices').keypress(function (event) {
+            var $this = $(this);
+            if ((event.which != 46 || $this.val().indexOf('.') != -1) &&
+               ((event.which < 48 || event.which > 57) &&
+               (event.which != 0 && event.which != 8))) {
+                event.preventDefault();
+            }
+
+            var text = $(this).val();
+            if ((event.which == 46) && (text.indexOf('.') == -1)) {
+                setTimeout(function () {
+                    if ($this.val().substring($this.val().indexOf('.')).length > 3) {
+                        $this.val($this.val().substring(0, $this.val().indexOf('.') + 3));
+                    }
+                }, 1);
+            }
+
+            if ((text.indexOf('.') != -1) &&
+                (text.substring(text.indexOf('.')).length > 2) &&
+                (event.which != 0 && event.which != 8) &&
+                ($(this)[0].selectionStart >= text.length - 2)) {
+                event.preventDefault();
+            }
+        });
+
+    </script>
+}
+

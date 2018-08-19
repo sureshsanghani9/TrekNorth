@@ -1,0 +1,290 @@
+﻿@model List<Tourism_Project.Models.BookingModel>
+@{
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+    int count = 1;
+}
+
+
+
+<image style="margin-bottom:20px;" plainwidth="64" plainheight="64" url="@Context.Server.MapPath("~/Images/LOGO.png")" />
+
+<paragraph style="font-family:Helvetica;font-size:18;font-style:italic;" setspacingbefore="10">
+    <chunk red="255" green="0" blue="0">@ViewBag.TourName</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Date: </chunk>
+    <chunk style="font-family:Times;">@ViewBag.Date</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Time: </chunk>
+    <chunk style="font-family:Times;">@DateTime.Now.AddHours(2).ToString("hh:mm tt")</chunk>
+</paragraph>
+
+@if (Model != null)
+{
+
+    <table width="100%" cellpadding="1.0" cellspacing="2.0" widths="3;5;8;2;2;2;2;2;2;3;3;5;5;2">
+        <row>
+
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;font-style:oblique;">
+                    <chunk>Time</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Location</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Name</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Ad</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Ch</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>FCh</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>FOC</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Tour Code</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Gold Class</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Total Price</chunk>
+                </paragraph>
+            </cell>
+            @*<cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>POB</chunk>
+                </paragraph>
+            </cell>*@
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Contact</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Comments</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Lunch(F,S,V)</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Index</chunk>
+                </paragraph>
+            </cell>
+        </row>
+        @{
+            float total = 0;
+            int totalAdults = 0;
+            int totalChildren = 0;
+            int totalFamilyChildren = 0;
+            int totalInfant = 0;
+            float pob = 0;
+            string temptimecurrent = string.Empty;
+            string temptimePrvious = string.Empty;
+            bool istimechanged = false;
+        }
+
+
+        @foreach (var report in Model)
+        {
+            temptimecurrent = report.time;
+            if (temptimecurrent != temptimePrvious && !string.IsNullOrEmpty(temptimePrvious))
+            {
+                istimechanged = true;
+            }
+            else { istimechanged = false; }
+            temptimePrvious = report.time;
+
+            if (istimechanged == true)
+            {
+                <row>
+                    <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true">
+                        <paragraph>
+                            <chunk>
+                               
+                            </chunk>
+                        </paragraph>
+                    </cell>
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    @*<cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />*@
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+                    <cell borderwidth="0.5" left="false" right="true" top="true" bottom="true" />
+
+                </row>
+            }
+            <row style="">
+
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.time</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.location</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.PassengerName</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.Adults</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.Children</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.FamilyChildren</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.Infant</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.tourcodevalues</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@(report.isGoldClass == false ? "No" : "Yes")</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>$@report.TotalPrice</chunk>
+                    </paragraph>
+                </cell>
+                @*<cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>$@report.POB</chunk>
+                    </paragraph>
+                </cell>*@
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.ContactDetails</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.Comments</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.Lunch</chunk>
+                    </paragraph>
+                </cell>
+                <cell borderwidth="0.5" left="true" right="true" top="false" bottom="false">
+                    <paragraph style="font-family:Helvetica;font-size:10;">
+                        <chunk>@report.BookingID</chunk>
+                    </paragraph>
+                </cell>
+            </row>
+
+            total += @report.TotalPrice;
+            totalAdults += @report.Adults;
+            totalChildren += @report.Children;
+            totalFamilyChildren += @report.FamilyChildren;
+            totalInfant += @report.Infant;
+            pob += (float)@report.POB;
+            count++;
+        }
+
+        <row>
+
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true" />
+            <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" />
+            <cell borderwidth="0.5" left="false" right="false" top="true" bottom="true" horizontalalign="right">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>Totals</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>@totalAdults</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>@totalChildren</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>@totalFamilyChildren</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>@totalInfant</chunk>
+                </paragraph>
+            </cell>
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true" />
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"></cell>
+            <cell borderwidth="0.5" left="true" right="false" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>$@total</chunk>
+                </paragraph>
+            </cell>
+            @*<cell borderwidth="0.5" left="true" right="false" top="true" bottom="true">
+                <paragraph style="font-family:Helvetica;font-size:10;">
+                    <chunk>$@pob</chunk>
+                </paragraph>
+            </cell>*@
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"></cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"></cell>
+            <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true"></cell>
+            <cell borderwidth="0.5" left="false" right="true" top="true" bottom="true" />
+        </row>
+
+    </table>
+}

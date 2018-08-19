@@ -1,0 +1,303 @@
+﻿@model Tourism_Project.Models.RegisterModel
+@{
+    ViewBag.Title = "Edit User";
+}
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+<style>
+    table#tbTourCodes td {
+        padding: 5px;
+    }
+
+    @@media(max-width:768px) {
+
+        #Name {
+            display: inline-block;
+            width: 63% !important;
+        }
+    }
+
+    @@media(max-width:460px) {
+
+        fieldset ol li {
+            display: inline-block;
+            width: 320px;
+        }
+
+            fieldset ol li table input {
+                width: 150px;
+            }
+    }
+
+    @@media(max-width:400px) {
+        body {
+            padding: 0;
+        }
+
+        .well {
+            padding: 0px !important;
+        }
+
+        fieldset ol li {
+            display: inline-block;
+            width: 240px;
+        }
+
+            fieldset ol li table input {
+                width: 120px;
+            }
+    }
+</style>
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> user has been updated.
+        </div>
+    }
+}
+@using (Html.BeginForm("EditRegister", "Account", FormMethod.Post, new { @class = "well form-inline", @id = "editRegisterForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Registration Form</legend>
+
+        <ol>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.Name)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(model => model.Name, new { @placeholder = "Enter user name...", style = "width:500px;" })
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.UserType)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.UserType, new SelectList(
+                  new List<Object>{
+                       new { value = 1 , text = "Admin" },
+                       new { value = 2 , text = "Staff" },
+                       new { value = 3 , text = "Agent" },
+                         new { value = 4 , text = "Driver" },
+                         new { value = 5 , text = "Satalite" }
+                    },
+                  "value",
+                  "text",
+                   @ViewBag.UserType))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.PaymentType)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.PaymentType, new SelectList(
+                  new List<Object>{
+                       new { value = 2 , text = "Full Payment"  },
+                       new { value = 3 , text = "Deposit Only"  }
+                    },
+                  "value",
+                  "text",
+                   @ViewBag.PaymentType))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.Address)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(model => model.Address, new { @maxlength = "200", @placeholder = "Enter address..." })
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.Phone)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(model => model.Phone, new { @maxlength = "30", @placeholder = "Enter phone number..." })
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.Email)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(model => model.Email, new { @type = "email", @placeholder = "Enter email..." })
+            </li>
+            <li>
+                <table id="tbTourCodes">
+                    <tr>
+                        <th></th>
+                        <th>Tour Code</th>
+                        <th>Commission</th>
+                    </tr>
+
+                </table>
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.Commission)
+                <div class="input-append">
+                    @Html.TextBoxFor(model => model.Commission, new { @class = "span2", @style = "width:180px", @placeholder = "Enter commission..." })
+                    <span class="add-on">%</span>
+            </li>
+
+            @*<li>
+                    @Html.LabelFor(model => model.Credit)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                    @Html.DropDownListFor(model => model.Credit, new SelectList(
+                      new List<Object>{
+                           new { value = 0 , text = "Deposit"  },
+                           new { value = 1 , text = "Full Amount" }
+                        },
+                      "value",
+                      "text",
+                       @ViewBag.CreditStatus))
+                </li>*@
+
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.UserName)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(model => model.UserName, new { @placeholder = "Enter username..." })
+            </li>
+            <li>
+                @Html.LabelFor(model => model.Password)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(model => model.Password, new { @placeholder = "Enter password..." })
+            </li>
+            <li>
+                @Html.LabelFor(model => model.ConfirmPassword)
+                @Html.TextBoxFor(model => model.ConfirmPassword, new { @placeholder = "Enter password again..." })
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Comments)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextAreaFor(m => m.Comments, new { @placeholder = "User Notes..." })
+            </li>
+        </ol>
+    </fieldset>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Update User</button>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            loadTourCodes();
+
+            $('.EnableRow').live('click', function () {
+                if ($(this).is(':checked'))
+                    $(this).parents('tr').find('.TourCommission').removeAttr('disabled');
+                else
+                    $(this).parents('tr').find('.TourCommission').attr('disabled', 'disabled');
+            });
+        });
+
+        function loadTourCodes() {
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getActiveTourCodes", "AgentCommission")',
+                success: function (resp) {
+                    $.each(resp, function (i, value) {
+                        $('#tbTourCodes').append(
+                            '<tr>' +
+                            '<td><input type="checkbox" class="EnableRow" />' +
+                            '<td>' + value['tourcodevalues'] + '</td>' +
+                            '<td style="display: none;" class="TourId">' + value['TourCode'] + '</td>' +
+                            '<td> <input type="text" class="TourCommission" placeholder="Commission" disabled="disabled" /> </td>' +
+                            '</tr>');
+                    });
+                    loadTourCommissions();
+
+                    $("input.TourCommission").keydown(function (event) {
+
+
+                        if (event.shiftKey == true) {
+                            event.preventDefault();
+                        }
+
+                        if ((event.keyCode >= 48 && event.keyCode <= 57) ||
+                            (event.keyCode >= 96 && event.keyCode <= 105) ||
+                            event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 ||
+                            event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190) {
+
+                        } else {
+                            event.preventDefault();
+                        }
+
+                        if ($(this).val().indexOf('.') !== -1 && event.keyCode == 190)
+                            event.preventDefault();
+                        //if a decimal has been added, disable the "."-button
+
+                    });
+                }
+            });
+        }
+
+
+        function loadTourCommissions() {
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                dataType: 'json',
+                data: JSON.stringify({ UserID: parseInt(location.pathname.substring(location.pathname.lastIndexOf('/') + 1)) }),
+                contentType: 'application/json; charset=utf-8',
+                url: '@Url.Action("getAgentTourCommissions", "AgentCommission")',
+                success: function (resp) {
+                    var array = new Array();
+                    $.each(resp, function (i, value) {
+                        var obj = {
+                            TourCodeID: value["TourCodeID"],
+                            Commission: value["Commission"]
+                        };
+                        array.push(obj);
+                    })
+                    for (var a = 0 ; a < array.length ; a++) {
+                        $('#tbTourCodes tr td:hidden').filter(function () {
+                            return parseInt($(this).text()) === array[a].TourCodeID;
+                        }).each(function () {
+                            $(this).parent().find('input.TourCommission').val(array[a].Commission).removeAttr('disabled');
+                            $(this).parent().find('input[type="checkbox"]').attr('checked', 'checked');
+                        });
+                    }
+                }
+            });
+        }
+
+
+
+        function testAjax() {
+            var array = new Array();
+
+            for (var i = 0 ; i < $('.TourCommission:enabled').length; i++) {
+                var data = {
+                    TourCodeID: parseInt($('.TourCommission:enabled').eq(i).parent().prev().html()),
+                    Commission: parseFloat($('.TourCommission:enabled').eq(i).val()),
+                    UserID: parseInt(location.pathname.substring(location.pathname.lastIndexOf('/') + 1)),
+                    active_f: 1
+                };
+                array.push(data);
+            }
+
+            //on 04-08-2015
+            for (var i = 0 ; i < $('.TourCommission:disabled').length; i++) {
+                var data = {
+                    TourCodeID: parseInt($('.TourCommission:disabled').eq(i).parent().prev().html()),
+                    Commission: parseFloat($('.TourCommission:disabled').eq(i).val()),
+                    UserID: parseInt(location.pathname.substring(location.pathname.lastIndexOf('/') + 1)),
+                    active_f: 0
+                };
+                array.push(data);
+            }
+            //End
+
+
+            $.ajax({
+                url: '@Url.Action("submitAgentTourCommissions", "AgentCommission")',
+                data: JSON.stringify(array),
+                type: "POST",
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $('form').submit();
+                },
+                error: function () {
+                    return true;
+                }
+            });
+        }
+
+
+
+
+
+
+
+        $('button[type="submit"]').click(function (e) {
+            e.preventDefault();
+            testAjax();
+        });
+    </script>
+}

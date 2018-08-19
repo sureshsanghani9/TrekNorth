@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Title = "Manage";
+}
+
+<h2>Manage</h2>
+
+
+<a id="btnAddAgents" type="button" class="btn btn-primary" style="margin-top: -42px; float: right;" href="@Url.Action( "Backup", "Manage")">Backup</a>
+
+@{
+    if (TempData["IsSucceess"] != null && TempData["IsSucceess"].ToString() == "1")
+    { 
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> Backup has been created.
+        </div>
+    }
+    
+}

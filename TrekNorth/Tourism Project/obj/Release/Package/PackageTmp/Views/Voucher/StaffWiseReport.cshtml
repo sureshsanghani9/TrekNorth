@@ -1,0 +1,288 @@
+﻿@model  List<Tourism_Project.Models.voucherStaffList>
+
+@using Tourism_Project.Models;
+
+@{
+
+    Layout = "~/Views/Shared/VoucherMasterpage.cshtml";
+
+    double cardTotalPaid = 0;
+    double cashTotalPaid = 0;
+    double totalPriceAmount = 0;
+    int ad = 0;
+    int ch = 0;
+    int Infant = 0;
+
+    int? shid = null;
+
+    Double profit = 0;
+
+    // shop name and shop hours
+
+    int hour = 13;
+
+
+    int ADMIN = 1, STAFF = 2, AGENT = 3;
+    string[] user = User.Identity.Name.Split(',');
+    string userType = user[2];//userid,username,usertype
+
+}
+
+@*Search Box Js*@
+<script>
+    var companyCommissionPercentage = 0;
+    $(document).ready(function ()
+    {
+        $('#txt_Fromdate').val("");
+        $('#txt_Todate').val("");
+        //alert($('#txt_Fromdate').val());
+        var aa = "";
+        @if (ViewBag.VoucherType != null)
+        {
+            <text>
+        $("#drp_Report").val('@ViewBag.VoucherType');
+        </text>
+        }
+
+
+        window.setTimeout(function ()
+        {
+            //$("select").chosen();
+        }, 100);
+
+        $('#txt_Fromdate').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+        {
+            $('#CreatedDate_From_Report').val(convertdateFormat('#txt_Fromdate'));
+        });
+        $('#txt_Todate').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+        {
+            $('#CreatedDate_To_Report').val(convertdateFormat('#txt_Todate'));
+        });
+        $('#txt_Todate').datepicker('setDate', 'today');
+        $('#txt_Fromdate').datepicker('setDate', 'today');
+
+        $('#CreatedDate_From_Report').val(convertdateFormat('#txt_Fromdate'));
+        $('#CreatedDate_To_Report').val(convertdateFormat('#txt_Todate'));
+
+    });
+
+    function convertdateFormat(oDate)
+    {
+        console.log("oDate", $(oDate).val());
+        if ($(oDate).val() != "")
+        {
+            return moment($(oDate).datepicker("getDate")).format("MM/DD/YYYY");
+        }
+    }
+
+    function convertdate(oDate)
+    {
+        console.log("oDate", $(oDate).val());
+        if ($(oDate).val() != "")
+        {
+            return moment($(oDate).datepicker("getDate")).format("DD/MM/YYYY");
+        }
+    }
+
+
+    function getStaffSummaryReport(control)
+    {
+        var fromDate = "";
+        var toDate = "";
+
+        if (control == "genrate")
+        {
+            fromDate = $('#CreatedDate_From_Report').val();
+            toDate = $('#CreatedDate_To_Report').val();
+        }
+     
+        else if (control == "today")
+        {
+            $('#txt_Todate').datepicker('setDate', 'today');
+            $('#txt_Fromdate').datepicker('setDate', 'today');
+
+            $('#CreatedDate_From_Report').val(convertdateFormat('#txt_Fromdate'));
+            $('#CreatedDate_To_Report').val(convertdateFormat('#txt_Todate'));
+
+            fromDate = $('#CreatedDate_From_Report').val();
+            toDate = $('#CreatedDate_To_Report').val();
+
+
+        }
+        else if (control == "yesterday")
+        {
+            $('#txt_Todate').datepicker('setDate', -1);
+            $('#txt_Fromdate').datepicker('setDate', -1);
+
+            $('#CreatedDate_From_Report').val(convertdateFormat('#txt_Fromdate'));
+            $('#CreatedDate_To_Report').val(convertdateFormat('#txt_Todate'));
+
+            fromDate = $('#CreatedDate_From_Report').val();
+            toDate = $('#CreatedDate_To_Report').val();
+        }
+        //alert($('#CreatedDate_From_Report').val());
+        var url = "/Voucher/StaffWiseReport";
+
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("StaffWiseReport", "Voucher")',
+            data: { fromDate: fromDate, endDate: toDate },
+            success: function (resp)
+            {
+                debugger;
+                console.log($(resp).find("#divreportList"));
+                $("#divreportList").html("");
+                $("#divreportList").html($(resp).find("#divreportList table.tblreport"));
+            }
+        });
+    }
+</script>
+@*Search Box Js*@
+
+<div id="div-voucher-report">
+
+    <h2 class="h2-heading">Staff Perfomance Report</h2>
+    @*@Html.Partial("_FilterStaffVouchers", new RegisterModel())*@
+
+    @*SEARCH BOX*@
+    <div style="width:100%">
+        <table width="100%" class="tblform" border="0">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="editor-label">
+                            From  Booked Date
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.TextBox("txt_Fromdate", TempData["createFromdate"], "{0:dd/MM/yyyy}", new { required = "required", style = "width: 230px;" })
+                            <input type="hidden" id="CreatedDate_From_Report" name="CreatedDate_From_Report">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-label">
+                            To  Booked Date
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.TextBox("txt_Todate", TempData["createTodate"], "{0:dd/MM/yyyy}", new { required = "required", style = "width: 230px;" })
+                            <input type="hidden" id="CreatedDate_To_Report" name="CreatedDate_To_Report">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="1">
+                        <p>
+                            <input type="submit" onclick="getStaffSummaryReport('genrate');" value="Generate" class="btn btn-large btn-block btn-primary" />
+
+                        </p>
+                    </td>
+
+                    <td colspan="6">
+                        <h3>
+                            <span>
+                                <a href="#" class="editinpopup" onclick=getStaffSummaryReport('today')>Today</a>
+                            </span>
+                            <span style="margin-left:20px;">
+                                <a href="#" class="editinpopup" onclick=getStaffSummaryReport('yesterday')>Yesterday</a>
+                            </span>
+                        </h3>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+
+    @*End Search Box*@
+
+
+    @if (Model != null)
+    {
+        <hr />
+
+        <div class="tblresponsive" id="divreportList">
+            <table cellspacing="1" class="tblreport">
+                <tr>
+                    <th>
+                        Staff  Name
+                    </th>
+                    <th>
+                        Total Credit Paid
+                    </th>
+                    <th>
+                        Total Cash Paid
+                    </th>
+                    <th>
+                        Total Price
+                    </th>
+                </tr>
+
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                <tr>
+                    <td>
+                        @Html.ActionLink(item.createdBy.ToString().ToString().Split(',')[1], "CashSheet", new { staffId = item.createdBy.ToString().ToString().Split(',')[0], fromDate = TempData["createFromdate"].ToString(), toDate = TempData["createTodate"].ToString() }, null)
+                    </td>
+
+                    <td>
+
+                        @String.Format("{0:C2}", item.totalCardPaid)
+
+                        @{ cardTotalPaid += Convert.ToDouble(item.totalCardPaid);
+                        }
+
+                    </td>
+
+                    <td>
+                        @String.Format("{0:C2}", item.totalCashPaid)
+                        @{ cashTotalPaid += Convert.ToDouble(item.totalCashPaid);
+                        }
+                    </td>
+
+                    <td>
+                        @{ totalPriceAmount += Convert.ToDouble(item.totalPrice);
+                        }
+                        @String.Format("{0:C2}", item.totalPrice)
+
+
+                    </td>
+                </tr>
+                    }
+                <tr style="background-color:gray;color:white;">
+                    <td align="right">Total :</td>
+
+                    <td>
+                        @*@{
+                                @Html.Raw((cardTotalPaid != 0 ? cardTotalPaid.ToString() : ""));
+                            }*@
+                        @String.Format("{0:C2}", cardTotalPaid)
+                    </td>
+
+
+                    <td>
+                        @String.Format("{0:C2}", cashTotalPaid)
+                    </td>
+                    <td>
+                        @String.Format("{0:C2}", totalPriceAmount)
+                    </td>
+
+                </tr>
+                }
+            </table>
+
+        </div>
+    }
+
+
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

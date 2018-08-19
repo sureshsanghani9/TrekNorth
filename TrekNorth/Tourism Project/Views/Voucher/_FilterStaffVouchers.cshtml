@@ -1,0 +1,192 @@
+﻿@model Tourism_Project.Models.RegisterModel
+
+@{
+    ViewBag.Title = "_FilterStaffVouchers";
+    //Layout = null;
+}
+
+@*@using (Html.BeginForm("StaffWiseReport", "Voucher", FormMethod.Post))
+    {*@
+<style>
+    input[type="number"] {
+        width: 44px !important;
+    }
+
+    input[type="text"], input[type="date"] {
+        width: 300px;
+    }
+
+    select {
+        width: 314px;
+        height: 38px !important;
+        line-height: 5px;
+        padding-left: 10px;
+    }
+
+        select option {
+            line-height: 15px;
+        }
+
+    textarea {
+        width: 290px;
+    }
+
+    .prices input {
+        width: 50px !important;
+    }
+</style>
+
+<script type="text/javascript">
+
+
+</script>
+
+<a href="#"> Yesterday </a>
+<a href="#"> Today </a>
+<div style="width:100%">
+    <table width="100%" class="tblform" border="0">
+        <tbody>
+            <tr>
+                <td>
+                    <div class="editor-label">
+                        From  Booked Date
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.TextBox("txt_Fromdate", TempData["createFromdate"], "{0:dd/MM/yyyy}", new { required = "required", style = "width: 230px;" })
+                        <input type="hidden" id="CreatedDate_From_Report" name="CreatedDate_From_Report">
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-label">
+                        To  Booked Date
+                    </div>
+                </td>
+                <td>
+                    <div class="editor-field">
+                        @Html.TextBox("txt_Todate", TempData["createTodate"], "{0:dd/MM/yyyy}", new { required = "required", style = "width: 230px;" })
+                        <input type="hidden" id="CreatedDate_To_Report" name="CreatedDate_To_Report">
+                    </div>
+                </td>
+
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <p>
+                        <input type="submit" onclick="getStaffSummaryReport();" value="Generate" class="btn btn-large btn-block btn-primary" />
+                    </p>
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+</div>
+<script>
+    var companyCommissionPercentage = 0;
+    $(document).ready(function ()
+    {
+        $('#txt_Fromdate').val("");
+        $('#txt_Todate').val("");
+
+        var aa = "";
+        @if (ViewBag.VoucherType != null)
+            {
+                <text>
+        $("#drp_Report").val('@ViewBag.VoucherType');
+        </text>
+            }
+
+
+        window.setTimeout(function ()
+        {
+            $("select").chosen();
+        }, 100);
+
+        /*
+        var from = $("#txt_date").val().split("-");
+        var date = new Date(from[2], from[1] - 1, from[0]);
+
+        if (!$.browser.safari)
+        {
+            $('#txt_date').datepicker({ dateFormat: 'dd/mm/yy' });
+        }
+        else
+        {
+            $('#txt_date').datepicker({ dateFormat: 'dd/mm/yy' });
+        }
+        */
+
+
+        $('#txt_Fromdate').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+        {
+            $('#CreatedDate_From_Report').val(convertdateFormat('#txt_Fromdate'));
+        });
+        $('#txt_Todate').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en)
+        {
+            $('#CreatedDate_To_Report').val(convertdateFormat('#txt_Todate'));
+        });
+        $('#txt_Todate').datepicker('setDate', 'today');
+        $('#txt_Fromdate').datepicker('setDate', 'today');
+
+    });
+
+
+
+    function convertdateFormat(oDate)
+    {
+        console.log("oDate", $(oDate).val());
+        if ($(oDate).val() != "")
+        {
+            return moment($(oDate).datepicker("getDate")).format("MM/DD/YYYY");
+        }
+    }
+
+    function convertdate(oDate)
+    {
+        console.log("oDate", $(oDate).val());
+        if ($(oDate).val() != "")
+        {
+            return moment($(oDate).datepicker("getDate")).format("DD/MM/YYYY");
+        }
+    }
+
+
+
+    function getStaffSummaryReport()
+    {
+        var url = "/Voucher/StaffWiseReport";
+        var Tour = $('#Tour').val();
+        var pickuplocation = $('#pickuplocation').val();
+        var locationId = $('#ID').val();
+        var strtime = "";
+
+        $(".TextBoxContainer .clstime").each(function ()
+        {
+            if (strtime != "")
+            {
+                strtime = strtime + "," + $(this).val();
+            }
+            else
+            {
+                strtime = $(this).val();
+            }
+        });
+
+        $.post(url, { fromDate: $('#CreatedDate_From_Report').val(), endDate: $('#CreatedDate_To_Report').val() }, function (data)
+        {
+
+        });
+
+    }
+
+
+
+</script>
+
+@*}*@
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+

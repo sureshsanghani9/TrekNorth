@@ -1,0 +1,45 @@
+﻿@using System.Configuration
+@{
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+    ViewBag.Title = "Top Agents";
+}
+
+
+
+<image style="margin-bottom:20px;" plainwidth="64" plainheight="64" url="@Context.Server.MapPath("~/Images/LOGO.png")"/>
+<paragraph style="font-family: Helvetica; font-size: 18; font-style: italic;" setspacingbefore="10">
+	<chunk red="255" green="0" blue="0">Top Agents</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Date: </chunk>
+    <chunk style="font-family:Times;">@DateTime.Now.AddHours(2).ToString("MM/dd/yyyy")</chunk>
+</paragraph>
+<paragraph>
+    <chunk style="font-family:Times;font-weight:bold;">Report Time: </chunk>
+    <chunk style="font-family:Times;">@DateTime.Now.AddHours(2).ToString("hh:mm tt")</chunk>
+</paragraph>
+<paragraph align="right">
+    <newline />
+    <chunk style="font-family: Times; font-weight: bold;">Trek North Tours</chunk><newline />
+    <chunk style="font-family: Times;">PO Box 2901, Cairns, QId 4870</chunk><newline />
+    <chunk style="font-family: Times;">BSB: 484 799</chunk><newline />
+    <chunk style="font-family: Times;">ACC: 4527 98506</chunk>
+</paragraph>
+
+<table width="100%" cellpadding="1.0" cellspacing="5.0" widths="10;2;1">
+    <row>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" >Agent</cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" >Amount</cell>
+        <cell borderwidth="0.5" left="true" right="true" top="true" bottom="true" >Pax</cell>
+    </row>
+    @for (int a = 0; a < ViewBag.Agent.Count; a++ )
+    {
+        <row>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true" horizontalalign="right">@ViewBag.Agent[a]</cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true">$ @String.Format("{0:0.00}", @ViewBag.Amount[a])</cell>
+            <cell borderwidth="0.5" left="true" right="true" top="false" bottom="true">@ViewBag.Pax[a]</cell>
+        </row>
+    }
+</table>
+
+<anchor fontstyle="normal, underline" red="0" green="0" blue="255" reference="http://www.tntq.net">www.tntq.net</anchor>

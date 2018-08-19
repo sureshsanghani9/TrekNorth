@@ -1,0 +1,520 @@
+﻿@{
+    string[] user = User.Identity.Name.Split(',');
+    string userType = user[2];//userid,username,usertype
+    int ADMIN = 1, STAFF = 2, AGENT = 3;
+}
+
+@model Tourism_Project.Models.BookingModel
+@{
+    ViewBag.Title = "Add Booking";
+}
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+
+@{ 
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+    <div class="alert alert-success" id="okDone">
+        <a class="close" data-dismiss="alert">×</a>
+        <a href="~/Booking/Bookings/@ViewBag.BookingId">Booking Confirmation # @ViewBag.BookingId - Success!</a>
+        <a href="~/Booking/EditBooking?bookingid=@ViewBag.BookingId" id="EditBooking">For editting the details, please click here.</a>
+    </div> 
+    }
+    else if (status.Equals("error"))
+    {
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error!</strong> an error occured while making booking.Try Again!  
+    </div> 
+    }
+    else if (status.Equals("seatserror"))
+    {
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error!</strong> Seats are not enough for this booking!  
+    </div> 
+    }      
+}
+
+@using (Html.BeginForm("AddBooking", "Booking", FormMethod.Post, new { @class = "well form-inline", @id = "addForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Booking Form</legend>
+        <ol>
+            @{
+    if (Int32.Parse(userType) == ADMIN || Int32.Parse(userType) == STAFF)
+    {
+                <li style="margin-top: 10px">
+                    @Html.LabelFor(m => m.Agent)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                    @Html.TextBoxFor(m => m.Agent, new { @data_provide = "typeahead", @placeholder = "Enter agent...", @autocomplete = "off" })
+
+                    @Html.TextBoxFor(m => m.AgentId, new { @class = "span2", @style = "width:26px;", @readonly = "readonly" })
+
+                    @Html.LabelFor(m => m.Voucher)
+                    @Html.TextBoxFor(m => m.Voucher, new { @style = "width:100px", @placeholder = "Enter voucher..." })
+                </li>
+                <li id="agentInfo" style="display: none;"></li>
+                <li>
+                    @Html.LabelFor(m => m.PaymentType)&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.PaymentType, new SelectList(
+                  new List<Object>{
+                       new { value = 2 , text = "Agent (invoice)"  },
+                       new { value = 3 , text = "Deposit Taken"  }
+                  },
+                  "value",
+                  "text",
+                   1))
+                </li>
+    }
+            }
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Reference)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Reference, new { @placeholder = "Enter reference..." })
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Tour)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                       new { value = 1000 , text = "Cape Tribulation Manifest"  }
+                  },
+                  "value",
+                  "text",
+                   1000))
+            </li>
+            <li>
+                @Html.LabelFor(m => m.TourCode)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.TourCode, new SelectList(
+                  new List<Object>{
+                       new { value = 100 , text = "CT1"  }
+                  },
+                  "value",
+                  "text",
+                   100))
+            </li>
+            <li>
+                @Html.LabelFor(m => m.pickuplocation)
+                @Html.DropDownListFor(model => model.pickuplocation, new SelectList(
+                  new List<Object>{
+                       new { value = 10 , text = ""  }
+                  },
+                  "value",
+                  "text",
+                   10), new { @class = "chzn-select" })&nbsp&nbsp&nbsp
+
+                    @Html.LabelFor(m => m.time)&nbsp&nbsp&nbsp&nbsp
+                    @Html.TextBoxFor(m => m.time, new { @class = "span2", @style = "width:180px;", @readonly = "readonly" })
+
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Date)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.Date, new { @class = "datepick", @data_date = "boardingdate", @placeholder = "Enter Date..." })
+                <span class="badge badge-info" id="seatslimit">0</span>
+            </li>
+            <li>
+                @Html.LabelFor(m => m.PassengerName)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.PassengerName, new { @placeholder = "Enter passenger name..." })
+
+                <label for="Adults">Adults</label>
+                <input class="input-medium search-query valid" data-val="true" data-val-number="The field Adults must be a number." data-val-required="The Adults field is required." id="Adults" name="Adults" style="width: 40px" type="number" min="1" value="">
+
+                <label for="Children">Children</label>
+                <input class="input-medium search-query" data-val="false" data-val-number="The field Children must be a number." data-val-required="The Children field is required." id="Children" name="Children" style="width: 40px" type="number" min="1" value="">
+
+                <label for="FamilyChildren">Family Children</label>
+                <input class="input-medium search-query" data-val="false" data-val-number="The field FamilyChildren must be a number." data-val-required="The FamilyChildren field is required." id="FamilyChildren" name="FamilyChildren" style="width: 40px" type="number" min="1" value="">
+
+                <label for="Infant">Infant - Free Passenger</label>
+                <input class="input-medium search-query" data-val="false" data-val-number="The field Infant must be a number." data-val-required="The Infant field is required." id="Infant" name="Infant" style="width: 40px" type="number" min="1" value="">
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Price)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <div class="input-prepend">
+                    <span class="add-on">$</span>
+                    @Html.TextBoxFor(m => m.Price, new { @class = "span2", @style = "width:180px", @placeholder = "Enter tour price..." })
+                </div>
+            </li>
+            <li>DC&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <div class="input-append">
+                    <input class="span2" data-val="false" data-val-number="The field DC must be a number." data-val-required="The DC field is required." id="Discount" name="Discount" style="width: 180px" type="text" value="">
+                    <span class="add-on">%</span>
+                </div>
+            </li>
+            @{
+    if (Int32.Parse(userType) == ADMIN || Int32.Parse(userType) == STAFF)
+    {
+                <li>
+                    @Html.LabelFor(m => m.Commission, "Deposit Paid")&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                            <div class="input-append">
+                                @Html.TextBoxFor(m => m.Commission, new { @class = "span2", @style = "width:180px", @placeholder = "Enter commmission..." })
+                                <span class="add-on">%</span>
+                            </div>
+                </li>
+    }
+    else
+        if (Int32.Parse(userType) == AGENT)
+        {
+                <li>
+                    @Html.LabelFor(m => m.Commission, "Deposit Paid")&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                            <div class="input-append">
+                                @Html.TextBoxFor(m => m.Commission, new { @class = "span2", @style = "width:180px", @placeholder = "Enter commmission...", @readonly = "readonly" })
+                                <span class="add-on">%</span>
+                            </div>
+                </li>
+        }
+            }
+            <li>
+                @Html.LabelFor(m => m.TotalPrice)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <div class="input-prepend">
+                    <span class="add-on">$</span>
+                    @Html.TextBoxFor(m => m.TotalPrice, new { @class = "span2", @style = "width:180px;", @readonly = "readonly" })
+                </div>
+            </li>
+            <li>
+                @Html.LabelFor(m => m.ContactDetails)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <input data-val="false" data-val-required="The Contact field is required." id="ContactDetails" name="ContactDetails" placeholder="Enter contact number..." type="text" value="" class="input-validation-error">
+            </li>
+            <li>
+                @Html.LabelFor(m => m.ConfirmationNumber)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <input data-val="false" data-val-required="The Confirmation Number field is required." id="ConfirmationNumber" name="ConfirmationNumber" placeholder="Enter confirmation number..." type="text" value="" class="input-validation-error">
+            </li>
+            <li>
+                @Html.LabelFor(m => m.Comments)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <textarea cols="20" data-val="false" data-val-required="The Comments field is required." id="Comments" name="Comments" placeholder="Any comments..." rows="2" class="input-validation-error"></textarea>
+            </li>
+        </ol>
+    </fieldset>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;" id="addbooking">Add Booking</button> 
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        var UserType = @userType;
+        $(document).ready(function () {
+
+
+           
+
+
+            if ($('#okDone').hasClass('alert-success')) {
+                $.pnotify({ title: 'Booking Confirmation', text: 'Booking Confirmation #  <a href="Bookings/@ViewBag.BookingId">@ViewBag.BookingId</a> - Success! <a href="/Booking/EditBooking?bookingid=@ViewBag.BookingId" id="EditBooking">For editting the details, please click here.</a>' });
+                try {
+                    console.log('@ViewBag.Error');
+                }
+                catch(a) {
+                }
+            }
+
+            $('#seatslimit').hide();
+            $('#Tour').on('change', function () {
+                var tempId = $(this).val();
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getTourCodes", "Booking")',
+                    data: { tourid: $(this).val() },
+                    success: function (resp) {
+                        $('#TourCode').empty();
+                        $.each(resp, function (i, value) {
+                            $('#TourCode').append('<option value=' + value['TourCode'] + '>' + value['tourcodevalues'] + '</option>');
+                            if (i == resp.length - 1) {
+                                $.ajax({
+                                    type: 'POST',
+                                    traditional: true,
+                                    url: '@Url.Action("getLocations", "Booking")',
+                                    data: { tourid: tempId, check: true },
+                                    success: function (respData) {
+                                        $('#pickuplocation').empty();
+                                        $('#time').val('');
+                                        $.each(respData, function (index, value) {
+                                            if (index == 0) {
+                                                $.ajax({
+                                                    type: 'POST',
+                                                    traditional: true,
+                                                    url: '@Url.Action("getTimes", "Booking")',
+                                                    data: { pickupid: value['pickuplocation'] },
+                                                    success: function (resp) {
+                                                        $('#time').val('');
+                                                        $.each(resp, function (i, value) {
+                                                            $('#time').val(value['time']);
+                                                        })
+                                                    }
+
+                                                });
+                                            }
+                                            $('#pickuplocation').append('<option value=' + value['pickuplocation'] + '>' + value['location'] + '</option>');
+                                        })
+                                        $(".chzn-select").trigger("liszt:updated");
+                                    }
+
+                                });
+
+                            }
+                        })
+                    }
+                });
+            });
+            //populate the tour drop down
+            var firstDropDownId = 0;
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp) {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value) {
+                        if (i == 0)
+                            firstDropDownId = value['Tour'];
+
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+
+                        if (i == resp.length - 1) {
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("getTourCodes", "Booking")',
+                                data: { tourid: firstDropDownId },
+                                success: function (resp) {
+                                    $('#TourCode').empty();
+                                    $.each(resp, function (i, value) {
+                                        $('#TourCode').append('<option value=' + value['TourCode'] + '>' + value['tourcodevalues'] + '</option>');
+                                    })
+                                }
+
+                            });
+
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("getLocations", "Booking")',
+                                data: { tourid: firstDropDownId, check: true },
+                                success: function (respData) {
+                                    $('#pickuplocation').empty();
+                                    $('#time').val('');
+                                    $.each(respData, function (index, value) {
+
+                                        if (index == 0) {
+                                            $.ajax({
+                                                type: 'POST',
+                                                traditional: true,
+                                                url: '@Url.Action("getTimes", "Booking")',
+                                                data: { pickupid: value['pickuplocation'] },
+                                                success: function (resp) {
+                                                    $('#time').val('');
+                                                    $.each(resp, function (i, value) {
+                                                        $('#time').val(value['time']);
+                                                    })
+                                                }
+
+                                            });
+                                        }
+                                        $('#pickuplocation').append('<option value=' + value['pickuplocation'] + '>' + value['location'] + '</option>');
+                                    })
+                                    $(".chzn-select").trigger("liszt:updated");
+                                }
+
+                            });
+
+
+                        }
+                    })
+                }
+            });
+            if ($('.datepick').val().trim() == '')
+                $('#seatslimit').hide();
+
+            $(".datepick").datepicker({ dateFormat: 'dd/mm/yy' });
+
+            $('.datepick').on('change', function () {
+                if ($('.datepick').val().trim() == '') {
+                    $('#seatslimit').hide(); return;
+                }
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getSeatsLimit", "Booking")',
+                    data: { date: $(this).val(), tourid: $("#Tour option:selected").val() },
+                    success: function (resp) {
+                        if (resp == 0) {
+                            if ($('#seatslimit').hasClass('badge-info')) {
+                                $('#seatslimit').removeClass('badge-info');
+                                $('#seatslimit').addClass('badge-warning');
+                            }
+                        }
+                        else {
+                            if ($('#seatslimit').hasClass('badge-warning')) {
+                                $('#seatslimit').removeClass('badge-warning');
+                                $('#seatslimit').addClass('badge-info');
+                            }
+                        }
+                        $('#seatslimit').show();
+                        $('#seatslimit').html(resp);
+                    }
+
+                });
+            });
+            $("#seatslimit").popover({ title: 'Booking Date', content: "Seats Available", trigger: 'hover' });
+
+            $('#Price').on('blur', function () {
+                if (parseFloat($(this).val())) {
+                    var price = parseFloat($(this).val());
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+                else
+                    $('#TotalPrice').val('');
+            });
+
+            $('#Discount').on('blur', function () {
+                if (parseFloat($(this).val()) && parseFloat($('#Price').val())) {
+                    var price = parseFloat($('#Price').val())
+                    var temp = price * (parseFloat($(this).val()) / 100);
+                    price = price - temp;
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+                else {
+                    var price = parseFloat($('#Price').val())
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+            });
+            $('#Commission').on('blur', function () {
+                if (parseFloat($(this).val()) && parseFloat($('#Price').val())) {
+                    var price = parseFloat($('#Price').val());
+                    var temp = price * (parseFloat($(this).val()) / 100);
+                    price = price - temp;
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+                else {
+                    var price = parseFloat($('#Price').val())
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    $('#TotalPrice').val(price);
+                }
+            });
+            $('#TotalPrice').on('blur', function () {
+
+                if (parseFloat($('#Price').val())) {
+                    var price = parseFloat($('#Price').val());
+                    if (parseFloat($('#Discount').val())) {
+                        var temp = price * (parseFloat($('#Discount').val()) / 100);
+                        price = price - temp;
+                    }
+                    if (parseFloat($('#Commission').val())) {
+                        var temp = price * (parseFloat($('#Commission').val()) / 100);
+                        price = price - temp;
+                    }
+                    $(this).val(price);
+                }
+                else
+                    $(this).val('');
+            });
+            var ajaxCall;
+            $('#Agent').typeahead({
+                source: function (query, process) {
+                    uid = [];
+                    map = {};
+                    if (ajaxCall)
+                        ajaxCall.abort();
+                    ajaxCall = $.ajax({
+                        type: 'POST',
+                        tradional: true,
+                        url: '@Url.Action("getAgents", "Booking")',
+                        data: { name: $('#Agent').val()
+                        },
+                        success: function (resp) {
+                            $.each(resp, function (i, data) {
+                                map[data.Name] = data;
+                                uid.push(data.Name);
+                            });
+
+                            process(uid);
+                        }
+                    });
+                },
+                matcher: function (item) {
+                    if (item.toLowerCase().indexOf(this.query.trim().toLowerCase()) != -1) {
+                        return true;
+                    }
+                },
+                sorter: function (items) {
+                    return items.sort();
+                },
+                highlighter: function (item) {
+                    var regex = new RegExp('(' + this.query + ')', 'gi');
+                    return item.replace(regex, "<strong>$1</strong>");
+                },
+                updater: function (item) {
+                    //selectedState = map[item].Commission;
+                    $('#Commission').val(map[item].Commission);
+                    $('#AgentId').val(map[item].ID);
+                    if(UserType == 1 || UserType == 2) {
+                        $('#AgentId').attr('title', map[item].Comments);
+                        $('#Agent').attr('title', map[item].Comments);
+                        $('#agentInfo').html('<b>Agent Comments</b>:&nbsp;' + map[item].Comments).show();
+                    }
+                    $('#PaymentType').val(map[item].PaymentType);
+                    return item;
+                }
+            });
+
+            $(".chzn-select").chosen();
+
+            $('#pickuplocation').on('change', function () {
+
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getTimes", "Booking")',
+                    data: { pickupid: $(this).val() },
+                    success: function (resp) {
+                        $('#time').val('');
+                        $.each(resp, function (i, value) {
+                            $('#time').val(value['time']);
+                        })
+                    }
+
+                });
+
+            });
+
+        });
+
+
+    </script>
+    @{
+        if (ViewBag.User.Equals("agent"))
+        {
+        <script>$('#Commission').val(@ViewBag.Commission);</script>  
+        }
+        else
+        {
+        <script>$('#Commission').val('');</script> 
+        }
+    }
+}

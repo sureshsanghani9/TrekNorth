@@ -1,0 +1,199 @@
+﻿@{
+    ViewBag.Title = "Booking Frequency";
+    Layout = "~/Views/Shared/VoucherMasterpage.cshtml";
+
+
+}
+<h2 class="h2-heading">Booking Frequency</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    @*<script src="~/Scripts/shieldui-all.min.js" type="text/javascript"></script>*@
+    @*<link id="themecss" href="~/Content/all.min.css" rel="stylesheet" type="text/css" />*@
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    @*<script src="~/Scripts/highChart_exporting.js"></script>*@
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+</head>
+
+<div id="div-voucher-report">
+    @*SEARCH BOX*@
+    <div style="width:100%">
+        <table width="100%" class="tblform" border="0">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="editor-label">
+                            From Created Date
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.TextBox("txt_Fromdate", TempData["createFromdate"], "{0:dd/MM/yyyy}", new { required = "required", style = "width: 230px;" })
+                            <input type="hidden" id="CreatedDate_From_Report" name="CreatedDate_From_Report">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-label">
+                            To  Created Date
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editor-field">
+                            @Html.TextBox("txt_Todate", TempData["createTodate"], "{0:dd/MM/yyyy}", new { required = "required", style = "width: 230px;" })
+                            <input type="hidden" id="CreatedDate_To_Report" name="CreatedDate_To_Report">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="1">
+                        <p>
+                            <input type="submit" onclick="getVoucherGraph('genrate');" value="Generate" class="btn btn-large btn-block btn-primary" />
+                        </p>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    @*End Search Box*@
+
+</div>
+<hr />
+<body class="theme-light">
+    <div id="chart"></div>
+   
+    <script type="text/javascript">
+        var chart;
+        $(document).ready(function () {
+            var loggedbugs = [25,65,100, 320, 453, 234, 553, 665, 345, 123, 432, 545];
+            var closedbugs = [0, 1, 4, 3, 0];
+            getVoucherGraph('genrate');
+        });
+    </script>
+</body>
+</html>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+@*Search Box Js*@
+<script>
+    $('#txt_Fromdate').val("");
+    $('#txt_Todate').val("");
+
+    var aa = "";
+    @if (ViewBag.VoucherType != null)
+        {
+            <text>
+    $("#drp_Report").val('@ViewBag.VoucherType');
+    </text>
+        }
+
+    window.setTimeout(function () {
+        //$("select").chosen();
+    }, 100);
+
+
+    $('#txt_Fromdate').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en) {
+        $('#CreatedDate_From_Report').val(convertdateFormat('#txt_Fromdate'));
+    });
+    $('#txt_Todate').datepicker({ dateFormat: 'dd/mm/yy' }).on('change', function (en) {
+        $('#CreatedDate_To_Report').val(convertdateFormat('#txt_Todate'));
+    });
+    $('#txt_Todate').datepicker('setDate', 'today');
+    $('#txt_Fromdate').datepicker('setDate', 'today');
+
+    $('#CreatedDate_From_Report').val(convertdateFormat('#txt_Fromdate'));
+    $('#CreatedDate_To_Report').val(convertdateFormat('#txt_Todate'));
+
+
+    function convertdateFormat(oDate) {
+        console.log("oDate", $(oDate).val());
+        if ($(oDate).val() != "") {
+            return moment($(oDate).datepicker("getDate")).format("MM/DD/YYYY");
+        }
+    }
+
+    function convertdate(oDate) {
+        console.log("oDate", $(oDate).val());
+        if ($(oDate).val() != "") {
+            return moment($(oDate).datepicker("getDate")).format("DD/MM/YYYY");
+        }
+    }
+
+
+    function getVoucherGraph(control) {
+        var fromDate = "";
+        var toDate = "";
+        if (control == "genrate") {
+            fromDate = $('#CreatedDate_From_Report').val();
+            toDate = $('#CreatedDate_To_Report').val();
+        }
+
+        var url = "/Voucher/CreateLine";
+
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("GetVoucher_Data", "Voucher")',
+            data: { fromDate: fromDate, endDate: toDate },
+            success: function (resp) {
+                console.log(resp);
+                loggedbugs = [];
+                var xAxis = [];
+                $.each(resp, function (i, value) {
+                    loggedbugs.push(value.Count);
+                    xAxis.push(value.Hour);
+                });
+
+                $('#chart').highcharts({
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Booking Frequency'
+                    },
+                    xAxis: {
+                        categories: xAxis,
+                        crosshair: true
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Booking Count'
+                        }
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var points = this.points;
+                            console.log(points);
+                            var pointsLength = points.length;
+                            var Next = parseInt(parseInt(points[0].key) + parseInt(2));
+                            var Range = points[0].key + " - " + Next;
+                            var tooltipMarkup = pointsLength ? '<span style="font-size: 10px">' + Range + '</span><br/>' : '';
+                            var index;
+                            var y_value_kwh;
+                            tooltipMarkup += '<span style="color:' + points[0].series.color + '">\u25CF</span> ' + points[0].series.name + ': <b>' + points[0].y + ' Booking</b><br/>';
+                            return tooltipMarkup;
+                        },
+                        shared: true,
+                        useHTML: true
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0,
+                            borderWidth: 0
+                        }
+                    },
+                    series:[{
+                        name: 'Time (Hours)',
+                        data: loggedbugs
+
+                    }]
+                });
+            }
+        });
+    }
+</script>
+@*Search Box Js*@

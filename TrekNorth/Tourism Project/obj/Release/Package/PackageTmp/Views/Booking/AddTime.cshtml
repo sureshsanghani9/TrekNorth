@@ -1,0 +1,122 @@
+﻿@model Tourism_Project.Models.Location
+@{
+    ViewBag.Title = "Add Time";
+}
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+@{ 
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+    <div class="alert alert-success">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Success!</strong> Time has been added.  
+    </div> 
+    }
+    else if (status.Equals("error"))
+    {
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error!</strong> an error occured while entering time.Try Again!  
+    </div> 
+    }      
+}
+
+@using (Html.BeginForm("AddTime", "Booking", FormMethod.Post, new { @class = "well form-inline" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Booking Form</legend>
+        <ol>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.Tour)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                       new { value = 010 , text = ""  }
+                  },
+                  "value",
+                  "text",
+                   010))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(m => m.pickuplocation)&nbsp&nbsp&nbsp
+                @Html.DropDownListFor(model => model.pickuplocation, new SelectList(
+                  new List<Object>{
+                       new { value = 010 , text = ""  }
+                  },
+                  "value",
+                  "text",
+                   010), new { @class = "chzn-select" })
+            </li>
+            <li>
+                @Html.LabelFor(m => m.time)&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.time, new { @placeholder = "Enter time..." })
+            </li>
+        </ol>
+    </fieldset>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Add Time</button> 
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+
+        $(function () {
+            var id = 0;
+            $.ajax({
+                type: 'POST',
+                traditional: true,
+                url: '@Url.Action("getTourName", "Booking")',
+                success: function (resp) {
+                    $('#Tour').empty();
+                    $.each(resp, function (i, value) {
+                        if (i == 0)
+                            id = value['Tour'];
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+
+                        if (i == resp.length - 1) {
+                            $.ajax({
+                                type: 'POST',
+                                traditional: true,
+                                url: '@Url.Action("getLocations", "Booking")',
+                                data: { tourid: id, check: true },
+                                success: function (resp) {
+                                    $('#pickuplocation').empty();
+                                    $.each(resp, function (i, value) {
+                                        $('#pickuplocation').append('<option value=' + value['pickuplocation'] + '>' + value['location'] + '</option>');
+                                    })
+                                    $(".chzn-select").trigger("liszt:updated");
+                                }
+                            });
+                        }
+                    })
+                }
+            });
+
+            $('#Tour').on('change', function () {
+
+                $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("getLocations", "Booking")',
+                    data: { tourid: $(this).val(), check: true },
+                    success: function (resp) {
+                        $('#pickuplocation').empty();
+                        $.each(resp, function (i, value) {
+                            $('#pickuplocation').append('<option value=' + value['pickuplocation'] + '>' + value['location'] + '</option>');
+                        })
+                        $(".chzn-select").trigger("liszt:updated");
+                    }
+                });
+
+            });
+
+            $(".chzn-select").chosen();
+        });
+
+    </script>
+}

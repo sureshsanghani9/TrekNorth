@@ -1,0 +1,83 @@
+﻿@model Tourism_Project.Models.RegisterModel
+@{
+    ViewBag.Title = "Agents Reports";
+}
+<h2>@ViewBag.Title</h2>
+@using (Html.BeginForm("ViewTopAgentsReports", "Booking", FormMethod.Post, new { @class = "well form-inline" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend>Agents Report</legend>
+        <ol>
+            <li style="margin-top: 10px">
+                <label for="Tour">From</label>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.FromDate, new { @data_pickdate = "reportsFrom", @class = "seatschecking", @placeholder = "Enter Date..." , @id= "FromDate" })
+            </li>
+            <li style="margin-top: 10px">
+                <label for="Tour">To</label>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                @Html.TextBoxFor(m => m.ToDate, new { @data_pickdate = "reportsTo", @class = "seatschecking", @placeholder = "Enter Date..." ,@id= "ToDate" })
+            </li>
+        </ol>
+    </fieldset>
+
+
+
+    <div id="result" style="max-height: 400px; overflow-y: auto;">
+
+    </div>
+
+
+
+
+    <button class="btn btn-primary" style="margin-top: 10px;" id="generateBtn">Generate</button>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Download</button>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            //$(".seatschecking").datepicker({ dateFormat: 'mm/dd/yy' });
+            $(".seatschecking").datepicker({ dateFormat: 'dd/mm/yy' });
+            $('#generateBtn').bind('click', getReportView);
+
+
+        });
+
+        function getReportView(event) {
+            event.preventDefault();
+            $('#result').html('');
+            if ($('#FromDate').val() == "" || $('#ToDate').val() == "") {
+                alert("Please enter all the values to see the result");
+                return;
+            }
+
+            var data = {
+                FromDate: $('#FromDate').val(),
+                ToDate: $('#ToDate').val()
+            };
+            $.ajax({
+                url: '@Url.Action("ViewTopAgentsReportsView", "Booking")',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                error: function (xhr) {
+                    if (xhr.status == 200) {
+                        $('#result').html(xhr.responseText);
+                        $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+                    }
+                    else
+                        alert('Error Found: ' + xhr.statusText);
+                },
+                success: function (result) {
+                },
+                async: true,
+                processData: false
+            });
+
+            return false;
+        }
+    </script>
+}

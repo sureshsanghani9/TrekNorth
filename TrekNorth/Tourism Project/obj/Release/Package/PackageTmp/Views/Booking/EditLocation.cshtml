@@ -1,0 +1,298 @@
+﻿@model Tourism_Project.Models.LocationWiseTime
+@{
+    ViewBag.Title = "Edit Location";
+}
+
+
+<hgroup class="title">
+    <h2>@ViewBag.Title</h2>
+</hgroup>
+@{
+    string status = ViewBag.Status;
+    if (status.Equals("true"))
+    {
+        <div class="alert alert-success">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Success!</strong> location has been updated.
+        </div>
+    }
+}
+
+@*<script src="~/Scripts/timepick/timepicki.js"></script>
+    <link href="~/Scripts/timepick/timepicki.css" rel="stylesheet" type="text/css" />*@
+
+<script src="~/Scripts/timepick/jquery.inputmask.js"></script>
+<script src="~/Scripts/timepick/jquery.inputmask.date.extensions.js"></script>
+
+<script type="text/javascript">
+
+    $('body').on('focus',".clstime", function(){
+        //$(this).timepicki({
+        //    show_meridian:false,
+        //    min_hour_value:0,
+        //    max_hour_value:23,
+        //    step_size_minutes:15,
+        //    overflow_minutes:true,
+        //    increase_direction:'up',
+        //    disable_keyboard_mobile: true});
+
+        $(this).inputmask( 'h:s' );
+    });
+
+
+
+    $(document).ready(function () {
+
+        //On 2015-03-09
+        function onLocationChange()
+        {
+            $.ajax({
+                type:'POST',
+                traditional: true,
+                url:'@Url.Action("getTimeList", "Booking")',
+                success: function (resp) {
+                    $.each(resp, function (i, value) {
+                        console.log(value["time"]);
+                    });
+                }
+
+            });
+        }
+
+        var selectedIndex = @ViewBag.Tour;
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("getTourName", "Booking")',
+            success: function (resp) {
+                $('#Tour').empty();
+                $.each(resp, function (i, value) {
+                    if(selectedIndex==value['Tour'])
+                        $('#Tour').append('<option value=' + value['Tour'] + ' selected>' + value['tourname'] + '</option>');
+                    else
+                        $('#Tour').append('<option value=' + value['Tour'] + '>' + value['tourname'] + '</option>');
+                });
+
+            }
+        });
+
+        $('#modal-1').modal({ keyboard: false, backdrop: 'static' });
+        $('#modal-1').on('show.bs.modal', function () {
+            $(this).find('.modal-dialog').css({
+                'margin-top': function () {
+                    return -($(this).outerHeight() / 2);
+                },
+                'margin-left': function () {
+                    return -($(this).outerWidth() / 2);
+                }
+            });
+        }).modal('show');
+    });
+
+    function cancelClick() {
+        $(".modal-backdrop.in").remove();
+    }
+</script>
+
+<button aria-hidden="true" data-dismiss="modal" class="close" type="button" onclick="cancelClick();">×</button>
+
+@Html.HiddenFor(model => model.ID)
+
+@*@using (Ajax.BeginForm("EditLocation", "Booking", new AjaxOptions
+    {
+        InsertionMode = InsertionMode.Replace,
+        HttpMethod = "POST",
+        OnSuccess = "reloadLocations"
+    }, new { @class = "well form-inline", @id = "editLocationForm" }))*@
+@{
+    @*}
+
+        @using (Html.BeginForm("EditLocation", "Booking", FormMethod.Post, new { @class = "well form-inline", @id = "editLocationForm" }))
+        {*@
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <fieldset style="background-color: antiquewhite">
+        <legend></legend>
+        <ol>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.Tour)&nbsp;
+                @Html.DropDownListFor(model => model.Tour, new SelectList(
+                  new List<Object>{
+                       new { value = 0 , text = ""  }
+                    },
+                  "value",
+                  "text",
+                   @ViewBag.Tour))
+            </li>
+            <li style="margin-top: 10px">
+                @Html.LabelFor(model => model.pickuplocation)&nbsp;
+                @Html.TextBoxFor(model => model.pickuplocation)
+            </li>
+        </ol>
+    </fieldset>
+
+    <!--On 09-04-2015 -->
+    <fieldset style="background-color: antiquewhite">
+        <div class="datescon">
+            <div class="col-md-8" style="width:62%; margin-left: 30px;">
+
+
+                <input id="btnGettTimes" class="btn btn-primary" type="button" onclick="getDynamicTimebox();" value="Add Time" />
+
+                <div class="add_more_btn" id="btnAdd" style="display:none;">
+                    <span class="">+</span>
+                </div>
+                <label class="lableFormat" style="display:none;">Format  HH:MM</label>
+                <div class="clear-fix"></div>
+
+                @*<input id="btnAdd" style="display:none;" type="button" class="btn btn-primary " value="Add" />*@
+                <div id="TextBoxContainer" class="TextBoxContainer" style="height: 300px;overflow: scroll;overflow-y: auto;overflow-x: hidden">
+                    <!--Textboxes will be added here -->
+                </div>
+                <br />
+                <input id="btnGet" type="button" style="display:none;" value="Get Values" />
+                <!--On 09-04-2015 -->
+                <button onclick="EditLocationTime();" class="btn btn-primary" style="margin-top: 10px;">Update Location</button>
+            </div>
+        </div>
+    </fieldset>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+
+    </script>
+}
+
+
+<script type="text/javascript">
+
+    var isEditTime =false;
+    function getDynamicTimebox()
+    {
+        isEditTime =true;
+        var number = [@Html.Raw("'" + string.Join("', '", (string[])ViewBag.TimeList) + "'")];
+        console.log(number);
+        if(number !=null)
+        {
+            var arrtimeList = number;//values.split(",");
+            var content ="";
+
+            for (i=0;i<arrtimeList.length;i++){
+                var div = $("<div />");
+                div.html(GetDynamicTextBox(arrtimeList[i]));
+                $("#TextBoxContainer").append(div);
+            }
+        }
+
+        $("#btnGettTimes").hide();
+        $("#btnAdd").show();
+        $(".lableFormat").show();
+    }
+    //ajax function to edit location and time
+    function EditLocationTime()
+    {
+        //alert(isEditTime);
+
+        var url = "/Booking/EditLocationandTime";
+        var Tour =$('#Tour').val();
+        var pickuplocation = $('#pickuplocation').val();
+        var locationId =$('#ID').val();
+        var strtime = "";
+
+        $(".TextBoxContainer .clstime").each(function() {
+
+            if(strtime !="")
+            {
+                strtime  =strtime+","+$(this).val();
+            }
+            else
+            {
+                strtime = $(this).val();
+            }
+
+        });
+
+        $.post(url, { Tour: Tour, pickuplocation: pickuplocation,locationId:locationId,strtime:strtime, isEditTime:isEditTime }, function (data) {
+            if(data=="success")
+            {
+                alert("successfully data saved..!");
+            }
+            else if(data=="errortime")
+            {
+                alert("Error on Update times...!");
+            }
+            else
+            {
+                alert("Error on Update records...!");
+            }
+        });
+    }
+
+
+
+</script>
+
+
+<script type="text/javascript">
+
+    $(function () {
+        $("#btnAdd").bind("click", function () {
+            var div = $("<div />");
+            div.html(GetDynamicTextBox(""));
+            $("#TextBoxContainer").append(div);
+        });
+        $("#btnGet").bind("click", function () {
+            var values = "";
+            $("input[name=DynamicTextBox]").each(function () {
+                // values += $(this).val() + "\n";
+                if(values =="")
+                {
+                    values = $(this).val();
+                }
+                else
+                {
+                    values =values + ","+ $(this).val();
+                }
+            });
+
+            if(values.length>0)
+            {
+                var arrtimeList = values.split(",");
+                for (i=0;i<arrtimeList.length;i++){
+                    alert(arrtimeList[i]);
+                }
+            }
+            console.log(values);
+
+        });
+        $("body").on("click", ".remove", function () {
+            $(this).closest("div").remove();
+        });
+    });
+    function GetDynamicTextBox(value) {
+        return '<input name="DynamicTextBox" style="width:50px;" type="text" class="clstime" value = "' + value + '" />&nbsp;' +
+                '<button type="button" class="close remove"><span aria-hidden="true">&times;</span></button> '
+    }
+</script>
+
+<script type="text/javascript">
+
+    function onLocationSave()
+    {
+        $.ajax({
+            type: 'POST',
+            traditional: true,
+            url: '@Url.Action("EditLocation", "Booking")',
+            data: { tour: "tttt",pickupid: "5" ,Id: 5 },
+            success: function (resp) {
+                alert("success..!");
+            }
+        });
+    }
+
+</script>
+@*on 2015-04-09*@
